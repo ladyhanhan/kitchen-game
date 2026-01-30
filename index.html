@@ -445,7 +445,9 @@
         .ing-icon { 
             font-size: 36px; 
             margin-bottom: 4px; 
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+            text-shadow: 0 2px 2px rgba(0,0,0,0.2);
+            pointer-events: none;
+            will-change: transform;
             transition: transform 0.2s;
         }
         
@@ -471,27 +473,30 @@
 
 
 
-        /* Drag Cursor */ 
- #drag-cursor { 
-     position: fixed; 
-     pointer-events: none; 
-     z-index: 9999; 
-     font-size: 40px; 
-     transform: translate(-50%, -50%); 
-     display: none; 
-     filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); 
- } 
+/* Drag Cursor */ 
+#drag-cursor { 
+    position: fixed; 
+    pointer-events: none; 
+    z-index: 9999; 
+    font-size: 40px; 
+    transform: translate(-50%, -50%); 
+    display: none; 
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    will-change: transform;
+    top: 0;
+    left: 0;
+} 
  
  /* --- 真实菜品图片适配 --- */ 
  /* 1. 订单上的图片 */ 
- .item-icon { 
-     width: 36px; 
-     height: 36px; 
-     object-fit: contain; 
-     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15)); 
-     display: block; 
- } 
- 
+.item-icon { 
+    width: 36px; 
+    height: 36px; 
+    object-fit: contain; 
+    text-shadow: 0 2px 2px rgba(0,0,0,0.15); 
+    display: block; 
+} 
+
  /* 2. 工位完成时的图片 (机器上显示) */ 
  .cook-machine img { 
      width: 50px; 
@@ -520,15 +525,65 @@
     user-select: none; 
     gap: 15px; /* 卡片间距固定 */ 
 } 
-.station-card { background: #fff; border-radius: 16px; /* 更圆润的角 */ box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 0; position: relative; transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.2s; border: 3px solid transparent; /* 预留边框位置防止抖动 */ display: flex; flex-direction: column; overflow: visible; box-sizing: border-box; /* 确保边框计算在尺寸内 */ } 
+.station-card { 
+    background: transparent !important; 
+    backdrop-filter: none !important; 
+    -webkit-backdrop-filter: none !important; 
+    border-radius: 16px; 
+    box-shadow: none !important; 
+    padding: 0; 
+    position: relative; 
+    transition: transform 0.1s ease; 
+    border: 2px solid rgba(255, 255, 255, 0.1); /* 微弱的边框用于界定区域 */
+    display: flex; 
+    flex-direction: column; 
+    overflow: visible; 
+    box-sizing: border-box; 
+} 
+
+/* 悬停交互反馈 */
+.station-card:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.05) !important; /* 极淡的白色悬停底色 */
+}
 
 /* [核心修复 1] 强制固定高度，拒绝伸缩 */ .station-card.prep-card { height: 260px; /* 备菜区固定高度，足够容纳按钮 */ flex-shrink: 0; } .station-card.cook-card { height: 200px; /* 烹饪区固定高度 */ flex-shrink: 0; } 
 
-/* Card Header */ .card-header { flex: 0 0 40px; /* 标题栏高度固定 */ display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border-bottom: 2px solid #f0f0f0; background: #fafafa; border-radius: 13px 13px 0 0; } 
+/* Card Header - 完全透明 */ 
+.card-header { 
+    flex: 0 0 40px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 12px; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
+    background: transparent !important; 
+    border-radius: 13px 13px 0 0; 
+} 
 
-.card-title { font-size: 12px; font-weight: 800; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px; } 
+/* Card Title - 增强对比度 */
+.card-title { 
+    font-size: 12px; 
+    font-weight: 800; 
+    color: #fff; /* 纯白文字 */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* 强阴影保证可读性 */
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+} 
 
-.btn-trash-mini { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: #bdc3c7; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all 0.2s; z-index: 5; } .btn-trash-mini:hover { background: #f0f0f0; color: #7f8c8d; transform: none; } .btn-trash-mini:active { background: #e0e0e0; transform: scale(0.95); } 
+/* 垃圾桶按钮 - 增强对比度 */
+.btn-trash-mini { 
+    width: 28px; height: 28px; 
+    border-radius: 6px; border: none; 
+    background: rgba(0, 0, 0, 0.2); /* 半透明黑底 */
+    color: #fff; 
+    display: flex; align-items: center; justify-content: center; 
+    cursor: pointer; font-size: 16px; 
+    transition: all 0.2s; z-index: 5; 
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+} 
+.btn-trash-mini:hover { background: rgba(255, 255, 255, 0.2); color: #fff; transform: none; } 
+.btn-trash-mini:active { background: rgba(0, 0, 0, 0.4); transform: scale(0.95); } 
 
 /* 1. 备菜区 (上半部) */ .station-prep-zone { flex: 1; width: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; /* 上下两端对齐 */ cursor: pointer; border-radius: 0 0 16px 16px; /* [核心修复 2] 移除背景色变化，只保留透明 */ background-color: transparent; transition: transform 0.05s ease; /* 极速响应 */ } 
 
@@ -543,13 +598,21 @@
 
 /* 2. 烹饪区 (下半部) */ .station-cook-zone { flex: 1; width: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 0 0 16px 16px; transition: transform 0.05s ease; } .station-cook-zone:active { transform: scale(0.98); } 
 
-/* 机器主体 */ .cook-machine { width: 76px; height: 76px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; pointer-events: none; } .cook-machine img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15)); } .cook-machine.active { animation: machineWork 0.5s infinite; } .cook-machine.finished { transform: scale(1.1); filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.6)); } 
+/* 机器主体 */ .cook-machine { width: 76px; height: 76px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; pointer-events: none; } .cook-machine img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4)); } .cook-machine.active { animation: machineWork 0.5s infinite; } .cook-machine.finished { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.9)); } 
 
-.progress-bar-container { width: 80%; height: 10px; background: #eee; border-radius: 5px; overflow: hidden; margin-top: 5px; border: 1px solid rgba(0,0,0,0.05); } .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e67e22); width: 0%; transition: width 0.1s linear; } 
+.progress-bar-container { width: 80%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); } .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e67e22); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 10px rgba(230, 126, 34, 0.5); } 
 
-/* 状态样式 - 使用边框色区分 */ .prep-card.status-active { border-color: #3498db; } .cook-card.status-cooking { border-color: #e67e22; } .cook-card.status-finished { border-color: #f1c40f; background: #fffcf0; } /* 完成时微弱的暖色底，不突兀 */ 
+/* 状态样式 - 使用边框色区分 */ 
+.prep-card.status-active { border-color: #3498db; box-shadow: 0 0 15px rgba(52, 152, 219, 0.3) !important; } 
+.cook-card.status-cooking { border-color: #e67e22; box-shadow: 0 0 15px rgba(230, 126, 34, 0.3) !important; } 
+.cook-card.status-finished { 
+    border-color: #f1c40f; 
+    background: transparent !important; /* 移除背景色 */
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.5) !important; /* 增强发光效果替代背景 */
+} 
 
 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } } @keyframes machineWork { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } } 
+ 
 
 /* 隐藏旧元素 */ .btn-trash { display: none; }
 
@@ -1385,6 +1448,10 @@
             font-size: 40px;
             transform: translate(-50%, -50%);
             display: none;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            will-change: transform;
+            top: 0;
+            left: 0;
         }
         .ingredient-btn {
             display: flex;
@@ -1401,7 +1468,7 @@
         .ingredient-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .ingredient-btn:active { transform: scale(0.95); }
         .ingredient-btn:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
-        .ing-icon { font-size: 28px; margin-bottom: 4px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+        .ing-icon { font-size: 28px; margin-bottom: 4px; text-shadow: 0 2px 2px rgba(0,0,0,0.3); pointer-events: none; will-change: transform; }
         .ing-name { font-size: 12px; font-weight: bold; color: #f0f0f0; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
         .ing-stock { font-size: 10px; color: #999; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 10px; margin-top: 4px; border: 1px solid rgba(255,255,255,0.1); }
 
@@ -2002,7 +2069,7 @@
 .item-icon {
     font-size: 26px; /* 稍微调大菜品图标 */
     flex-shrink: 0;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    text-shadow: 0 2px 2px rgba(0,0,0,0.15);
 }
 .order-info-col {
     display: flex;
@@ -2147,7 +2214,8 @@
         <button class="close-btn" onclick="hideSettingsModal()">保存并返回</button>
     </div>
 </div>
-<audio id="bgm" src="audio/餐饮大亨的幻想.MP4" loop style="display:none"></audio>
+<audio id="bgm" src="audio/theme_bgm.mp4" loop style="display:none"></audio>
+<audio id="game-bgm" src="audio/game_bgm.mp3" loop style="display:none"></audio>
 
 <div id="overlay">
     <div class="modal">
@@ -2266,10 +2334,12 @@ let sfxEnabled = true, themeMusicEnabled = true, gameMusicEnabled = true;
 let gameLang = (localStorage.getItem('gameLang') || ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'zh'));
 let coinBuffer = null;
 let bgmSource = null; // Track BGM MediaElementSource
+let gameBgmSource = null; // Track Game BGM MediaElementSource
 const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.9; masterGain.connect(audioCtx.destination);
 const sfxGain = audioCtx.createGain(); sfxGain.gain.value = 0.8; sfxGain.connect(masterGain);
 const musicGain = audioCtx.createGain(); musicGain.gain.value = 0.3; musicGain.connect(masterGain);
 const themeGain = audioCtx.createGain(); themeGain.gain.value = 0.15; themeGain.connect(musicGain); // Theme song specific gain for normalization
+const gameFileGain = audioCtx.createGain(); gameFileGain.gain.value = 0.3; gameFileGain.connect(musicGain); // Game BGM specific gain
 
 let uiState = 'LOADING';
 
@@ -2402,54 +2472,33 @@ let nintendoBGMInterval = null;
 
 function startNintendoBGM() { 
     if (!gameMusicEnabled) return; 
-    const ctx = audioCtx; 
-    // BPM 和音符设置 
-    const tempo = 150; 
-    const noteDuration = 60 / tempo / 2; // 八分音符 
-    // C 大调五声音阶 
-    const notes = [ 523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 523.25, 659.25, 783.99, 523.25, 587.33, 783.99, 523.25, 659.25, 783.99, 1046.50, 1174.66, 1318.51, 1567.98, 1046.50 ]; 
-    let noteIdx = 0; 
     
-    // 清理旧的循环 
-    if (nintendoBGMInterval) clearInterval(nintendoBGMInterval); 
-    // 强制设定音量 (防止被 setPaused 覆盖) 
-    musicGain.gain.cancelScheduledValues(ctx.currentTime); 
-    musicGain.gain.setValueAtTime(0.3, ctx.currentTime); 
-    
-    console.log("🎵 游戏 BGM 循环已启动"); 
-    
-    nintendoBGMInterval = setInterval(() => { 
-        // 严格检查状态 
-        if (!gameMusicEnabled || game.isPaused || !game.isLive) return; 
+    // 清理旧的循环 (如果存在)
+    if (nintendoBGMInterval) {
+        clearInterval(nintendoBGMInterval);
+        nintendoBGMInterval = null;
+    }
+
+    const gameBgm = document.getElementById('game-bgm');
+    if (gameBgm) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         
-        const now = ctx.currentTime; 
-        const osc = ctx.createOscillator(); 
-        const gain = ctx.createGain(); 
+        if (!gameBgmSource) {
+            try {
+                gameBgmSource = audioCtx.createMediaElementSource(gameBgm);
+                gameBgmSource.connect(gameFileGain);
+            } catch (e) { console.log("Game BGM Source connect error:", e); }
+        }
         
-        osc.type = 'square'; 
-        osc.frequency.value = notes[noteIdx % notes.length]; 
-        
-        // 双音轨合唱效果 
-        const osc2 = ctx.createOscillator(); 
-        osc2.type = 'sawtooth'; 
-        osc2.frequency.value = notes[noteIdx % notes.length] * 1.01; 
-        
-        osc.connect(gain); 
-        osc2.connect(gain); 
-        gain.connect(musicGain); 
-        
-        // 包络控制 (Envelope) 
-        gain.gain.setValueAtTime(0, now); 
-        gain.gain.linearRampToValueAtTime(0.05, now + 0.02); 
-        gain.gain.linearRampToValueAtTime(0.01, now + noteDuration - 0.02); 
-        
-        osc.start(now); 
-        osc.stop(now + noteDuration); 
-        osc2.start(now); 
-        osc2.stop(now + noteDuration); 
-        
-        noteIdx++; 
-    }, noteDuration * 1000); 
+        // 确保主音乐音量正常
+        musicGain.gain.cancelScheduledValues(audioCtx.currentTime); 
+        musicGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+        if (gameBgm.paused) {
+            gameBgm.play().catch(e => console.log("Game BGM Play Error:", e));
+        }
+    }
+    console.log("🎵 游戏 BGM (MP3) 已启动"); 
 }
 
 function startMusic() {
@@ -2463,6 +2512,14 @@ function startMusic() {
     
     // A. 菜单状态：播放主题曲
     if (isMenuState) {
+        // 确保游戏音乐停止
+        const gameBgm = document.getElementById('game-bgm');
+        if (gameBgm) gameBgm.pause();
+        if (nintendoBGMInterval) {
+            clearInterval(nintendoBGMInterval);
+            nintendoBGMInterval = null;
+        }
+
         const bgm = document.getElementById('bgm');
         if (themeMusicEnabled && bgm && bgm.paused) {
             // 确保音频上下文已激活
@@ -2477,8 +2534,12 @@ function startMusic() {
             bgm.play().catch(e => console.log("BGM Play Error:", e));
         }
     }
-    // B. 游戏状态：播放 8-bit 电子乐
+    // B. 游戏状态：播放 游戏BGM
     else {
+        // 确保主题曲停止
+        const bgm = document.getElementById('bgm');
+        if (bgm) bgm.pause();
+
         if (gameMusicEnabled) startNintendoBGM();
     }
 }
@@ -2486,6 +2547,10 @@ function startMusic() {
 function stopMusic() {
     const bgm = document.getElementById('bgm');
     if (bgm) bgm.pause();
+    
+    const gameBgm = document.getElementById('game-bgm');
+    if (gameBgm) gameBgm.pause();
+
     if (nintendoBGMInterval) {
         clearInterval(nintendoBGMInterval);
         nintendoBGMInterval = null;
@@ -2497,15 +2562,17 @@ function stopMusic() {
 const SHOP_CONFIG = {
     pot: {
         name: "烹饪设备",
-        desc: "升级烹饪设备，提升出菜效率与品质。",
+        desc: "工欲善其事，必先利其器。从铁锅到AI，最终返璞归真。",
         basePrice: 500,
         levels: [
             { name: "基础铁锅", effect: 0, effectText: "传统手工烹饪，需时刻关注火候。", price: 0 },
-            { name: "专业不粘锅", effect: 0.1, effectText: "烹饪速度提升 10%。", price: 500 },
-            { name: "多段控温精钢锅", effect: 0.2, effectText: "精准控温，烹饪速度提升 20%。", price: 1200 },
-            { name: "Omni 1.0", effect: 0.4, effectText: "智能温控，烹饪速度提升 40%，自动防糊。", isDigital: true, price: 3000 },
-            { name: "Omni 2.0", effect: 0.6, effectText: "双核极速加热，烹饪速度提升 60%，完美品质。", isDigital: true, price: 6000 },
-            { name: "Omni 3.0", effect: 1.0, effectText: "AI 智能大厨，瞬间完成烹饪，永不失误。", isDigital: true, price: 12000 }
+            { name: "专业不粘锅", effect: 0.15, effectText: "不粘涂层，烹饪速度提升 15%。", price: 500 },
+            { name: "多段控温精钢锅", effect: 0.35, effectText: "精准控温，烹饪速度提升 35%。", price: 1500 },
+            { name: "Omni 1.0", effect: 0.5, effectText: "智能温控，烹饪速度提升 50%，自动防糊。", isDigital: true, price: 5000 },
+            { name: "Omni 2.0", effect: 0.8, effectText: "双核极速加热，烹饪速度提升 80%。", isDigital: true, price: 12000 },
+            { name: "Omni 3.0", effect: 1.0, effectText: "AI 智能大厨，瞬间完成烹饪。", isDigital: true, price: 25000 },
+            { name: "单边小锅", effect: 1.5, effectText: "大师御用。虽无芯片，但聚热性能超越 AI 50%。", price: 60000 },
+            { name: "小锅", effect: 2.0, effectText: "【传说】大道至简。烹饪速度提升 200%，唯有厨神方可驾驭。", price: 99999 }
         ]
     },
     knife: {
@@ -2602,7 +2669,7 @@ function renderShop() {
             let iconHtml = getShopItemIcon(key);
 
             if (key === 'pot') {
-                const targetPots = ['基础铁锅', '专业不粘锅', '多段控温精钢锅', 'Omni 1.0', 'Omni 2.0', 'Omni 3.0'];
+                const targetPots = ['基础铁锅', '专业不粘锅', '多段控温精钢锅', 'Omni 1.0', 'Omni 2.0', 'Omni 3.0', '单边小锅', '小锅'];
                 if (targetPots.includes(itemName)) {
                     // [UI替换] 使用本地商店图片，带Emoji回退
                     const fallbackId = `fallback-pot-${levelIdx}`;
@@ -3362,6 +3429,21 @@ function renderStation(sid) {
     const prepStyle = isBusy ? 'opacity: 0.4; pointer-events: none; filter: grayscale(1);' : '';
 
     el.innerHTML = `
+        <div class="station-card cook-card ${cookStatus}">
+            <div class="card-header">
+                <span class="card-title">OUTPUT / 烹饪</span>
+                <button class="btn-trash-mini" title="丢弃" onclick="event.stopPropagation(); trashStation('${sid}', 'cook')">🗑️</button>
+            </div>
+            <div class="station-cook-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'cook')">
+                <div class="cook-machine">
+                    <!-- 动态生成机器 -->
+                </div>
+                <div class="dish-status" style="font-size:12px; color:#999; margin-top:4px; font-weight:bold;">空闲</div>
+                <div class="progress-bar-container" style="display:none;"><div class="progress-bar-fill"></div></div>
+                <button class="clean-btn" style="display:none" onclick="event.stopPropagation(); cleanStation('${sid}')">🔧</button>
+            </div>
+        </div>
+
         <div class="station-card prep-card ${prepStatus}" style="${prepStyle}">
             <div class="card-header">
                 <span class="card-title">INPUT / 备菜</span>
@@ -3377,21 +3459,6 @@ function renderStation(sid) {
                 <div class="prep-action-container">
                     <!-- 动态生成按钮 -->
                 </div>
-            </div>
-        </div>
-
-        <div class="station-card cook-card ${cookStatus}">
-            <div class="card-header">
-                <span class="card-title">OUTPUT / 烹饪</span>
-                <button class="btn-trash-mini" title="丢弃" onclick="event.stopPropagation(); trashStation('${sid}', 'cook')">🗑️</button>
-            </div>
-            <div class="station-cook-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'cook')">
-                <div class="cook-machine">
-                    <!-- 动态生成机器 -->
-                </div>
-                <div class="dish-status" style="font-size:12px; color:#999; margin-top:4px; font-weight:bold;">空闲</div>
-                <div class="progress-bar-container" style="display:none;"><div class="progress-bar-fill"></div></div>
-                <button class="clean-btn" style="display:none" onclick="event.stopPropagation(); cleanStation('${sid}')">🔧</button>
             </div>
         </div>
     `;
@@ -3621,6 +3688,10 @@ function switchScreen(screenId) {
             game.isPaused = false;
             updateBalanceDisplay();
             
+            // 确保停止游戏音乐，播放主题曲
+            stopMusic(); 
+            startMusic();
+            
             // [关键] 确保首页按钮可点击
             const startBtn = document.getElementById('btn-start');
             if(startBtn) {
@@ -3840,29 +3911,34 @@ function updateCursor() {
     const cursor = document.getElementById('drag-cursor');
     if (!cursor) return;
     
-    // Highlight logic
     const tickets = document.querySelectorAll('.order-ticket');
     tickets.forEach(t => t.classList.remove('match-highlight'));
 
     if (holdingThing) {
-        cursor.style.display = 'block'; // 确保显示
-        
-        // [核心修改] 支持图片显示
-        if (holdingThing.type === 'INGREDIENT') {
-            // 食材暂时保持 Emoji (或者你有食材图片也可以换)
-            cursor.innerHTML = holdingThing.val.icon;
-        } else if (holdingThing.type === 'DISH') {
-            // 菜品使用图片
-            const dishName = holdingThing.val.name;
-            const dishIcon = holdingThing.val.icon;
-            
-            cursor.innerHTML = `
-                <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                <span style="display:none; font-size:40px;">${dishIcon}</span>
-            `;
-            
-            // Highlight matching orders
+        if (cursor.style.display !== 'block') cursor.style.display = 'block';
+
+        let newHTML = '';
+        const currentId = cursor.getAttribute('data-holding-id');
+        const newId = holdingThing.type + '-' + (holdingThing.val.name || holdingThing.val.id);
+
+        if (currentId !== newId) {
+            if (holdingThing.type === 'INGREDIENT') {
+                newHTML = `<span style="font-size:40px;">${holdingThing.val.icon}</span>`;
+            } else if (holdingThing.type === 'DISH') {
+                const dishName = holdingThing.val.name;
+                const dishIcon = holdingThing.val.icon || '🥘';
+                newHTML = `
+                    <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
+                         style="width:60px; height:60px; object-fit:contain; display:block;"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <span style="display:none; font-size:40px;">${dishIcon}</span>
+                `;
+            }
+            cursor.innerHTML = newHTML;
+            cursor.setAttribute('data-holding-id', newId);
+        }
+
+        if (holdingThing.type === 'DISH') {
             game.activeOrders.forEach(order => {
                 if (order.dishes.some(d => (d.name||d.n) === holdingThing.val.name)) {
                     if (order.dom) order.dom.classList.add('match-highlight');
@@ -3870,17 +3946,16 @@ function updateCursor() {
             });
         }
     } else {
-        cursor.style.display = 'none';
+        if (cursor.style.display !== 'none') cursor.style.display = 'none';
     }
 }
 
 window.addEventListener('mousemove', (e) => {
     const cursor = document.getElementById('drag-cursor');
-    if (cursor && holdingThing) {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
+    if (cursor && cursor.style.display !== 'none') {
+        cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
     }
-});
+}, { passive: true });
 
 function initOrderSlots() {
     const belt = document.getElementById('belt-container');
@@ -3917,19 +3992,6 @@ function initStations() {
         
         // 2. 生成 HTML 结构 (Split Cards - Initial State)
         el.innerHTML = `
-            <!-- Prep Card -->
-            <div class="station-card prep-card">
-                <div class="card-header">
-                    <span class="card-title">INPUT / 备菜</span>
-                    <button class="btn-trash-mini" title="清空备菜" onclick="event.stopPropagation(); trashStation('${sid}', 'prep')">🗑️</button>
-                </div>
-                <div class="station-prep-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'prep')">
-                    <div class="prep-bowl"><img src="assets/station/备菜盘.png" alt="备菜盘"></div>
-                    <div class="ing-list-prep"></div>
-                    <div class="prep-action-container"></div>
-                </div>
-            </div>
-            
             <!-- Cook Card -->
             <div class="station-card cook-card">
                 <div class="card-header">
@@ -3943,6 +4005,19 @@ function initStations() {
                     <div class="dish-status" style="font-size:12px; color:#666; margin-top:8px; font-weight:bold;">空闲</div>
                     <div class="progress-bar-container"><div class="progress-bar-fill"></div></div>
                     <button class="clean-btn" style="display:none" onclick="event.stopPropagation(); cleanStation('${sid}')">🔧 维修</button>
+                </div>
+            </div>
+
+            <!-- Prep Card -->
+            <div class="station-card prep-card">
+                <div class="card-header">
+                    <span class="card-title">INPUT / 备菜</span>
+                    <button class="btn-trash-mini" title="清空备菜" onclick="event.stopPropagation(); trashStation('${sid}', 'prep')">🗑️</button>
+                </div>
+                <div class="station-prep-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'prep')">
+                    <div class="prep-bowl"><img src="assets/station/备菜盘.png" alt="备菜盘"></div>
+                    <div class="ing-list-prep"></div>
+                    <div class="prep-action-container"></div>
                 </div>
             </div>
         `;
@@ -5070,6 +5145,10 @@ if (musicToggle) {
                 startNintendoBGM();
             }
         } else {
+            // 停止 MP3 播放
+            const gameBgm = document.getElementById('game-bgm');
+            if (gameBgm) gameBgm.pause();
+            
             if (nintendoBGMInterval) {
                 clearInterval(nintendoBGMInterval);
                 nintendoBGMInterval = null;
