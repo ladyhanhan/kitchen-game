@@ -33,17 +33,6 @@
             font-style: normal;
             font-display: swap;
         }
-        /* [新增] 全局隐藏滚动条 (Webkit/Mobile) */ 
-        *::-webkit-scrollbar { 
-            display: none !important; 
-            width: 0 !important; 
-            height: 0 !important; 
-        } 
-        * { 
-            -ms-overflow-style: none; /* IE/Edge */ 
-            scrollbar-width: none; /* Firefox */ 
-        }
-
         :root {
             --bg: #fdfcfb; --panel: #ffffff; --primary: #e60012; --accent: #FCC307;
             --prep: #3498db; --cook: #e74c3c; --plate: #2ecc71; --burnt: #2c3e50;
@@ -108,24 +97,27 @@
         }
 
         #game-bg { 
-            position: fixed; 
-            inset: 0; 
+            /* [核心修改] 从 fixed 改为 absolute，相对于 #game-container 定位 */ 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; /* 强制填满 1920x1080 */ 
             z-index: 0; 
             pointer-events: none; 
-            overflow: hidden; 
-            background-color: #000; /* [优化] 黑色填充空白 */
+            background-color: #000; 
+            /* 移除 inset: 0 */ 
         }
         #game-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22)); opacity: var(--game-bg-overlay, 0.34); transition: opacity 0.6s ease; }
         #game-bg .bg-layer { 
             position: absolute; 
-            inset: 0; /* [优化] 移除 -24px 放大，确保贴边 */
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
             background-repeat: no-repeat; 
             background-position: center; 
-            background-size: cover; /* [优化] 默认铺满 (用于首页) */
+            /* [核心修改] 强制拉伸填满容器，禁止自动裁切 */ 
+            background-size: 100% 100% !important; 
             opacity: 0; 
-            transform: scale(1); /* [优化] 初始不缩放 */
+            transform: scale(1); 
             transition: opacity 0.6s ease, filter 0.6s ease; 
-            will-change: opacity, filter; 
         }
         /* [新增] 游戏模式下的背景样式：完整展示 + 顶部贴边 */
         #game-bg .bg-layer.game-mode {
@@ -844,12 +836,18 @@
     flex-shrink: 0;
 }
 
-/* 微调备菜列表位置 */
+/* 微调备菜列表位置 - 覆盖在图片上 */
 .ing-list-prep {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
     display: flex; gap: -10px; align-items: center; justify-content: center; pointer-events: none; flex-shrink: 0;
     margin: 0 !important;
-    height: 32px !important;
-} .ing-item-small { font-size: 28px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15)); background: transparent; width: 32px; height: 32px; line-height: 32px; text-align: center; border: none; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); } 
+    width: 100%;
+    height: auto !important;
+} .ing-item-small { font-size: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); background: transparent; width: auto; height: auto; line-height: 1; text-align: center; border: none; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); } 
 
 /* 确保按钮容器固定在底部 */
 .prep-action-container {
@@ -1467,8 +1465,9 @@
 
         /* Location Selection View (Map Screen) */
         #map-screen {
-            position: fixed;
+            position: absolute !important;
             inset: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 3500;
             display: none;
             flex-direction: column;
@@ -1478,6 +1477,22 @@
             background: #000 url('assets/bg/餐厅解锁地图.jpg') no-repeat center center / contain;
             animation: fadeIn 0.3s ease;
             color: #2c3e50;
+        }
+
+        /* 批量修改附属界面的定位 - 强制铺满容器 */
+        .shop-overlay, 
+        #achievement-modal, 
+        #settings-modal, 
+        #overlay, 
+        #pause-overlay, 
+        #end-game-modal, 
+        .prep-overlay { 
+            position: absolute !important; 
+            top: 0; left: 0; 
+            /* [核心修改] 强制使用 100% 填满 1920x1080 画板，覆盖 100vw */ 
+            width: 100% !important; 
+            height: 100% !important; 
+            inset: 0; 
         }
 
         /* Top Header (Floating) */
@@ -1934,6 +1949,44 @@
             gap: 20px; padding: 20px;
             align-content: start;
         }
+
+        /* Pagination Styles */
+        .shop-pagination {
+            flex: 0 0 60px; /* 固定高度 */
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .shop-page-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .shop-page-btn:not(:disabled):hover {
+            background: #f1c40f;
+            color: #2c3e50;
+            transform: scale(1.05);
+        }
+        .shop-page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .shop-page-info {
+            color: #ecf0f1;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
         @media (max-width: 1024px) {
             #shop-items-container { 
                 gap: 12px; padding: 15px; 
@@ -1946,14 +1999,15 @@
                 gap: 8px; padding: 10px; 
                 grid-template-columns: repeat(2, 1fr);
             }
-            .shop-item-image-container { height: 120px; }
-            .shop-item-content { padding: 12px; }
+            /* Mobile Optimization: Adjust proportion */
+            .shop-item-image-container { height: 40% !important; min-height: 110px; }
+            .shop-item-content { padding: 10px 12px !important; }
             
             .shop-item-category { font-size: 10px; }
             .shop-item-name { font-size: 14px; }
             .shop-item-level { font-size: 10px; padding: 2px 6px; }
-            .shop-item-desc { font-size: 11px; -webkit-line-clamp: 2; }
-            .shop-item-effect { font-size: 11px; }
+            .shop-item-desc { font-size: 11px; -webkit-line-clamp: 2; margin-bottom: 4px !important; }
+            .shop-item-effect { font-size: 11px; margin-bottom: 8px !important; }
             .shop-btn-buy { padding: 8px; font-size: 12px; border-radius: 6px; }
         }
         #shop-items-container::-webkit-scrollbar { width: 8px; }
@@ -1972,17 +2026,22 @@
             height: 100%; /* Ensure uniform height in grid */
         }
         
-        /* Image Container - Significantly increased area */
+        /* Image Container - Significantly increased area & Visual Polish */
         .shop-item-image-container {
             width: 100%;
-            height: 140px; /* Large image area */
-            background: rgba(0,0,0,0.1);
+            height: 45%; /* Use percentage for responsive balance (approx 160-200px on desktop) */
+            min-height: 140px; /* Safety minimum */
+            background: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.15) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 20px; /* Increased padding for breathing room */
             box-sizing: border-box;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s ease;
+        }
+        .shop-item-card:hover .shop-item-image-container {
+            background: radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0.1) 100%);
         }
         
         .shop-item-icon {
@@ -1994,7 +2053,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4)); /* Enhanced shadow */
         }
         
         .shop-item-icon img {
@@ -2011,10 +2070,11 @@
 
         /* Content Container */
         .shop-item-content {
-            padding: 16px;
+            padding: 12px 16px; /* Reduced vertical padding for better fit */
             flex: 1;
             display: flex;
             flex-direction: column;
+            gap: 6px; /* Use gap for consistent spacing */
         }
 
         .shop-item-header {
@@ -2050,12 +2110,23 @@
         }
 
         .shop-item-desc { 
-            font-size: 13px; color: #bdc3c7; line-height: 1.5; margin-bottom: 12px; 
+            font-size: 13px; 
+            color: #bdc3c7; 
+            line-height: 1.5; 
+            
+            /* 强制卡片内容适配，防止溢出 */
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* 限制描述最多2行 */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 8px;
+            
             flex-grow: 1; /* Push footer down */
         }
         
         .shop-item-effect { 
-            font-size: 13px; color: #2ecc71; margin-bottom: 16px; font-weight: bold; 
+            font-size: 13px; color: #2ecc71; margin-bottom: 4px; font-weight: bold; 
             display: flex; align-items: center; gap: 6px;
         }
         .shop-item-effect::before { content: "✨"; font-size: 12px; }
@@ -2387,12 +2458,12 @@
     <div style="opacity: 0.8; margin-top: 10px;">为了最佳体验，请使用横屏游玩</div>
 </div>
 
-<div id="game-bg" aria-hidden="true">
-    <div class="bg-layer bg-a"></div>
-    <div class="bg-layer bg-b"></div>
-</div>
 
 <div id="game-container">
+    <div id="game-bg" aria-hidden="true">
+        <div class="bg-layer bg-a"></div>
+        <div class="bg-layer bg-b"></div>
+    </div>
     <div id="game-header">
         <div id="game-title"><img src="assets/ui/游戏logo.png" alt="游戏logo" class="title-logo">不停餐饮大亨</div>
     </div>
@@ -2456,6 +2527,131 @@
         </div>
     </div>
 
+    <div id="start-screen">
+        <div class="home-top-right">
+            <div class="home-balance">
+                <span>钱包</span>
+                <span id="home-balance">¥0</span>
+            </div>
+            <button id="btn-world-map" class="home-btn-secondary">🗺 商业版图</button>
+            <button id="btn-shop" class="home-btn-secondary" onclick="showShop()">🛒 商店</button>
+        </div>
+        <div class="home-title">
+            <img src="assets/ui/robotinkitchen.png" alt="不停餐饮大亨" class="home-title-logo">
+        </div>
+        <div class="home-main-actions">
+            <button id="btn-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开始游戏</button>
+        </div>
+        <button id="btn-reset" class="base-button-reset" title="重置游戏" onclick="GameStateManager.resetAllDataPrompt()">🔄</button>
+        <button id="btn-settings" class="base-button-reset" title="游戏设置" onclick="showSettingsModal()">⚙️</button>
+    </div>
+
+    <!-- 移入游戏容器的子界面 -->
+    <div id="shop-overlay" class="shop-overlay" style="display:none; position:absolute; inset:0; width:100%; height:100%; z-index:3000; flex-direction:column; align-items:center; justify-content:center;">
+        <div class="shop-modal" style="width: 80%; max-width: 1000px; height: 80%; background: #fff; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+             <div class="shop-header" style="background: #f1c40f; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                 <h2 style="margin:0; color:#fff; font-size: 28px; text-shadow: 0 2px 0 rgba(0,0,0,0.1);">🛒 道具商店</h2>
+                 <button class="close-shop-btn" onclick="closeShop()" style="background:none; border:none; font-size:30px; color:white; cursor:pointer;">&times;</button>
+             </div>
+             <div class="shop-content" style="flex: 1; padding: 30px; overflow-y: auto; background: #f9f9f9;">
+                 <!-- Shop Items Dynamic Render -->
+             </div>
+        </div>
+    </div>
+
+    <div id="settings-modal">
+        <div class="modal">
+            <h2>游戏设置</h2>
+            <div class="settings-group">
+                <div class="settings-item">
+                    <span class="settings-label">主题音乐</span>
+                    <label class="toggle"><input type="checkbox" id="toggle-theme" checked><span>开启</span></label>
+                </div>
+                <div class="settings-item">
+                    <span class="settings-label">游戏音乐</span>
+                    <label class="toggle"><input type="checkbox" id="toggle-music" checked><span>开启</span></label>
+                </div>
+                <div class="settings-item">
+                    <span class="settings-label">游戏音效</span>
+                    <label class="toggle"><input type="checkbox" id="toggle-sfx" checked><span>开启</span></label>
+                </div>
+            </div>
+            <button class="close-btn" onclick="hideSettingsModal()">保存并返回</button>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div class="modal">
+            <h2 id="modal-title">关卡结算</h2>
+            <div id="modal-desc" class="modal-content"></div>
+            <div class="modal-actions">
+                <button onclick="startNextLevel()" id="modal-btn">继续营业</button>
+                <button onclick="hideResultModal()" id="modal-cancel">返回首页</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="achievement-modal" style="position:absolute; inset:0; background:rgba(0,0,0,0.9); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:3200; color:white;">
+        <div class="modal" style="width: 600px; max-width: 95vw;">
+            <h2 id="ach-title" style="color:#f1c40f; font-size:28px;">🏆 传奇名厨</h2>
+            <div id="ach-container" class="ach-content">
+                <!-- Dynamic Content -->
+            </div>
+            <div style="margin-top: 20px; width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                 <button id="btn-continue-business" onclick="startNextLevel('btn-continue-business')" style="background:#2ecc71; border-color:#27ae60; color:white; font-size: 20px; padding: 15px; width: 100%; font-weight: bold; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">💰 继续营业</button>
+                 <button onclick="showLocationSelection()" style="background:#f1c40f; border-color:#d4ac0d; color:#2c3e50; font-size: 20px; padding: 15px; width: 100%; font-weight: bold; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">🚀 开启新的征途</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="map-screen" role="dialog" aria-modal="true" aria-labelledby="location-title">
+        <button class="glass-btn btn-outline-glass loc-back-btn" onclick="closeLocationSelection()">返回</button>
+        <div class="loc-header-float">
+            <h2 id="location-title">🗺️ 选择新分店位置</h2>
+            <div class="loc-subtitle">扩张你的商业帝国，选择下一个挑战地点</div>
+        </div>
+        
+        <div class="region-dock" id="region-dock-container">
+            <!-- Step 1: Regions -->
+        </div>
+
+        <div class="district-panel-container" id="district-panel">
+            <div class="dp-header">
+                <div class="dp-title">
+                    <span id="dp-flag"></span>
+                    <span id="dp-city-name"></span>
+                </div>
+            </div>
+            <div class="dp-list" id="district-list-container">
+                <!-- Step 2: Districts -->
+            </div>
+            <div class="panel-actions">
+                 <button id="btn-confirm-loc" class="glass-btn btn-primary-glass" onclick="confirmNewJourney()">确认进驻</button>
+                 <button class="glass-btn btn-outline-glass" onclick="closeDistrictPanel()">返回选择城市</button>
+                 <button class="glass-btn btn-outline-glass" onclick="closeLocationSelection()">返回成绩单</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pause-overlay">
+        <div class="modal">
+            <h2>⏸ 已暂停</h2>
+            <p>按空格 / P 键，或点击“继续”恢复游戏。</p>
+            <button type="button" id="btn-resume">继续</button>
+            <button type="button" id="btn-end-game" style="margin-top: 10px; background: #e74c3c; border-bottom: 4px solid #c0392b;" onclick="window.confirmEndGame()">店铺打烊</button>
+        </div>
+    </div>
+
+    <div id="end-game-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:3200; align-items:center; justify-content:center;">
+        <div class="modal" style="background:white; padding:30px; border-radius:15px; text-align:center; max-width:400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <h2 style="margin-top:0; color:#e74c3c; font-size:24px;">⚠️ 结束游戏确认</h2>
+            <p style="color:#555; font-size:16px; line-height:1.6; margin:20px 0;">确定要结束当前游戏吗？<br><span style="font-size:14px; color:#7f8c8d;">当前关卡进度将丢失，但最高分记录会保留。</span></p>
+            <div style="display:flex; justify-content:center; gap:20px; margin-top:25px;">
+                <button onclick="window.hideEndGameModal()" style="padding:10px 25px; background:#95a5a6; border-bottom:4px solid #7f8c8d; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">取消</button>
+                <button onclick="window.endGame()" style="padding:10px 25px; background:#e74c3c; border-bottom:4px solid #c0392b; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">确认结束</button>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
@@ -2468,25 +2664,6 @@
         <div id="loading-text" style="color:#FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.9);">资源加载中 0%</div>
         <div id="loading-bar-container" style="background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 6px rgba(0,0,0,0.4);"><div id="loading-bar"></div></div>
     </div>
-</div>
-
-<div id="start-screen">
-    <div class="home-top-right">
-        <div class="home-balance">
-            <span>钱包</span>
-            <span id="home-balance">¥0</span>
-        </div>
-        <button id="btn-world-map" class="home-btn-secondary">🗺 商业版图</button>
-        <button id="btn-shop" class="home-btn-secondary" onclick="showShop()">🛒 商店</button>
-    </div>
-    <div class="home-title">
-        <img src="assets/ui/robotinkitchen.png" alt="不停餐饮大亨" class="home-title-logo">
-    </div>
-    <div class="home-main-actions">
-        <button id="btn-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开始游戏</button>
-    </div>
-    <button id="btn-reset" class="base-button-reset" title="重置游戏" onclick="GameStateManager.resetAllDataPrompt()">🔄</button>
-    <button id="btn-settings" class="base-button-reset" title="游戏设置" onclick="showSettingsModal()">⚙️</button>
 </div>
 <div id="transition-overlay" style="position:fixed; inset:0; background:black; z-index:10000; opacity:0; pointer-events:none; transition:opacity 0.45s ease;"></div>
 
@@ -2590,72 +2767,43 @@
 
 <script src="tests.js"></script>
 <script>
-// [优化版] 移动端沉浸式适配系统 
-function resizeGameWindow() { 
-    const container = document.getElementById('game-container'); 
-    const startScreen = document.getElementById('start-screen'); 
-    const loadingScreen = document.getElementById('loading'); 
+// [新增] 移动端视窗适配系统
+function resizeGameWindow() {
+    const container = document.getElementById('game-container');
+    const loadingScreen = document.getElementById('loading');
     
-    // [核心调整] 将基准设计高度降低，实现“视觉放大”效果 
-    // 电脑端保持 1080，移动端使用 920 (相当于放大 ~17%) 
-    const isMobile = window.innerWidth < 1024; 
-    const designH = isMobile ? 920 : 1080; 
-    const designW = 1920; // 基准宽度仅作参考 
+    // 目标设计尺寸
+    const designW = 1920;
+    const designH = 1080;
     
-    const winW = window.innerWidth; 
-    const winH = window.innerHeight; 
+    // 当前窗口尺寸
+    const winW = window.innerWidth;
+    const winH = window.innerHeight;
     
-    // 计算缩放比例 (以高度为基准铺满屏幕) 
-    let scale = winH / designH; 
+    // 计算缩放比例 (Contain 模式：保证全部内容可见)
+    const scale = Math.min(winW / designW, winH / designH);
     
-    // 计算适配后的容器尺寸 
-    // 宽度：根据屏幕实际比例反推，确保填满左右黑边 
-    let newW = winW / scale; 
-    let newH = designH; 
+    // 应用缩放
+    const targetStyles = `
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(${scale});
+        width: ${designW}px;
+        height: ${designH}px;
+        transform-origin: center center;
+        display: flex; /* 确保容器始终可见 */
+    `;
     
-    // 边界保护：如果屏幕太宽(如超宽屏)，限制最大宽度防止UI过于分散 
-    // 如果屏幕太方(如iPad)，改用宽度基准防止上下裁切 
-    if (winW / winH < 1.6) { // iPad 等方屏逻辑 
-        scale = winW / designW; 
-        newW = designW; 
-        newH = winH / scale; 
-    } 
+    if (container) {
+        container.style.cssText = targetStyles;
+    }
     
-    // 应用变换 
-    const targetStyles = ` 
-        position: absolute; 
-        left: 50%; 
-        top: 50%; 
-        transform: translate(-50%, -50%) scale(${scale}); 
-        width: ${newW}px; 
-        height: ${newH}px; 
-        transform-origin: center center; 
-        display: flex; /* 确保 display 恢复 */ 
-    `; 
-    
-    // 应用到主容器和首页 
-    if (container) { 
-        // 保持 display状态，避免覆盖 'none' 
-        const displayState = container.style.display === 'none' ? 'none' : 'flex'; 
-        container.style.cssText = targetStyles + `display: ${displayState};`; 
-    } 
-    if (startScreen) { 
-        const displayState = startScreen.style.display === 'none' ? 'none' : 'flex'; 
-        startScreen.style.cssText = targetStyles + `display: ${displayState};`; 
-    } 
-    
-    // 加载页始终全屏 
-    if (loadingScreen) { 
-        loadingScreen.style.width = '100vw'; 
-        loadingScreen.style.height = '100vh'; 
-    } 
-    
-    // [新增] 修复背景图适配：在宽屏下强制 Cover 模式防止白边 
-    const bgLayers = document.querySelectorAll('.bg-layer'); 
-    bgLayers.forEach(layer => { 
-        layer.style.backgroundSize = 'cover'; 
-        layer.style.backgroundPosition = 'center 30%'; // 略微上移焦点 
-    }); 
+    // 加载页特殊处理：全屏铺满
+    if (loadingScreen) {
+        loadingScreen.style.width = '100vw';
+        loadingScreen.style.height = '100vh';
+    }
 }
 
 // 监听窗口变化
@@ -3112,6 +3260,10 @@ const SHOP_TABS = [
 
 let currentShopTab = 'expand';
 
+// [新增] 商店分页状态
+let currentShopPage = 0;
+const SHOP_ITEMS_PER_PAGE = 8; // 每页显示8个 (2行 x 4列)
+
 function getShopItemIcon(type) {
     switch(type) {
         case 'expansion': return '🏗️';
@@ -3137,8 +3289,21 @@ function getUpgradePrice(type, nextLevelIdx) {
     return Math.round(base * Math.pow(1.5, nextLevelIdx));
 }
 
+// [修改] 切换 Tab 时重置页码
 function switchShopTab(tabId) {
     currentShopTab = tabId;
+    currentShopPage = 0; // 重置回第一页
+    renderShop();
+}
+
+// [新增] 翻页函数
+function changeShopPage(delta) {
+    const overlay = document.getElementById('shop-overlay');
+    // 简单的防抖，防止渲染未完成
+    if (!overlay) return;
+    
+    currentShopPage += delta;
+    if(typeof playSfx === 'function') playSfx(300, 'square', 0.1); // 翻页音效
     renderShop();
 }
 
@@ -3149,8 +3314,8 @@ function renderShop() {
     const currentTab = SHOP_TABS.find(t => t.id === currentShopTab) || SHOP_TABS[0];
     const types = currentTab.types;
 
-    let itemsHtml = '';
-
+    // 1. 收集所有卡片的 HTML 到数组中
+    let allCards = [];
     types.forEach((key) => {
         const config = SHOP_CONFIG[key];
         if (!config) return;
@@ -3159,32 +3324,27 @@ function renderShop() {
         config.levels.forEach((levelData, levelIdx) => {
             const isOwned = levelIdx <= currentLevelIdx;
             const isNext = levelIdx === currentLevelIdx + 1;
-            // const isLocked = levelIdx > currentLevelIdx + 1;
-
             const itemName = levelData.name;
             const isDigital = levelData.isDigital;
             let iconHtml = getShopItemIcon(key);
 
+            // 图片加载逻辑
             if (key === 'pot') {
                 const targetPots = ['基础铁锅', '专业不粘锅', '多段控温精钢锅', 'Omni 1.0', 'Omni 2.0', 'Omni 3.0', '单边小锅', '小锅'];
                 if (targetPots.includes(itemName)) {
-                    // [UI替换] 使用本地商店图片，带Emoji回退
-                    const fallbackId = `fallback-pot-${levelIdx}`;
+                    const fallbackId = `fallback-pot-${levelIdx}-${key}`; // 唯一ID防止冲突
                     iconHtml = `
                         <img src="assets/equipment/${itemName}.png" 
                              alt="${itemName}" 
                              style="width: 100%; height: 100%; object-fit: contain;"
-                             onerror="console.warn('图片加载失败: ${itemName}'); this.style.display='none'; document.getElementById('${fallbackId}').style.display='flex';">
-                        <span id="${fallbackId}" style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">${getShopItemIcon(key)}</span>
+                             onerror="this.style.display='none'; document.getElementById('${fallbackId}').style.display='flex';">
+                        <span id="${fallbackId}" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-size:50px;">${getShopItemIcon(key)}</span>
                     `;
                 }
             }
             
-            let digitalBadge = '';
-            if (isDigital) {
-                digitalBadge = `<span class="digital-badge">DIGITAL</span>`;
-            }
-
+            let digitalBadge = isDigital ? `<span class="digital-badge">DIGITAL</span>` : '';
+            
             let btnHtml = '';
             if (isOwned) {
                 btnHtml = `<button class="shop-btn-buy maxed">已拥有</button>`;
@@ -3193,14 +3353,13 @@ function renderShop() {
                 const canAfford = game.coins >= price;
                 const btnClass = canAfford ? 'can-buy' : 'disabled';
                 const btnText = canAfford ? `购买 (¥${price})` : `余额不足 (¥${price})`;
+                // 购买后刷新页面，保持当前页码
                 btnHtml = `<button class="shop-btn-buy ${btnClass}" onclick="buyUpgrade('${key}', this)">${btnText}</button>`;
             } else {
                  btnHtml = `<button class="shop-btn-buy disabled">需前置等级</button>`;
             }
 
-            const effectText = `${levelData.effectText}`;
-            
-            itemsHtml += `
+            const cardHtml = `
                 <div class="shop-item-card ${isDigital ? 'digital-card' : ''} ${isOwned ? 'owned-card' : ''}">
                     <div class="shop-item-image-container">
                         <div class="shop-item-icon">${iconHtml}</div>
@@ -3214,28 +3373,49 @@ function renderShop() {
                             <div class="shop-item-level">Lv.${levelIdx}</div>
                         </div>
                         <div class="shop-item-desc">${config.desc}</div>
-                        <div class="shop-item-effect">${effectText}</div>
-                        <div class="shop-item-footer">
-                            ${btnHtml}
-                        </div>
+                        <div class="shop-item-effect">${levelData.effectText}</div>
+                        <div class="shop-item-footer">${btnHtml}</div>
                     </div>
                 </div>
             `;
+            allCards.push(cardHtml);
         });
     });
+
+    // 2. 计算分页
+    const totalPages = Math.ceil(allCards.length / SHOP_ITEMS_PER_PAGE) || 1;
+    
+    if (currentShopPage >= totalPages) currentShopPage = totalPages - 1;
+    if (currentShopPage < 0) currentShopPage = 0;
+
+    const start = currentShopPage * SHOP_ITEMS_PER_PAGE;
+    const end = start + SHOP_ITEMS_PER_PAGE;
+    const pageCards = allCards.slice(start, end).join('');
 
     const tabsHtml = SHOP_TABS.map(tab => `
         <button class="shop-tab ${tab.id === currentTab.id ? 'active' : ''}" onclick="switchShopTab('${tab.id}')">${tab.label}</button>
     `).join('');
 
+    // 3. 构建分页控制栏 HTML
+    const prevDisabled = currentShopPage === 0 ? 'disabled style="opacity:0.5; cursor:default;"' : '';
+    const nextDisabled = currentShopPage === totalPages - 1 ? 'disabled style="opacity:0.5; cursor:default;"' : '';
+    
+    const paginationHtml = `
+        <div class="shop-pagination">
+            <button class="shop-page-btn" ${prevDisabled} onclick="changeShopPage(-1)">◀ 上一页</button>
+            <span class="shop-page-info">${currentShopPage + 1} / ${totalPages}</span>
+            <button class="shop-page-btn" ${nextDisabled} onclick="changeShopPage(1)">下一页 ▶</button>
+        </div>
+    `;
+
+    // 4. 组装最终 HTML (Grid + Footer)
     overlay.innerHTML = `
         <div class="shop-modal">
             <div class="shop-header">
                 <div class="shop-header-left">
                     <button class="shop-back-btn" onclick="closeShop()">返回</button>
-                    <div class="shop-title">不停厨房商店</div>
+                    <div class="shop-title">🛒 道具商店</div>
                 </div>
-                <!-- 复用首页钱包样式 -->
                 <div class="home-balance" style="position:static; transform:none; min-width:auto; height:40px; border-color:rgba(255,255,255,0.2);">
                     <span>钱包</span>
                     <span id="shop-balance">¥${game.coins}</span>
@@ -3244,9 +3424,10 @@ function renderShop() {
             <div class="shop-tabs">
                 ${tabsHtml}
             </div>
-            <div id="shop-items-container">
-                ${itemsHtml}
+            <div id="shop-items-container" style="flex: 1; overflow: hidden; padding: 20px 40px; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); gap: 20px;">
+                ${pageCards}
             </div>
+            ${paginationHtml}
         </div>
     `;
 
@@ -3956,8 +4137,9 @@ function renderStation(sid) {
             </div>
             <div class="station-prep-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'prep')">
                 <div class="prep-status-text"></div>
-                <div class="ing-list-prep"></div>
-                <div class="prep-bowl">
+                <div class="prep-bowl" style="position:relative;">
+                     <!-- ing-list-prep 移动到这里面或者同级绝对定位 -->
+                     <div class="ing-list-prep"></div>
                     ${s.currentIngredients.length > 0 
                         ? '<img src="assets/station/备菜砧板.png" alt="备菜砧板">' 
                         : '<img src="assets/station/备菜盘.png" alt="备菜盘">'}
@@ -4126,75 +4308,60 @@ function updateBalanceDisplay() {
 }
 
 function switchScreen(screenId) {
-    // [核心修复] 重写页面切换逻辑，确保彻底清除遮罩并重置状态
-    console.log(`[UI] Switching to screen: ${screenId}`);
+    console.log(`[UI] Switching to: ${screenId}`);
     
-    // 1. 定义所有可能存在的界面层级 ID，包括主界面、弹窗、遮罩
-    const allLayers = [
-        'start-screen', 
-        'game-container', 
-        'map-screen', 
-        'shop-overlay', 
-        'overlay',       // 结算弹窗遮罩
-        'pause-overlay', // 暂停遮罩
-        'prep-modal',    // 备货弹窗
-        'cover',         // 可能残留的封面
-        'loading'        // 可能残留的加载层
-    ];
+    // 1. 获取关键元素
+    const container = document.getElementById('game-container');
+    const startScreen = document.getElementById('start-screen');
+    const playArea = document.getElementById('play-area');
+    const hud = document.getElementById('hud');
+    const belt = document.getElementById('belt-container');
 
-    // 2. 暴力隐藏所有层级，并重置交互状态
-    allLayers.forEach(id => {
+    // 2. 确保主容器始终显示
+    if (container) container.style.display = 'flex';
+
+    // 3. 定义所有互斥的界面层级
+    const overlays = ['shop-overlay', 'overlay', 'pause-overlay', 'map-screen', 'loading', 'achievement-modal', 'settings-modal', 'end-game-modal'];
+
+    // 4. 先隐藏所有悬浮层
+    overlays.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            // [修复] game-container 使用 display: block (或 grid/flex 根据 CSS)，而不是 display: none
-            // 这里我们先全隐藏
-            el.style.display = 'none';
-            
-            // [关键] 移除可能残留的 pointer-events: none 样式
-            el.style.pointerEvents = ''; 
-            el.style.opacity = ''; // 移除可能残留的透明度设置
-        }
+        if (el) el.style.display = 'none';
     });
 
-    // 3. 强制恢复 Body 状态
-    document.body.style.pointerEvents = 'auto';
-    document.body.style.overflow = ''; 
-
-    // 4. 显示目标层级
-    const targetEl = document.getElementById(screenId);
-    if (targetEl) {
-        // [修复] start-screen 原生样式是 flex，game-container 原生是 block
-        // 最好恢复为空字符串让 CSS 接管，或者强制指定
-        if (screenId === 'game-container') {
-            targetEl.style.display = 'block';
-        } else {
-            targetEl.style.display = 'flex';
-        }
+    // 5. 根据目标 ID 处理显示逻辑
+    if (screenId === 'start-screen') {
+        // --- 首页模式 ---
+        if (startScreen) startScreen.style.display = 'flex';
+        if (playArea) playArea.style.display = 'none';
+        if (hud) hud.style.display = 'none';
+        if (belt) belt.style.display = 'none';
         
-        // 针对首页的特殊处理
-        if (screenId === 'start-screen') {
-            uiState = 'HOME';
-            game.isLive = false; // 确保游戏状态重置
-            game.isPaused = false;
-            updateBalanceDisplay();
-            
-            // 确保停止游戏音乐，播放主题曲
-            stopMusic(); 
-            startMusic();
-            
-            // [关键] 确保首页按钮可点击
-            const startBtn = document.getElementById('btn-start');
-            if(startBtn) {
-                startBtn.style.pointerEvents = 'auto';
-                startBtn.style.cursor = 'pointer';
-            }
-        } 
-        // 针对游戏页面的特殊处理
-        else if (screenId === 'game-container') {
-            uiState = 'GAME';
-        }
+        uiState = 'HOME';
+        stopMusic();
+        startMusic();
+    } else if (screenId === 'game-container') {
+        // --- 游戏模式 ---
+        if (startScreen) startScreen.style.display = 'none';
+        if (playArea) playArea.style.display = 'grid';
+        if (hud) hud.style.display = 'flex';
+        if (belt) belt.style.display = 'flex';
+        
+        uiState = 'GAME';
     } else {
-        console.error(`[UI] Target screen not found: ${screenId}`);
+        // --- 通用弹窗模式 (如 map-screen) ---
+        // 如果目标是一个覆盖层，直接显示它
+        const targetEl = document.getElementById(screenId);
+        if (targetEl) {
+            targetEl.style.display = 'flex';
+            
+            // 地图页属于首页分支，隐藏游戏元素，保留背景
+            if (screenId === 'map-screen') {
+                if (startScreen) startScreen.style.display = 'none';
+                if (playArea) playArea.style.display = 'none';
+                if (hud) hud.style.display = 'none';
+            }
+        }
     }
 }
 
@@ -6034,38 +6201,34 @@ window.changePrep = function(id, delta) {
 };
 
 window.confirmPrep = async function() { 
-        console.log("确认进货：正在初始化游戏..."); 
-        
-        // 1. 强制唤醒音频引擎 
-        if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') { 
-            try { 
-                await audioCtx.resume(); 
-                console.log("✅ AudioContext 已强制唤醒"); 
-            } catch (err) { 
-                console.warn("❌ AudioContext 唤醒失败:", err); 
-            } 
+    console.log("确认进货：正在初始化游戏..."); 
+    
+    // 1. 强制唤醒音频引擎 
+    if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') { 
+        try { 
+            await audioCtx.resume(); 
+            console.log("✅ AudioContext 已强制唤醒"); 
+        } catch (err) { 
+            console.warn("❌ AudioContext 唤醒失败:", err); 
         } 
- // 2. 同步数据 
- game.dailyInventory = { ...window.tempInventory }; 
- game.coins = window.tempCoins; 
- 
- // 3. 清理遮罩 
- const uiIds = ['prep-modal', 'cover', 'start-screen']; 
- uiIds.forEach(id => { 
-     const el = document.getElementById(id); 
-     if(el) el.style.display = 'none'; 
- }); 
- 
- // 4. 显示游戏主界面 
- const gameContainer = document.getElementById('game-container'); 
- if(gameContainer) { 
-     gameContainer.style.display = 'flex'; 
-     gameContainer.style.zIndex = '10'; 
- } 
- 
- // 5. 激活核心状态 
- game.isPaused = false; 
- game.isLive = true; 
+    } 
+    // 2. 同步数据 
+    game.dailyInventory = { ...window.tempInventory }; 
+    game.coins = window.tempCoins; 
+
+    // [核心修改] 3. & 4. 切换到游戏视图
+    // 先手动隐藏 prep-modal (因为它可能不在 switchScreen 的管理列表里)
+    const prepModal = document.getElementById('prep-modal');
+    if(prepModal) prepModal.style.display = 'none';
+    const cover = document.getElementById('cover');
+    if(cover) cover.style.display = 'none';
+
+    // 使用 switchScreen 统一管理：它会自动显示 play-area/hud/belt，并隐藏 start-screen
+    switchScreen('game-container');
+
+    // 5. 激活核心状态 
+    game.isPaused = false; 
+    game.isLive = true; 
  
  // 6. 切换背景 
  if(typeof updateGameBackground === 'function') { 
@@ -6114,9 +6277,11 @@ function showPrepModal() {
     if (!modal) { 
         modal = document.createElement('div'); 
         modal.id = 'prep-modal'; 
-        document.body.appendChild(modal); 
+        // [核心修改] 挂载到游戏容器内部 
+        document.getElementById('game-container').appendChild(modal); 
     } 
-    modal.className = 'prep-overlay'; 
+    // [核心修改] 确保样式为 absolute 
+    modal.className = 'prep-overlay'; // CSS中已改为 absolute 
     modal.style.cssText = 'display: flex !important; pointer-events: auto !important; opacity: 1 !important; visibility: visible !important;'; 
     // [核心修改] Day 1 特殊文案处理 
     const isDayOne = game.level === 1; 
@@ -6364,7 +6529,7 @@ function checkAndPlayPantryAnimation() {
 
 
 
-<div id="shop-overlay" class="shop-overlay" style="display:none;"></div>
+
 
 <script>
 // 3. 强制重置开始按钮（放在代码最末尾）：
