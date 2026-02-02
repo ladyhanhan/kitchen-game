@@ -33,6 +33,17 @@
             font-style: normal;
             font-display: swap;
         }
+        /* [新增] 全局隐藏滚动条 (Webkit/Mobile) */ 
+        *::-webkit-scrollbar { 
+            display: none !important; 
+            width: 0 !important; 
+            height: 0 !important; 
+        } 
+        * { 
+            -ms-overflow-style: none; /* IE/Edge */ 
+            scrollbar-width: none; /* Firefox */ 
+        }
+
         :root {
             --bg: #fdfcfb; --panel: #ffffff; --primary: #e60012; --accent: #FCC307;
             --prep: #3498db; --cook: #e74c3c; --plate: #2ecc71; --burnt: #2c3e50;
@@ -2579,42 +2590,72 @@
 
 <script src="tests.js"></script>
 <script>
-// [新增] 移动端视窗适配系统
-function resizeGameWindow() {
-    const container = document.getElementById('game-container');
-    const startScreen = document.getElementById('start-screen'); // 首页也需要缩放
-    const loadingScreen = document.getElementById('loading'); // 加载页也需要
+// [优化版] 移动端沉浸式适配系统 
+function resizeGameWindow() { 
+    const container = document.getElementById('game-container'); 
+    const startScreen = document.getElementById('start-screen'); 
+    const loadingScreen = document.getElementById('loading'); 
     
-    // 目标设计尺寸
-    const designW = 1920;
-    const designH = 1080;
+    // [核心调整] 将基准设计高度降低，实现“视觉放大”效果 
+    // 电脑端保持 1080，移动端使用 920 (相当于放大 ~17%) 
+    const isMobile = window.innerWidth < 1024; 
+    const designH = isMobile ? 920 : 1080; 
+    const designW = 1920; // 基准宽度仅作参考 
     
-    // 当前窗口尺寸
-    const winW = window.innerWidth;
-    const winH = window.innerHeight;
+    const winW = window.innerWidth; 
+    const winH = window.innerHeight; 
     
-    // 计算缩放比例 (Contain 模式：保证全部内容可见)
-    const scale = Math.min(winW / designW, winH / designH);
+    // 计算缩放比例 (以高度为基准铺满屏幕) 
+    let scale = winH / designH; 
     
-    // 应用缩放
-    const targetStyles = `
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%) scale(${scale});
-        width: ${designW}px;
-        height: ${designH}px;
-        transform-origin: center center;
-    `;
+    // 计算适配后的容器尺寸 
+    // 宽度：根据屏幕实际比例反推，确保填满左右黑边 
+    let newW = winW / scale; 
+    let newH = designH; 
     
-    if (container) container.style.cssText = targetStyles + (container.style.display === 'none' ? 'display:none;' : 'display:flex;');
-    if (startScreen) startScreen.style.cssText = targetStyles + (startScreen.style.display === 'none' ? 'display:none;' : 'display:flex;');
+    // 边界保护：如果屏幕太宽(如超宽屏)，限制最大宽度防止UI过于分散 
+    // 如果屏幕太方(如iPad)，改用宽度基准防止上下裁切 
+    if (winW / winH < 1.6) { // iPad 等方屏逻辑 
+        scale = winW / designW; 
+        newW = designW; 
+        newH = winH / scale; 
+    } 
     
-    // 加载页特殊处理：全屏铺满
-    if (loadingScreen) {
-        loadingScreen.style.width = '100vw';
-        loadingScreen.style.height = '100vh';
-    }
+    // 应用变换 
+    const targetStyles = ` 
+        position: absolute; 
+        left: 50%; 
+        top: 50%; 
+        transform: translate(-50%, -50%) scale(${scale}); 
+        width: ${newW}px; 
+        height: ${newH}px; 
+        transform-origin: center center; 
+        display: flex; /* 确保 display 恢复 */ 
+    `; 
+    
+    // 应用到主容器和首页 
+    if (container) { 
+        // 保持 display状态，避免覆盖 'none' 
+        const displayState = container.style.display === 'none' ? 'none' : 'flex'; 
+        container.style.cssText = targetStyles + `display: ${displayState};`; 
+    } 
+    if (startScreen) { 
+        const displayState = startScreen.style.display === 'none' ? 'none' : 'flex'; 
+        startScreen.style.cssText = targetStyles + `display: ${displayState};`; 
+    } 
+    
+    // 加载页始终全屏 
+    if (loadingScreen) { 
+        loadingScreen.style.width = '100vw'; 
+        loadingScreen.style.height = '100vh'; 
+    } 
+    
+    // [新增] 修复背景图适配：在宽屏下强制 Cover 模式防止白边 
+    const bgLayers = document.querySelectorAll('.bg-layer'); 
+    bgLayers.forEach(layer => { 
+        layer.style.backgroundSize = 'cover'; 
+        layer.style.backgroundPosition = 'center 30%'; // 略微上移焦点 
+    }); 
 }
 
 // 监听窗口变化
@@ -2677,6 +2718,7 @@ let gameLang = (localStorage.getItem('gameLang') || ((navigator.language || '').
 let coinBuffer = null;
 let revenueBuffer = null;
 let angryBuffers = []; // [新增] 存储生气音效 Buffer
+let angryAudioElements = []; // [新增] 存储生气音效 Audio 元素 (Fallback)
 const ANGRY_SOUNDS = ['audio/angry_man.mp3', 'audio/angry_woman.mp3', 'audio/angry_child.mp3']; // [新增] 音效文件列表 (英文文件名避免编码问题)
 const revenueAudio = new Audio('audio/coin.mp3'); // Fallback
 let bgmSource = null; // Track BGM MediaElementSource
@@ -2828,36 +2870,40 @@ function playRandomAngrySound() {
         audioCtx.resume().catch(e => console.error("Audio resume failed:", e));
     }
 
-    // 如果没有加载到生气音效，回退到原来的蜂鸣声
-    if (angryBuffers.length === 0) {
-        console.warn("Angry sounds not loaded yet, fallback to sawtooth");
-        playSfx(80, 'sawtooth', 0.4);
-        return;
-    }
-
-    try {
-        // 随机选择一个
-        const buffer = angryBuffers[Math.floor(Math.random() * angryBuffers.length)];
-        // 确保 buffer 有效
-        if (!buffer) {
-             playSfx(80, 'sawtooth', 0.4);
-             return;
+    // 优先使用 Web Audio API (Buffer)
+    if (angryBuffers.length > 0) {
+        try {
+            const buffer = angryBuffers[Math.floor(Math.random() * angryBuffers.length)];
+            if (buffer) {
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(sfxGain);
+                source.start();
+                console.log("Played angry sound (Web Audio)");
+                return;
+            }
+        } catch (e) {
+            console.error("Web Audio Play Error:", e);
         }
-
-        const source = audioCtx.createBufferSource();
-        source.buffer = buffer;
-        
-        // 连接到 sfxGain 以受音效开关控制
-        source.connect(sfxGain);
-        
-        // 播放
-        source.start();
-        console.log("Played angry sound");
-    } catch (e) {
-        console.error("Play Angry Sound Error:", e);
-        // 出错时回退
-        playSfx(80, 'sawtooth', 0.4);
     }
+
+    // 降级方案：使用 HTML5 Audio (Fallback)
+    if (angryAudioElements.length > 0) {
+        try {
+            console.warn("Using fallback HTML5 Audio for angry sound");
+            const aud = angryAudioElements[Math.floor(Math.random() * angryAudioElements.length)];
+            aud.currentTime = 0;
+            aud.volume = 0.8; // 模拟 sfxGain
+            aud.play().catch(e => console.error("HTML5 Audio Play Error:", e));
+            return;
+        } catch (e) {
+             console.error("HTML5 Audio Fallback Error:", e);
+        }
+    }
+
+    // 最后防线：蜂鸣声
+    console.warn("Angry sounds not loaded yet, fallback to sawtooth");
+    playSfx(80, 'sawtooth', 0.4);
 }
 
 /* Removed old playCoin and createCoinBuffer definitions to avoid duplication */
@@ -2880,7 +2926,9 @@ function preloadAudio() {
         .catch(e => console.error("Error loading coin.mp3:", e));
 
     // [新增] 预加载生气音效
+    angryAudioElements.length = 0; // Clear previous fallback elements
     ANGRY_SOUNDS.forEach(url => {
+        // 1. Web Audio Fetch
         fetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -2895,6 +2943,15 @@ function preloadAudio() {
                 }
             })
             .catch(e => console.error(`Failed to load ${url}:`, e));
+
+        // 2. HTML5 Audio Fallback (Create element immediately)
+        try {
+            const aud = new Audio(url);
+            aud.preload = 'auto'; // Hint to preload
+            angryAudioElements.push(aud);
+        } catch (e) {
+            console.error(`Failed to create fallback Audio for ${url}:`, e);
+        }
     });
 }
 
@@ -4797,6 +4854,19 @@ window.onload = () => {
 
     if (btn) {
         btn.onclick = function() {
+            // [新增] 用户点击开始时，再次确保 AudioContext 激活
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => {
+                    console.log("AudioContext resumed by Start Button");
+                }).catch(e => console.error("Audio resume failed:", e));
+            }
+            
+            // [新增] 检查并补充预加载（以防onload时网络卡顿未完成）
+            if (angryBuffers.length === 0) {
+                 console.log("Retry preloading angry sounds...");
+                 preloadAudio(); 
+            }
+
             const cover = document.getElementById('cover') || document.getElementById('start-screen');
             if (cover) cover.style.display = 'none'; // 隐藏封面
             showPrepModal(); // 仅弹出补货窗口
