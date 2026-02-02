@@ -876,7 +876,32 @@
 /* 2. 烹饪区 (下半部) - 基础样式已合并至上方 */
 .station-cook-zone:active { transform: scale(0.98); } 
 
-/* 机器主体 */ .cook-machine { width: 150px !important; height: 150px !important; display: flex; align-items: center; justify-content: center; margin-bottom: 0 !important; pointer-events: none; } .cook-machine img { width: 100% !important; height: 100% !important; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.35)) !important; transition: transform 0.2s; } .cook-machine.active { animation: machineWork 0.5s infinite; } .cook-machine.finished { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.9)); } 
+/* 机器主体 */ 
+.cook-machine { 
+    width: 150px !important; 
+    height: 150px !important; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 0 !important; 
+    pointer-events: none;
+    position: relative; /* Enable relative positioning */
+    top: -20px; /* Move up by 20px as requested */
+} 
+.cook-machine img { 
+    width: 100% !important; 
+    height: 100% !important; 
+    object-fit: contain; 
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.35)) !important; 
+    transition: transform 0.2s; 
+} 
+.cook-machine.active { 
+    animation: machineWork 0.5s infinite; 
+} 
+.cook-machine.finished { 
+    transform: scale(1.1); 
+    filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.9)); 
+} 
 
 .progress-bar-container { width: 80%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); } .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e67e22); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 10px rgba(230, 126, 34, 0.5); } 
 
