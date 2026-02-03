@@ -684,13 +684,14 @@
 } 
 
  /* 2. 工位完成时的图片 (机器上显示) */ 
- .cook-machine img { 
-     width: 50px; 
-     height: 50px; 
-     object-fit: contain; 
-     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-     filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); 
- } 
+.cook-machine img { 
+    width: 50px; 
+    height: 50px; 
+    object-fit: contain; 
+    /* [修改] 移除默认动画，防止取餐后重置 */
+    /* animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); */
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); 
+} 
  
  /* 3. 鼠标拖拽时的图片 */ 
  #drag-cursor img { 
@@ -727,6 +728,18 @@
     box-sizing: border-box; 
 } 
 
+/* 确保占位符有效 */
+.station {
+    width: 240px;
+    flex-shrink: 0;
+    margin: 0 10px;
+}
+
+/* 微调：二号工位整体向右平移 4px */
+#s_s2 {
+    transform: translateX(4px);
+}
+
 /* 悬停交互反馈 */
 .station-card:hover {
     border-color: rgba(255, 255, 255, 0.4);
@@ -735,13 +748,14 @@
 
 /* [修改] 统一增加高度，确保按钮不溢出 */
 .station-card.prep-card, .station-card.cook-card {
-    /* 高度从 260px 增加到 320px */
+    /* [修改] 高度调整回 320px */
     height: 320px !important;
     flex-shrink: 0;
     /* 确保内容垂直分布均匀 */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    transform: translateX(16px);
 } 
 
 /* Card Header - 完全透明 */ 
@@ -784,8 +798,8 @@
 .station-cook-zone, .station-prep-zone {
     flex: 1;
     width: 100%;
-    /* 增加内边距，让内容不要贴边 */
-    padding: 20px 10px !important;
+    /* [修改] 减少左右内边距，允许图片更大 (10px -> 0) */
+    padding: 20px 0 !important;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -803,8 +817,8 @@
 /* [核心修复 2] 点击时的物理反馈：整体微缩，背景不变色 */ .station-prep-zone:active { transform: scale(0.98); /* 模拟按压感 */ background-color: transparent; /* 强制保持一致 */ } 
 
 .prep-bowl { /* [修改] 容器极大化，利用 flex 剩余空间 */
-    width: 180px !important;
-    height: 140px !important;
+    width: 220px !important; /* 放大至约 1.3 倍 (180->220) */
+    height: 180px !important; /* 放大至约 1.3 倍 (140->180) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -814,6 +828,8 @@
     box-shadow: none;
     margin: 5px 0 !important; /* 给上下留点间隙 */
     flex-shrink: 0;
+    position: relative;
+    top: 10px; /* [调整] 适应 320px 高度，稍微上移 (20px -> 10px) */
 }
 .prep-bowl img { /* [修改] 图片撑满容器 */
     width: 100% !important;
@@ -856,6 +872,11 @@
     flex-shrink: 0;
     /* 确保在最下方 */
     margin-top: auto;
+    /* [修改] 增加内边距防止按钮贴边 */
+    padding: 0 10px;
+    box-sizing: border-box;
+    /* [修改] 按钮整体上移 15px (原10px) */
+    transform: translateY(-15px);
     
     /* Preserved layout properties */
     display: flex;
@@ -895,6 +916,11 @@
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.35)) !important; 
     transition: transform 0.2s; 
 } 
+ /* 精确定位仅移动大锅（烹饪/空闲）图片 */
+ .cook-machine img[alt="Idle"], 
+ .cook-machine img[alt="Cooking"] {
+     transform: translateX(6px);
+ }
 .cook-machine.active { 
     animation: machineWork 0.5s infinite; 
 } 
@@ -958,7 +984,17 @@
         }
         .dish-icon.bounce { animation: bounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        .station-controls { width: 100%; height: auto; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+        .station-controls { 
+            width: 100%; 
+            height: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            flex-shrink: 0;
+            /* [修改] 增加内边距防止按钮贴边 */
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
 
         .action-btn {
             width: 100%; height: 48px; /* 1.5x */
@@ -2025,15 +2061,15 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             /* Mobile Optimization: Adjust proportion */
-            .shop-item-image-container { height: 40% !important; min-height: 110px; }
-            .shop-item-content { padding: 10px 12px !important; }
+            .shop-item-image-container { height: 60% !important; min-height: 120px; } /* [优化] 移动端同步提升图片占比 */
+            .shop-item-content { padding: 8px 10px !important; }
             
-            .shop-item-category { font-size: 10px; }
-            .shop-item-name { font-size: 14px; }
-            .shop-item-level { font-size: 10px; padding: 2px 6px; }
-            .shop-item-desc { font-size: 11px; -webkit-line-clamp: 2; margin-bottom: 4px !important; }
-            .shop-item-effect { font-size: 11px; margin-bottom: 8px !important; }
-            .shop-btn-buy { padding: 8px; font-size: 12px; border-radius: 6px; }
+            .shop-item-category { font-size: 9px; }
+            .shop-item-name { font-size: 13px; }
+            .shop-item-level { font-size: 9px; padding: 2px 4px; }
+            .shop-item-desc { font-size: 10px; -webkit-line-clamp: 2; margin-bottom: 2px !important; }
+            .shop-item-effect { font-size: 10px; margin-bottom: 4px !important; }
+            .shop-btn-buy { padding: 4px; font-size: 11px; border-radius: 4px; }
         }
         #shop-items-container::-webkit-scrollbar { width: 8px; }
         #shop-items-container::-webkit-scrollbar-track { background: transparent; }
@@ -2054,13 +2090,13 @@
         /* Image Container - Significantly increased area & Visual Polish */
         .shop-item-image-container {
             width: 100%;
-            height: 45%; /* Use percentage for responsive balance (approx 160-200px on desktop) */
-            min-height: 140px; /* Safety minimum */
+            height: 65%; /* [优化] 图片区域占比提升至 65% */
+            min-height: 160px; /* Safety minimum */
             background: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.15) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px; /* Increased padding for breathing room */
+            padding: 10px; /* [优化] 减少内边距，让图片更大 */
             box-sizing: border-box;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             transition: background 0.3s ease;
@@ -2084,7 +2120,7 @@
         .shop-item-icon img {
             width: 100% !important;
             height: 100% !important;
-            object-fit: contain !important;
+            object-fit: contain !important; /* [优化] 自适应填充，完整展示 */
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
             transition: transform 0.3s ease;
         }
@@ -2095,18 +2131,18 @@
 
         /* Content Container */
         .shop-item-content {
-            padding: 12px 16px; /* Reduced vertical padding for better fit */
+            padding: 8px 10px; /* [优化] 紧凑内边距 */
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 6px; /* Use gap for consistent spacing */
+            gap: 4px; /* [优化] 减小间距 */
         }
 
         .shop-item-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 8px;
+            margin-bottom: 4px; /* [优化] 减小底部间距 */
         }
         
         .shop-item-title-group {
@@ -2115,29 +2151,29 @@
         }
 
         .shop-item-category { 
-            font-size: 11px; color: #bdc3c7; font-weight: bold; 
+            font-size: 9px; color: #bdc3c7; font-weight: bold; /* [优化] 更小的字体 */
             text-transform: uppercase; letter-spacing: 1px; 
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         
         .shop-item-name { 
-            font-size: 18px; font-weight: bold; color: #ecf0f1; 
+            font-size: 14px; font-weight: bold; color: #ecf0f1; /* [优化] 调整标题大小 */
             line-height: 1.2;
             margin-bottom: 0;
         }
         
         .shop-item-level { 
-            font-size: 12px; color: #bdc3c7; background: rgba(255,255,255,0.1); 
-            padding: 4px 8px; border-radius: 6px; 
+            font-size: 10px; color: #bdc3c7; background: rgba(255,255,255,0.1); 
+            padding: 2px 6px; border-radius: 4px; /* [优化] 更紧凑的等级标签 */
             white-space: nowrap;
-            margin-left: 8px;
+            margin-left: 6px;
             height: fit-content;
         }
 
         .shop-item-desc { 
-            font-size: 13px; 
+            font-size: 11px; /* [优化] 更小的描述字体 */
             color: #bdc3c7; 
-            line-height: 1.5; 
+            line-height: 1.4; 
             
             /* 强制卡片内容适配，防止溢出 */
             display: -webkit-box;
@@ -2145,19 +2181,31 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             
             flex-grow: 1; /* Push footer down */
         }
         
         .shop-item-effect { 
-            font-size: 13px; color: #2ecc71; margin-bottom: 4px; font-weight: bold; 
-            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; color: #2ecc71; margin-bottom: 4px; font-weight: bold; /* [优化] 更小的特效字体 */
+            display: flex; align-items: center; gap: 4px;
         }
-        .shop-item-effect::before { content: "✨"; font-size: 12px; }
+        .shop-item-effect::before { content: "✨"; font-size: 10px; }
 
         .shop-item-footer {
             margin-top: auto;
+        }
+        
+        /* [新增] 紧凑按钮样式 */
+        .shop-btn-buy {
+            padding: 6px 0;
+            width: 100%;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         /* Hover Effects */
@@ -3222,37 +3270,102 @@ function stopMusic() {
 const SHOP_CONFIG = {
     expansion: {
         name: "店铺装修",
-        desc: "扩建后厨空间，增加灶台数量和接单能力。",
+        desc: "升级后厨布局，增加灶台位与订单容量。",
         basePrice: 0,
         levels: [
-            { name: "创业小摊", stations: 1, slots: 2, effectText: "初始状态：1个灶台，2个订单槽。", price: 0 },
-            { name: "标准档口", stations: 2, slots: 3, effectText: "扩建：解锁第2个灶台，接单上限提升至3单。", price: 2000 },
-            { name: "旗舰后厨", stations: 3, slots: 5, effectText: "满级：解锁第3个灶台，接单上限提升至5单。", price: 8000 }
+            {
+                name: "标准后厨",
+                stations: 1,
+                slots: 2,
+                effectText: "基础配置：1个灶台，2个订单位，适合起步经营。",
+                price: 0
+            },
+            {
+                name: "扩容后厨",
+                stations: 2,
+                slots: 3,
+                effectText: "升级配置：解锁第2个灶台，接单上限提升至3单。",
+                price: 2000
+            },
+            {
+                name: "星级后厨",
+                stations: 3,
+                slots: 5,
+                effectText: "顶级配置：解锁第3个灶台，接单上限提升至5单，火力全开。",
+                price: 8000
+            }
         ]
     },
     pot: {
         name: "烹饪设备",
-        desc: "工欲善其事，必先利其器。从铁锅到AI，最终返璞归真。",
+        desc: "选择你的流派：是追求极致的工业化量产，还是唯快不破的手速大师？",
         basePrice: 500,
         levels: [
-            { name: "基础铁锅", effect: 0, effectText: "传统手工烹饪，需时刻关注火候。", price: 0 },
-            { name: "专业不粘锅", effect: 0.15, effectText: "不粘涂层，烹饪速度提升 15%。", price: 500 },
-            { name: "多段控温精钢锅", effect: 0.35, effectText: "精准控温，烹饪速度提升 35%。", price: 1500 },
-            { name: "Omni 1.0", effect: 0.5, effectText: "智能温控，烹饪速度提升 50%，自动防糊。", isDigital: true, price: 5000 },
-            { name: "Omni 2.0", effect: 0.8, effectText: "双核极速加热，烹饪速度提升 80%。", isDigital: true, price: 12000 },
-            { name: "Omni 3.0", effect: 1.0, effectText: "AI 智能大厨，瞬间完成烹饪。", isDigital: true, price: 25000 },
-            { name: "单边小锅", effect: 1.5, effectText: "大师御用。虽无芯片，但聚热性能超越 AI 50%。", price: 60000 },
-            { name: "小锅", effect: 2.0, effectText: "【传说】大道至简。烹饪速度提升 200%，唯有厨神方可驾驭。", price: 99999 }
-        ]
-    },
-    knife: {
-        name: "极速切配",
-        desc: "工欲善其事，必先利其器。升级切配工具以应对高峰客流。",
-        basePrice: 400,
-        levels: [
-            { name: "精钢厨刀", effect: 0, effectText: "标准切配速度。", price: 0 },
-            { name: "自动切片机", effect: 0.3, effectText: "机械化切配，效率提升 30%。", price: 800 },
-            { name: "数字化切配中心", effect: 0.6, effectText: "智能识别食材，自动化处理，效率提升 60%。", price: 2500 }
+            // --- 阶段一：手工起步 ---
+            { 
+                name: "基础铁锅", 
+                effect: 0, 
+                yield: 1, 
+                effectText: "传统手工烹饪，慢工出细活。", 
+                price: 0 
+            },
+            { 
+                name: "专业不粘锅", 
+                effect: 0.25, // 提速 25% 
+                yield: 1, 
+                effectText: "不粘涂层，烹饪速度小幅提升。", 
+                price: 500 
+            },
+            { 
+                name: "多段控温精钢锅", 
+                effect: 0.5, // 提速 50% 
+                yield: 1, 
+                effectText: "精准控温，烹饪速度显著提升。", 
+                price: 1800 
+            },
+            
+            // --- 阶段二：Omni 工业化 (量产流) ---
+            { 
+                name: "Omni 1.0", 
+                effect: 0.6, // 速度一般 
+                yield: 2,    // [核心] 双份出餐 
+                isDigital: true, 
+                effectText: "智能温控，虽然速度普通，但一次烹饪产出 2 份！", 
+                price: 5500 
+            },
+            { 
+                name: "Omni 2.0", 
+                effect: 0.7, 
+                yield: 3,    // [核心] 三份出餐 
+                isDigital: true, 
+                effectText: "双核加热，效能升级，一次烹饪产出 3 份！", 
+                price: 15000 
+            },
+            { 
+                name: "Omni 3.0", 
+                effect: 0.8, 
+                yield: 4,    // [核心] 四份出餐 
+                isDigital: true, 
+                effectText: "AI 算力全开，工业级怪兽，一次烹饪产出 4 份！", 
+                price: 35000 
+            },
+            
+            // --- 阶段三：小锅大师 (极速流) ---
+            // 价格定位比 Omni 略高，因为“灵活性”通常比“死板量产”更强
+            { 
+                name: "单边小锅", 
+                effect: 4.0, // [核心] 5倍速 (极快) 
+                yield: 1, 
+                effectText: "【双胆模拟】极速加热，几乎瞬发，适合连续处理不同订单。", 
+                price: 45000 
+            },
+            { 
+                name: "小锅", 
+                effect: 10.0, // [核心] 11倍速 (瞬发) 
+                yield: 1, 
+                effectText: "【四胆模拟】意念合一，点击即完成。手速越快，产出越快。", 
+                price: 88888 
+            }
         ]
     },
     belt: {
@@ -3279,7 +3392,7 @@ const SHOP_CONFIG = {
 
 const SHOP_TABS = [
     { id: 'expand', label: '🏗️ 装修', types: ['expansion'] },
-    { id: 'equip', label: '🍳 厨具', types: ['pot', 'knife'] },
+    { id: 'equip', label: '🍳 厨具', types: ['pot'] },
     { id: 'system', label: '💻 系统', types: ['belt', 'fridge'] }
 ];
 
@@ -3292,7 +3405,6 @@ const SHOP_ITEMS_PER_PAGE = 8; // 每页显示8个 (2行 x 4列)
 function getShopItemIcon(type) {
     switch(type) {
         case 'expansion': return '🏗️';
-        case 'knife': return '🔪';
         case 'pot': return '🍳';
         case 'belt': return '🖥️';
         case 'fridge': return '❄️';
@@ -3554,7 +3666,7 @@ const GameStateManager = {
         game.history = [];
         game.orderQueue = [];
         game.coins = 0;
-            game.inventory = { knife: 0, pot: 0, belt: 0, fridge: 0, expansion: 0 };
+            game.inventory = { pot: 0, belt: 0, fridge: 0, expansion: 0 };
         
         // Persist the clean state immediately
         saveGameState();
@@ -3579,7 +3691,7 @@ let game = {
     logs: [], // 系统日志
     history: [], // Stores {day, revenue, rate}
     coins: 0, // 当前可用货币
-    inventory: { knife: 0, pot: 0, belt: 0, fridge: 0, expansion: 0 }, // 商店道具等级
+    inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0 }, // 商店道具等级
     startTime: 0, // Game start timestamp
     totalErrors: 0, // Track operational errors
     totalOrdersCompleted: 0, // Track total completed orders
@@ -4109,10 +4221,126 @@ function showToast(text, duration = 2000) {
     setTimeout(() => div.remove(), duration + 100);
 }
 
-function renderStation(sid) {
+window.cycleStationEquipment = function(sid) {
+    const s = stations[sid];
+    // 只有空闲时允许换锅，防止烹饪中数据错乱
+    if (s.stage !== 'IDLE' && s.stage !== 'PREP_ING') {
+        // Find the button to position feedback
+        const btn = document.querySelector(`#s_${sid} .btn-trash-mini[title*="切换设备"]`);
+        const x = btn ? btn.getBoundingClientRect().left : event.clientX;
+        const y = btn ? btn.getBoundingClientRect().top : event.clientY;
+        triggerFeedback(x, y, "工作中无法换锅!", "red");
+        return;
+    }
+
+    const maxLevel = game.inventory.pot || 0;
+    // 循环切换： 0 -> 1 -> ... -> max -> 0
+    s.equipLevel = (s.equipLevel || 0) + 1;
+    if (s.equipLevel > maxLevel) s.equipLevel = 0;
+
+    playSfx(300, 'sine', 0.1);
+    renderStation(sid); // 刷新 UI 显示新锅
+
+    // 提示当前装备名称
+    const config = SHOP_CONFIG.pot.levels[s.equipLevel];
+    const el = document.getElementById('s_'+sid);
+    if (el) {
+        const rect = el.getBoundingClientRect();
+        triggerFeedback(rect.left + 100, rect.top + 50, `已装备: ${config.name}`, "#f1c40f");
+    }
+};
+
+function renderStation(sid, updateMode = 'full') {
     const s = stations[sid];
     const el = document.getElementById('s_' + sid);
     if (!el) return;
+
+    // [新增] 读取工位独立等级
+    const currentPotLevel = (s.equipLevel !== undefined) ? s.equipLevel : ((game.inventory && game.inventory.pot) || 0);
+    const potConfig = SHOP_CONFIG.pot.levels[currentPotLevel] || SHOP_CONFIG.pot.levels[0];
+    const potName = potConfig.name;
+    // const potImgSrc = `assets/equipment/${potName}.png`; // Used in template
+
+    // [Partial Update] 针对备菜区的局部刷新，避免重绘整个工位导致锅动画重置
+    if (updateMode === 'prep' && el.querySelector('.station-card.prep-card')) {
+        const isBusy = (s.stage === 'COOKING' || s.stage === 'FINISHED');
+        const prepCard = el.querySelector('.station-card.prep-card');
+        const prepStatus = s.currentIngredients.length > 0 ? 'status-active' : '';
+        
+        // 1. 更新容器样式
+        prepCard.className = `station-card prep-card ${prepStatus}`;
+        // 手动应用/移除忙碌状态样式
+        if (isBusy) {
+            prepCard.style.opacity = '0.4';
+            prepCard.style.pointerEvents = 'none';
+            prepCard.style.filter = 'grayscale(1)';
+        } else {
+            prepCard.style.opacity = '';
+            prepCard.style.pointerEvents = '';
+            prepCard.style.filter = '';
+        }
+        // 注意：transform 由 CSS 类控制，无需在此设置
+
+        // 2. 更新食材图标
+        const ingList = el.querySelector('.ing-list-prep');
+        if (ingList) {
+            ingList.innerHTML = '';
+            if (!isBusy) {
+                s.currentIngredients.forEach(ingId => {
+                    const span = document.createElement('span');
+                    span.className = 'ing-item-small';
+                    if(typeof INGREDIENTS !== 'undefined' && INGREDIENTS[ingId]) {
+                        span.innerText = INGREDIENTS[ingId].icon;
+                    }
+                    ingList.appendChild(span);
+                });
+            }
+        }
+
+        // 3. 更新砧板/盘子图片
+        const prepBowl = el.querySelector('.prep-bowl');
+        if (prepBowl) {
+             const existingImg = prepBowl.querySelector('img');
+             const shouldHaveBoard = s.currentIngredients.length > 0;
+             const targetSrc = shouldHaveBoard ? 'assets/station/备菜砧板.png' : 'assets/station/备菜盘.png';
+             const targetAlt = shouldHaveBoard ? '备菜砧板' : '备菜盘';
+             
+             // 简单判断 src 是否包含目标文件名
+             if (existingImg && !existingImg.src.includes(targetSrc.split('/').pop())) {
+                 existingImg.src = targetSrc;
+                 existingImg.alt = targetAlt;
+             } else if (!existingImg) {
+                 // 如果没有图片，追加一个
+                 prepBowl.insertAdjacentHTML('beforeend', `<img src="${targetSrc}" alt="${targetAlt}">`);
+             }
+        }
+
+        // 4. 更新状态文字和按钮
+        const prepActionDiv = el.querySelector('.prep-action-container');
+        const prepStatusDiv = el.querySelector('.prep-status-text');
+
+        if (prepActionDiv && !isBusy && (s.stage === 'PREP_ING' || s.stage === 'IDLE') && s.currentIngredients.length > 0) {
+            const analysis = analyzeDish(s.currentIngredients);
+            const labelColor = analysis ? analysis.color : '#999';
+            const labelText = analysis ? analysis.name : '...';
+
+            if (prepStatusDiv) {
+                prepStatusDiv.innerHTML = labelText;
+                prepStatusDiv.style.color = labelColor;
+            }
+
+            prepActionDiv.innerHTML = `
+                <button class="move-btn" onclick="event.stopPropagation(); this.disabled=true; startCooking('${sid}')">
+                    🔥 开始烹饪
+                </button>
+            `;
+        } else if (prepActionDiv) {
+            prepActionDiv.innerHTML = '<div style="height:36px;"></div>';
+            if (prepStatusDiv) prepStatusDiv.innerHTML = '';
+        }
+
+        return; // 局部更新结束
+    }
 
     // [性能优化] 如果正在烹饪且结构已存在，仅更新进度条
     const existingMachine = el.querySelector('.cook-machine');
@@ -4143,7 +4371,10 @@ function renderStation(sid) {
         <div class="station-card cook-card ${cookStatus}">
             <div class="card-header">
                 <span class="card-title">OUTPUT / 烹饪</span>
-                <button class="btn-trash-mini" title="丢弃" onclick="event.stopPropagation(); trashStation('${sid}', 'cook')">🗑️</button>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-trash-mini" style="background:rgba(52, 152, 219, 0.3);" title="切换设备: ${potName}" onclick="event.stopPropagation(); cycleStationEquipment('${sid}')">🔄</button>
+                    <button class="btn-trash-mini" title="丢弃" onclick="event.stopPropagation(); trashStation('${sid}', 'cook')">🗑️</button>
+                </div>
             </div>
             <div class="station-cook-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'cook')">
                 <div class="cook-machine">
@@ -4229,7 +4460,7 @@ function renderStation(sid) {
         
         if (s.stage === 'COOKING') {
             cookMachine.classList.add('active');
-            cookMachine.innerHTML = `<img src="assets/equipment/基础铁锅.png" alt="Cooking" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Cooking" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
             status.innerText = '烹饪中...';
             status.style.color = '#e67e22';
             barContainer.style.display = 'block';
@@ -4239,18 +4470,27 @@ function renderStation(sid) {
             const dishName = s.recipe ? s.recipe.name : 'unknown';
             const dishIcon = s.recipe ? s.recipe.icon : '✅';
             
+            // [新增] 如果剩余份数 > 1，显示数量角标
+            let badgeHtml = '';
+            if (s.servingsLeft > 1) {
+                badgeHtml = `<div style="position:absolute; top:25px; right:25px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;">x${s.servingsLeft}</div>`;
+            }
+
             cookMachine.innerHTML = `
-                <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
-                     style="width:64px; height:64px; object-fit:contain;" 
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                <span style="display:none; font-size:42px;">${dishIcon}</span>
+                <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                    <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
+                         style="width:64px; height:64px; object-fit:contain;" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <span style="display:none; font-size:42px;">${dishIcon}</span>
+                    ${badgeHtml}
+                </div>
             `;
             
             status.innerText = '点击取餐!';
             status.style.color = '#2ecc71';
             barContainer.style.display = 'none';
         } else {
-            cookMachine.innerHTML = `<img src="assets/equipment/基础铁锅.png" alt="Idle" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Idle" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
             status.innerText = '空闲';
             status.style.color = '#ccc';
             barContainer.style.display = 'none';
@@ -4346,7 +4586,7 @@ function switchScreen(screenId) {
     if (container) container.style.display = 'flex';
 
     // 3. 定义所有互斥的界面层级
-    const overlays = ['shop-overlay', 'overlay', 'pause-overlay', 'map-screen', 'loading', 'achievement-modal', 'settings-modal', 'end-game-modal'];
+    const overlays = ['shop-overlay', 'overlay', 'pause-overlay', 'map-screen', 'loading', 'achievement-modal', 'settings-modal', 'end-game-modal', 'prep-modal'];
 
     // 4. 先隐藏所有悬浮层
     overlays.forEach(id => {
@@ -4696,73 +4936,70 @@ function initStations() {
     if (!kitchen) return;
     kitchen.innerHTML = '';
     
-    // 1. 获取当前扩建等级
+    // 获取当前解锁数量 (1, 2, 或 3)
     const expLvl = (game.inventory && game.inventory.expansion) ? game.inventory.expansion : 0;
-    const config = SHOP_CONFIG.expansion.levels[expLvl];
-    const unlockedStations = config.stations; // 1, 2, or 3
+    // 安全获取配置，防止报错
+    const unlockedCount = (SHOP_CONFIG && SHOP_CONFIG.expansion) ? SHOP_CONFIG.expansion.levels[expLvl].stations : 1;
 
-    // 定义工位ID列表 (只使用前3个)
-    const allStationIds = ['s1', 's2', 's3'];
+    // [核心修改] 定义物理位置映射：[左侧位, 中间位, 右侧位]
+    // id: 对应的灶台ID
+    // req: 需要解锁到的数量才显示 (例如 req:2 表示只有解锁了2个灶台时，s2才会变成真灶台)
+    const layoutMap = [
+        { id: 's2', req: 2 }, // 左侧放 s2
+        { id: 's1', req: 1 }, // 中间放 s1 (永远显示，因为最少解锁1个)
+        { id: 's3', req: 3 }  // 右侧放 s3
+    ];
 
-    // 2. 只渲染已解锁的工位
-    for (let i = 0; i < unlockedStations; i++) {
-        const sid = allStationIds[i];
-        if (!stations[sid]) continue;
-
-        // Reset station state for new game
-        // [新增] 停止之前的音效和定时器
-        if (stations[sid].audio) {
-            stations[sid].audio.pause();
-            stations[sid].audio = null;
-        }
-        if (stations[sid].timer) {
-            clearInterval(stations[sid].timer);
-            stations[sid].timer = null;
-        }
-
-        stations[sid].currentIngredients = [];
-        stations[sid].stage = 'IDLE';
-        stations[sid].recipe = null;
-        stations[sid].maintenance = 0;
-        stations[sid].isBroken = false;
-
-        const el = document.createElement('div');
-        el.id = 's_' + sid;
-        el.className = 'station'; 
+    layoutMap.forEach(slot => {
+        // 判断该位置是否已解锁
+        const isUnlocked = unlockedCount >= slot.req;
         
-        // 3. 生成 HTML 结构
-        el.innerHTML = `
-            <!-- Cook Card -->
-            <div class="station-card cook-card">
-                <div class="card-header">
-                    <span class="card-title">OUTPUT / 烹饪</span>
-                    <button class="btn-trash-mini" title="丢弃/重置" onclick="event.stopPropagation(); trashStation('${sid}', 'cook')">🗑️</button>
-                </div>
-                <div class="station-cook-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'cook')">
-                    <div class="cook-machine">
-                        <img src="assets/equipment/基础铁锅.png" alt="基础铁锅" style="width:60px; height:60px; object-fit:contain; animation:none;">
-                    </div>
-                    <div class="dish-status" style="font-size:12px; color:#666; margin-top:8px; font-weight:bold;">空闲</div>
-                    <div class="progress-bar-container"><div class="progress-bar-fill"></div></div>
-                    <button class="clean-btn" style="display:none" onclick="event.stopPropagation(); cleanStation('${sid}')">🔧 维修</button>
-                </div>
-            </div>
+        if (isUnlocked) {
+            // --- 渲染真实工位 ---
+            const sid = slot.id;
+            
+            // 初始化数据状态 (保持不变)
+            if (!stations[sid]) {
+                stations[sid] = { 
+                    id: sid, 
+                    stage: 'IDLE', 
+                    currentIngredients: [], 
+                    recipe: null, 
+                    progress: 0, 
+                    maintenance: 0,
+                    // [新增] 默认装备当前拥有的最高级锅，但允许独立修改
+                    equipLevel: (game.inventory && game.inventory.pot) ? game.inventory.pot : 0
+                };
+            }
+            
+            // 清理旧定时器/音频
+            if (stations[sid].audio) { stations[sid].audio.pause(); stations[sid].audio = null; }
+            if (stations[sid].timer) { clearInterval(stations[sid].timer); stations[sid].timer = null; }
+            
+            // 重置状态
+            stations[sid].currentIngredients = [];
+            stations[sid].stage = 'IDLE';
+            stations[sid].recipe = null;
+            stations[sid].isBroken = false;
 
-            <!-- Prep Card -->
-            <div class="station-card prep-card">
-                <div class="card-header">
-                    <span class="card-title">INPUT / 备菜</span>
-                    <button class="btn-trash-mini" title="清空备菜" onclick="event.stopPropagation(); trashStation('${sid}', 'prep')">🗑️</button>
-                </div>
-                <div class="station-prep-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'prep')">
-                    <div class="prep-bowl"><img src="assets/station/备菜盘.png" alt="备菜盘"></div>
-                    <div class="ing-list-prep"></div>
-                    <div class="prep-action-container"></div>
-                </div>
-            </div>
-        `;
-        kitchen.appendChild(el);
-    }
+            const el = document.createElement('div');
+            el.id = 's_' + sid;
+            el.className = 'station';
+            
+            // 渲染工位 HTML (由 renderStation 接管)
+            el.innerHTML = '';
+            kitchen.appendChild(el);
+            renderStation(sid); // 立即渲染初始状态
+        } else {
+            // --- 渲染隐形占位符 (撑开布局) ---
+            const placeholder = document.createElement('div');
+            placeholder.className = 'station station-placeholder';
+            // 保持与正常 station 一样的尺寸和间距，但完全不可见
+            placeholder.style.visibility = 'hidden';
+            placeholder.style.pointerEvents = 'none';
+            kitchen.appendChild(placeholder);
+        }
+    });
 }
 
 function handleStationClick(sid, event, zone) {
@@ -4798,7 +5035,7 @@ function handleStationClick(sid, event, zone) {
             s.stage = 'PREP_ING'; 
             
             playSfx(200, 'sine', 0.1);
-            renderStation(sid);
+            renderStation(sid, 'prep');
             return;
         }
     }
@@ -4838,23 +5075,41 @@ function handleStationClick(sid, event, zone) {
             // 拿起当前工位的新菜
             holdingThing = { type: 'DISH', val: s.dishResult || s.recipe, sourceSid: sid };
             
-            // 清空当前工位
-            s.stage = 'IDLE';
-            s.currentIngredients = [];
-            s.dishResult = null;
-            s.recipe = null;
-            s.progress = 0;
-            if (s.timer) clearInterval(s.timer);
-
+            // [核心修改] 批量出餐逻辑
+            if (s.servingsLeft > 1) {
+                // 还有库存：扣减一份，保留 FINISHED 状态
+                s.servingsLeft--;
+                playSfx(1000, 'sine', 0.2); // 取餐音效
+                
+                // 视觉反馈：飘字提示剩余
+                const rect = event.target.getBoundingClientRect();
+                triggerFeedback(rect.left + rect.width/2, rect.top, `剩余 ${s.servingsLeft} 份`, "#2ecc71");
+                
+                // 仅刷新显示，不重置
+                renderStation(sid);
+            } else {
+                // 是最后一份：执行原本的清空逻辑
+                s.stage = 'IDLE';
+                s.currentIngredients = [];
+                s.dishResult = null;
+                s.recipe = null;
+                s.progress = 0;
+                s.servingsLeft = 0; // 清零
+                if (s.timer) clearInterval(s.timer);
+                playSfx(1000, 'sine', 0.2);
+                renderStation(sid);
+            }
+            
             updateCursor();
-            playSfx(1000, 'sine', 0.2);
-            renderStation(sid); // 刷新当前工位视觉
             return;
         }
     }
 }
 
 function startCooking(sid) {
+    // [修复] 开始烹饪时，强制清空鼠标上的物品 
+    if (holdingThing) resetHand(); 
+
     const s = stations[sid];
     if (s.stage === 'COOKING') return; // Prevent double trigger
     
@@ -4865,12 +5120,22 @@ function startCooking(sid) {
 
     // [库存扣除逻辑已移除] - 现改为在放入食材时实时扣除 (handleStationClick)
 
+    // [新增] 获取当前锅具配置
+    // const potLevel = (game.inventory && game.inventory.pot) ? game.inventory.pot : 0;
+    // [修改] 使用工位独立配置
+    const currentPotLevel = (s.equipLevel !== undefined) ? s.equipLevel : 0;
+    const potConfig = SHOP_CONFIG.pot.levels[currentPotLevel] || SHOP_CONFIG.pot.levels[0];
+
     s.stage = 'COOKING';
     s.currentIngredients = []; 
     s.progress = 0;
     
+    // [新增] 初始化剩余份数，默认为 1
+    s.servingsLeft = potConfig.yield || 1;
+    
     // Maintenance Speed
-    let speed = 2;
+    // [修改] 利用新的 effect 定义，effect 越大越快
+    let speed = 2 * (1 + (potConfig.effect || 0));
     if (s.maintenance >= 10) {
         s.isBroken = true;
         speed = 0.5; // Slow down
@@ -4910,7 +5175,10 @@ function startCooking(sid) {
             }
 
             s.maintenance++; // Add wear
-            playSfx(800, 'triangle', 0.3);
+            // [新增] 播放出餐音效
+            const finishAudio = new Audio('audio/出餐音效.mp3');
+            finishAudio.volume = 0.6;
+            finishAudio.play().catch(e => console.warn('Finish cooking SFX failed:', e));
             renderStation(sid);
         }
         renderStation(sid);
@@ -4968,7 +5236,7 @@ function trashStation(sid, type = 'all', withSound = true, isPenalty = true) {
         }
     }
 
-    renderStation(sid);
+    renderStation(sid, type === 'prep' ? 'prep' : 'full');
     if (withSound) {
         // [修改] 播放倒垃圾音效
         const trashAudio = new Audio('audio/倒垃圾.mp3');
@@ -6254,8 +6522,10 @@ window.confirmPrep = async function() {
     // 5. 激活核心状态 
     game.isPaused = false; 
     game.isLive = true; 
+    // [修复] 强制重置天数结束标志，防止上一局状态残留 
+    game.dayEnded = false; 
  
- // 6. 切换背景 
+    // 6. 切换背景 
  if(typeof updateGameBackground === 'function') { 
      updateGameBackground(); 
  } 
