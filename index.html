@@ -2569,7 +2569,7 @@
                         <span class="hud-main">
                             <span class="stat-val target-current" id="target-current">¥0</span>
                             <span class="target-sep">/</span>
-                            <span class="stat-val target-goal" id="target-goal">¥3000</span>
+                            <span class="stat-val target-goal" id="target-goal">¥1000</span>
                         </span>
                     </div>
                 </div>
@@ -2939,6 +2939,11 @@ let gameLang = (localStorage.getItem('gameLang') || ((navigator.language || '').
 let coinBuffer = null;
 let revenueBuffer = null;
 let angryBuffers = []; // [新增] 存储生气音效 Buffer
+let resultSfxBuffer = null; // [新增] 成绩单音效 Buffer
+let shopMusic = new Audio('audio/shop_bgm.mp3'); // [新增] 商店/集市音乐
+shopMusic.loop = true;
+let shopMusicSource = null;
+
 let angryAudioElements = []; // [新增] 存储生气音效 Audio 元素 (Fallback)
 const ANGRY_SOUNDS = ['audio/angry_man.mp3', 'audio/angry_woman.mp3', 'audio/angry_child.mp3']; // [新增] 音效文件列表 (英文文件名避免编码问题)
 const revenueAudio = new Audio('audio/coin.mp3'); // Fallback
@@ -3127,6 +3132,85 @@ function playRandomAngrySound() {
     playSfx(80, 'sawtooth', 0.4);
 }
 
+// [新增] 播放成绩单音效
+function playResultSfx() {
+    if (!sfxEnabled) return;
+    
+    // 确保 AudioContext 已激活
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(e => console.error(e));
+    }
+
+    // 优先尝试 Web Audio API (Buffer)
+    if (resultSfxBuffer) {
+        try {
+            const source = audioCtx.createBufferSource();
+            source.buffer = resultSfxBuffer;
+            source.connect(sfxGain);
+            source.start();
+            console.log("Played Result SFX (Web Audio)");
+            return;
+        } catch(e) { 
+            console.error('Web Audio Play Result SFX error:', e); 
+        }
+    } else {
+        console.warn("Result SFX Buffer not ready, trying fallback...");
+    }
+
+    // Fallback: 直接使用 HTML5 Audio
+    try {
+        const tempAudio = new Audio('audio/result_sfx.mp3');
+        tempAudio.volume = 0.8; // 模拟 sfxGain
+        tempAudio.play().catch(e => console.error("HTML5 Fallback Result SFX error:", e));
+        console.log("Played Result SFX (HTML5 Fallback)");
+    } catch(e) {
+        console.error("Result SFX Total Failure:", e);
+    }
+}
+
+// [新增] 播放商店/集市音乐 (作为 BGM)
+function playShopMusic() {
+    // [修改] 商店音乐属于 BGM，受 themeMusicEnabled 控制
+    if (!themeMusicEnabled) return;
+    
+    // [修复] 播放商店音乐时，暂停主背景音乐
+    const bgm = document.getElementById('bgm');
+    const gameBgm = document.getElementById('game-bgm');
+    if (bgm && !bgm.paused) bgm.pause();
+    if (gameBgm && !gameBgm.paused) gameBgm.pause();
+
+    try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        // [调整] 降低音量以匹配主题曲 (主题曲 themeGain=0.15)
+        shopMusic.volume = 0.15;
+
+        // 尝试连接到 musicGain (替代 sfxGain)
+        if (!shopMusicSource) {
+             try {
+                 shopMusicSource = audioCtx.createMediaElementSource(shopMusic);
+                 shopMusicSource.connect(musicGain);
+             } catch(e) {
+                 console.warn('MediaElementSource creation failed (maybe already connected):', e);
+             }
+        }
+        
+        // 防止重复播放导致重置
+        if (!shopMusic.paused && shopMusic.currentTime > 0) return;
+
+        shopMusic.currentTime = 0;
+        shopMusic.play().catch(e => console.error("Shop music play failed:", e));
+    } catch(e) { console.error(e); }
+}
+
+// [新增] 停止商店/集市音乐
+function stopShopMusic() {
+    if (shopMusic) {
+        shopMusic.pause();
+        shopMusic.currentTime = 0;
+    }
+}
+
 /* Removed old playCoin and createCoinBuffer definitions to avoid duplication */
 
 function preloadAudio() {
@@ -3145,6 +3229,18 @@ function preloadAudio() {
             revenueBuffer = audioBuffer;
         })
         .catch(e => console.error("Error loading coin.mp3:", e));
+
+    // [新增] 预加载成绩单音效 (使用英文文件名避免编码问题)
+    fetch('audio/result_sfx.mp3')
+        .then(r => {
+            if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+            return r.arrayBuffer();
+        })
+        .then(b => audioCtx.decodeAudioData(b))
+        .then(a => { resultSfxBuffer = a; console.log('Result SFX loaded'); })
+        .catch(e => {
+            console.error('Error loading result SFX:', e);
+        });
 
     // [新增] 预加载生气音效
     angryAudioElements.length = 0; // Clear previous fallback elements
@@ -3285,21 +3381,21 @@ const SHOP_CONFIG = {
                 stations: 2,
                 slots: 3,
                 effectText: "升级配置：解锁第2个灶台，接单上限提升至3单。",
-                price: 2000
+                price: 800
             },
             {
                 name: "星级后厨",
                 stations: 3,
                 slots: 5,
                 effectText: "顶级配置：解锁第3个灶台，接单上限提升至5单，火力全开。",
-                price: 8000
+                price: 2500
             }
         ]
     },
     pot: {
         name: "烹饪设备",
         desc: "选择你的流派：是追求极致的工业化量产，还是唯快不破的手速大师？",
-        basePrice: 500,
+        basePrice: 150,
         levels: [
             // --- 阶段一：手工起步 ---
             { 
@@ -3314,14 +3410,14 @@ const SHOP_CONFIG = {
                 effect: 0.25, // 提速 25% 
                 yield: 1, 
                 effectText: "不粘涂层，烹饪速度小幅提升。", 
-                price: 500 
+                price: 200 
             },
             { 
                 name: "多段控温精钢锅", 
                 effect: 0.5, // 提速 50% 
                 yield: 1, 
                 effectText: "精准控温，烹饪速度显著提升。", 
-                price: 1800 
+                price: 600 
             },
             
             // --- 阶段二：Omni 工业化 (量产流) ---
@@ -3331,7 +3427,7 @@ const SHOP_CONFIG = {
                 yield: 2,    // [核心] 双份出餐 
                 isDigital: true, 
                 effectText: "智能温控，虽然速度普通，但一次烹饪产出 2 份！", 
-                price: 5500 
+                price: 1800 
             },
             { 
                 name: "Omni 2.0", 
@@ -3339,7 +3435,7 @@ const SHOP_CONFIG = {
                 yield: 3,    // [核心] 三份出餐 
                 isDigital: true, 
                 effectText: "双核加热，效能升级，一次烹饪产出 3 份！", 
-                price: 15000 
+                price: 5000 
             },
             { 
                 name: "Omni 3.0", 
@@ -3347,7 +3443,7 @@ const SHOP_CONFIG = {
                 yield: 4,    // [核心] 四份出餐 
                 isDigital: true, 
                 effectText: "AI 算力全开，工业级怪兽，一次烹饪产出 4 份！", 
-                price: 35000 
+                price: 12000 
             },
             
             // --- 阶段三：小锅大师 (极速流) ---
@@ -3357,35 +3453,35 @@ const SHOP_CONFIG = {
                 effect: 4.0, // [核心] 5倍速 (极快) 
                 yield: 1, 
                 effectText: "【双胆模拟】极速加热，几乎瞬发，适合连续处理不同订单。", 
-                price: 45000 
+                price: 15000 
             },
             { 
                 name: "小锅", 
                 effect: 10.0, // [核心] 11倍速 (瞬发) 
                 yield: 1, 
                 effectText: "【四胆模拟】意念合一，点击即完成。手速越快，产出越快。", 
-                price: 88888 
+                price: 30000 
             }
         ]
     },
     belt: {
         name: "智慧系统",
         desc: "优化后厨管理系统，提升订单流转效率与顾客满意度。",
-        basePrice: 600,
+        basePrice: 200,
         levels: [
             { name: "纸质工单", effect: 0, effectText: "传统手写单，容易出错。", price: 0 },
-            { name: "平板派单", effect: 0.2, effectText: "电子化派单，减少沟通成本，顾客耐心提升 20%。", price: 1000 },
-            { name: "K-MES 基础版", effect: 0.4, effectText: "后厨管理系统，流程标准化，顾客耐心提升 40%。", price: 3000 },
-            { name: "K-MES 全功能版", effect: 0.8, effectText: "全链路数字化，智能调度，顾客极具耐心。", isDigital: true, price: 8000 }
+            { name: "平板派单", effect: 0.2, effectText: "电子化派单，减少沟通成本，顾客耐心提升 20%。", price: 400 },
+            { name: "K-MES 基础版", effect: 0.4, effectText: "后厨管理系统，流程标准化，顾客耐心提升 40%。", price: 1200 },
+            { name: "K-MES 全功能版", effect: 0.8, effectText: "全链路数字化，智能调度，顾客极具耐心。", isDigital: true, price: 3000 }
         ]
     },
     fridge: {
         name: "仓储管理",
         desc: "升级仓储设施，减少食材损耗。",
-        basePrice: 2000,
+        basePrice: 600,
         levels: [
             { name: "常温货架", effect: 0, effectText: "每日打烊后食材清零。", price: 0 },
-            { name: "保鲜冷库", effect: 1, effectText: "保留每日剩余食材。", price: 5000 }
+            { name: "保鲜冷库", effect: 1, effectText: "保留每日剩余食材。", price: 1500 }
         ]
     }
 };
@@ -3445,6 +3541,7 @@ function changeShopPage(delta) {
 }
 
 function renderShop() {
+    playShopMusic(); // [新增] 播放商店音乐
     const overlay = document.getElementById('shop-overlay');
     if (!overlay) return;
 
@@ -3470,6 +3567,18 @@ function renderShop() {
                 const targetPots = ['基础铁锅', '专业不粘锅', '多段控温精钢锅', 'Omni 1.0', 'Omni 2.0', 'Omni 3.0', '单边小锅', '小锅'];
                 if (targetPots.includes(itemName)) {
                     const fallbackId = `fallback-pot-${levelIdx}-${key}`; // 唯一ID防止冲突
+                    iconHtml = `
+                        <img src="assets/equipment/${itemName}.png" 
+                             alt="${itemName}" 
+                             style="width: 100%; height: 100%; object-fit: contain;"
+                             onerror="this.style.display='none'; document.getElementById('${fallbackId}').style.display='flex';">
+                        <span id="${fallbackId}" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-size:50px;">${getShopItemIcon(key)}</span>
+                    `;
+                }
+            } else if (key === 'expansion') {
+                const targetExpansions = ['标准后厨', '扩容后厨', '星级后厨'];
+                if (targetExpansions.includes(itemName)) {
+                    const fallbackId = `fallback-exp-${levelIdx}-${key}`;
                     iconHtml = `
                         <img src="assets/equipment/${itemName}.png" 
                              alt="${itemName}" 
@@ -3588,6 +3697,7 @@ function showShop() {
 }
 
 function closeShop() {
+    stopShopMusic(); // [新增] 停止商店音乐
     const shopOverlay = document.getElementById('shop-overlay');
     if (shopOverlay) {
         shopOverlay.style.display = 'none';
@@ -3599,6 +3709,11 @@ function closeShop() {
         if (startScreen) {
             startScreen.style.display = 'flex';
             updateBalanceDisplay();
+            // [修复] 返回首页时恢复背景音乐
+            if (themeMusicEnabled) {
+                const bgm = document.getElementById('bgm');
+                if (bgm && bgm.paused) bgm.play().catch(e => console.log(e));
+            }
         }
     } else {
         // Return to game/settlement view
@@ -3655,27 +3770,44 @@ function buyUpgrade(type, btnEl) {
 }
 
 const GameStateManager = {
-    resetAllData: function() {
-        // Clear game progress
-        localStorage.removeItem('gameState');
-        localStorage.removeItem('yesterdayRate');
+    // [核心修改] 增加 keepLegacy 参数，默认为 false (完全重置)
+    resetAllData: function(keepLegacy = false) {
+        const keysToRemove = [
+            'gameState',          // 核心存档
+            'yesterdayRate',      // 昨日评分
+            'ng_params',          // 新征程参数
+            'dailyLegacyIncome'
+        ];
         
-        // Reset runtime object
+        // [关键] 只有在非继承模式下，才删除旧店存档列表
+        if (!keepLegacy) {
+            keysToRemove.push('legacy_shops_list');
+            // 兼容清理旧版单店数据
+            keysToRemove.push('legacy_shop_data');
+        }
+        
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // 重置运行时对象
         game.level = 1;
         game.totalRevenue = 0;
+        game.dailyRevenue = 0;
         game.history = [];
         game.orderQueue = [];
         game.coins = 0;
-            game.inventory = { pot: 0, belt: 0, fridge: 0, expansion: 0 };
+        game.inventory = { pot: 0, belt: 0, fridge: 0, expansion: 0 };
         
-        // Persist the clean state immediately
+        window.tempInventory = {};
+        window.tempCoins = 0;
+        window.startCoins = 0;
+        
         saveGameState();
-        
-        console.log("Game progress reset to Day 1.");
+        console.log(`Game reset. Keep Legacy: ${keepLegacy}`);
     },
+    
     resetAllDataPrompt: function() {
-        if (confirm("确定要重置所有游戏进度，从 DAY 1 重新开始吗？")) {
-            this.resetAllData();
+        if (confirm("⚠️ 警告：这将删除所有存档（包括所有分店进度），完全回到初始状态。\n\n确定要重置吗？")) {
+            this.resetAllData(false); // 手动重置是彻底清除
             location.reload();
         }
     }
@@ -3683,7 +3815,7 @@ const GameStateManager = {
 
 let game = {
     level: 1, revenue: 0, served: 0, total: 0, spawned: 0, isLive: true, isPaused: false, dayEnded: false,
-    dailyRevenue: 0, totalRevenue: 0, targetRevenue: 3000,
+    dailyRevenue: 0, totalRevenue: 0, targetRevenue: 1000,
     dailyDishCount: 0, dailyQualitySum: 0,
     activeOrders: [],
     orderQueue: [], // 每日预生成订单队列
@@ -4255,49 +4387,39 @@ function renderStation(sid, updateMode = 'full') {
     const el = document.getElementById('s_' + sid);
     if (!el) return;
 
-    // [新增] 读取工位独立等级
     const currentPotLevel = (s.equipLevel !== undefined) ? s.equipLevel : ((game.inventory && game.inventory.pot) || 0);
     const potConfig = SHOP_CONFIG.pot.levels[currentPotLevel] || SHOP_CONFIG.pot.levels[0];
     const potName = potConfig.name;
-    // const potImgSrc = `assets/equipment/${potName}.png`; // Used in template
 
-    // [Partial Update] 针对备菜区的局部刷新，避免重绘整个工位导致锅动画重置
+    // 判断工位是否忙碌 (用于按钮状态，不再用于隐藏备菜区)
+    const isBusy = (s.stage === 'COOKING' || s.stage === 'FINISHED');
+
+    // [Partial Update] 备菜区局部刷新
     if (updateMode === 'prep' && el.querySelector('.station-card.prep-card')) {
-        const isBusy = (s.stage === 'COOKING' || s.stage === 'FINISHED');
         const prepCard = el.querySelector('.station-card.prep-card');
         const prepStatus = s.currentIngredients.length > 0 ? 'status-active' : '';
         
-        // 1. 更新容器样式
+        // [核心修改] 移除 opacity/pointer-events 的置灰逻辑
         prepCard.className = `station-card prep-card ${prepStatus}`;
-        // 手动应用/移除忙碌状态样式
-        if (isBusy) {
-            prepCard.style.opacity = '0.4';
-            prepCard.style.pointerEvents = 'none';
-            prepCard.style.filter = 'grayscale(1)';
-        } else {
-            prepCard.style.opacity = '';
-            prepCard.style.pointerEvents = '';
-            prepCard.style.filter = '';
-        }
-        // 注意：transform 由 CSS 类控制，无需在此设置
+        prepCard.style.opacity = '';
+        prepCard.style.pointerEvents = '';
+        prepCard.style.filter = '';
 
-        // 2. 更新食材图标
+        // 更新食材图标 (保持不变)
         const ingList = el.querySelector('.ing-list-prep');
         if (ingList) {
             ingList.innerHTML = '';
-            if (!isBusy) {
-                s.currentIngredients.forEach(ingId => {
-                    const span = document.createElement('span');
-                    span.className = 'ing-item-small';
-                    if(typeof INGREDIENTS !== 'undefined' && INGREDIENTS[ingId]) {
-                        span.innerText = INGREDIENTS[ingId].icon;
-                    }
-                    ingList.appendChild(span);
-                });
-            }
+            s.currentIngredients.forEach(ingId => {
+                const span = document.createElement('span');
+                span.className = 'ing-item-small';
+                if(typeof INGREDIENTS !== 'undefined' && INGREDIENTS[ingId]) {
+                    span.innerText = INGREDIENTS[ingId].icon;
+                }
+                ingList.appendChild(span);
+            });
         }
 
-        // 3. 更新砧板/盘子图片
+        // 更新砧板图片 (保持不变)
         const prepBowl = el.querySelector('.prep-bowl');
         if (prepBowl) {
              const existingImg = prepBowl.querySelector('img');
@@ -4305,21 +4427,19 @@ function renderStation(sid, updateMode = 'full') {
              const targetSrc = shouldHaveBoard ? 'assets/station/备菜砧板.png' : 'assets/station/备菜盘.png';
              const targetAlt = shouldHaveBoard ? '备菜砧板' : '备菜盘';
              
-             // 简单判断 src 是否包含目标文件名
              if (existingImg && !existingImg.src.includes(targetSrc.split('/').pop())) {
                  existingImg.src = targetSrc;
                  existingImg.alt = targetAlt;
              } else if (!existingImg) {
-                 // 如果没有图片，追加一个
                  prepBowl.insertAdjacentHTML('beforeend', `<img src="${targetSrc}" alt="${targetAlt}">`);
              }
         }
 
-        // 4. 更新状态文字和按钮
+        // [核心修改] 更新按钮：即使 isBusy 也要渲染按钮，但根据状态禁用
         const prepActionDiv = el.querySelector('.prep-action-container');
         const prepStatusDiv = el.querySelector('.prep-status-text');
 
-        if (prepActionDiv && !isBusy && (s.stage === 'PREP_ING' || s.stage === 'IDLE') && s.currentIngredients.length > 0) {
+        if (prepActionDiv && s.currentIngredients.length > 0) {
             const analysis = analyzeDish(s.currentIngredients);
             const labelColor = analysis ? analysis.color : '#999';
             const labelText = analysis ? analysis.name : '...';
@@ -4329,9 +4449,13 @@ function renderStation(sid, updateMode = 'full') {
                 prepStatusDiv.style.color = labelColor;
             }
 
+            // 如果机器在忙，按钮显示“等待空闲”并禁用
+            const btnDisabled = isBusy ? 'disabled style="background:#bdc3c7; cursor:not-allowed;"' : '';
+            const btnText = isBusy ? '⏳ 等待空闲' : '🔥 开始烹饪';
+
             prepActionDiv.innerHTML = `
-                <button class="move-btn" onclick="event.stopPropagation(); this.disabled=true; startCooking('${sid}')">
-                    🔥 开始烹饪
+                <button class="move-btn" ${btnDisabled} onclick="event.stopPropagation(); this.disabled=true; startCooking('${sid}')">
+                    ${btnText}
                 </button>
             `;
         } else if (prepActionDiv) {
@@ -4342,7 +4466,7 @@ function renderStation(sid, updateMode = 'full') {
         return; // 局部更新结束
     }
 
-    // [性能优化] 如果正在烹饪且结构已存在，仅更新进度条
+    // [性能优化] 烹饪进度条刷新 (保持不变)
     const existingMachine = el.querySelector('.cook-machine');
     if (s.stage === 'COOKING' && existingMachine && existingMachine.classList.contains('active')) {
         const barFill = el.querySelector('.progress-bar-fill');
@@ -4350,22 +4474,16 @@ function renderStation(sid, updateMode = 'full') {
         return;
     }
 
-    // 1. 设置外层样式
+    // 全量渲染逻辑
     el.className = 'station';
     
-    // 状态判定
     let prepStatus = s.currentIngredients.length > 0 ? 'status-active' : '';
     let cookStatus = '';
     if (s.stage === 'COOKING') cookStatus = 'status-cooking';
     else if (s.stage === 'FINISHED') cookStatus = 'status-finished';
 
-    // 2. 生成 HTML 结构
-    // [核心修改]
-    // - 移除了 prep-card 的内联 opacity/pointer-events 设置，现在通过 CSS 类控制显隐，或者让玩家始终可见但禁用按钮
-    // - station-prep-zone 现在包裹了除了 Header 外的所有内容，并设为 flex:1
-    const isBusy = (s.stage === 'COOKING' || s.stage === 'FINISHED');
-    // 如果正在烹饪，备菜区变灰，但依然保留布局占位
-    const prepStyle = isBusy ? 'opacity: 0.4; pointer-events: none; filter: grayscale(1);' : '';
+    // [核心修改] 移除 prepStyle 中的 opacity 设置
+    const prepStyle = '';
 
     el.innerHTML = `
         <div class="station-card cook-card ${cookStatus}">
@@ -4377,9 +4495,7 @@ function renderStation(sid, updateMode = 'full') {
                 </div>
             </div>
             <div class="station-cook-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'cook')">
-                <div class="cook-machine">
-                    <!-- 动态生成机器 -->
-                </div>
+                <div class="cook-machine"></div>
                 <div class="dish-status" style="font-size:12px; color:#999; margin-top:4px; font-weight:bold;">空闲</div>
                 <div class="progress-bar-container" style="display:none;"><div class="progress-bar-fill"></div></div>
                 <button class="clean-btn" style="display:none" onclick="event.stopPropagation(); cleanStation('${sid}')">🔧</button>
@@ -4394,22 +4510,19 @@ function renderStation(sid, updateMode = 'full') {
             <div class="station-prep-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'prep')">
                 <div class="prep-status-text"></div>
                 <div class="prep-bowl" style="position:relative;">
-                     <!-- ing-list-prep 移动到这里面或者同级绝对定位 -->
                      <div class="ing-list-prep"></div>
-                    ${s.currentIngredients.length > 0 
-                        ? '<img src="assets/station/备菜砧板.png" alt="备菜砧板">' 
+                    ${s.currentIngredients.length > 0
+                        ? '<img src="assets/station/备菜砧板.png" alt="备菜砧板">'
                         : '<img src="assets/station/备菜盘.png" alt="备菜盘">'}
                 </div>
-                <div class="prep-action-container">
-                    <!-- 动态生成按钮 -->
-                </div>
+                <div class="prep-action-container"></div>
             </div>
         </div>
     `;
 
-    // 3. 渲染食材图标
+    // 渲染食材图标 (保持不变)
     const ingList = el.querySelector('.ing-list-prep');
-    if (ingList && !isBusy) {
+    if (ingList) {
         s.currentIngredients.forEach(ingId => {
             const span = document.createElement('span');
             span.className = 'ing-item-small';
@@ -4420,89 +4533,88 @@ function renderStation(sid, updateMode = 'full') {
         });
     }
 
-    // 4. [修改] 分离渲染状态文字和按钮
-    const prepActionDiv = el.querySelector('.prep-action-container');
-    const prepStatusDiv = el.querySelector('.prep-status-text');
+    // [核心修改] 全量渲染时的按钮逻辑：允许显示但禁用 
+    const prepActionDiv = el.querySelector('.prep-action-container'); 
+    const prepStatusDiv = el.querySelector('.prep-status-text'); 
 
-    if (prepActionDiv && !isBusy && (s.stage === 'PREP_ING' || s.stage === 'IDLE') && s.currentIngredients.length > 0) {
-        const analysis = analyzeDish(s.currentIngredients);
-        const labelColor = analysis ? analysis.color : '#999';
-        const labelText = analysis ? analysis.name : '...';
+    if (prepActionDiv && s.currentIngredients.length > 0) { 
+        const analysis = analyzeDish(s.currentIngredients); 
+        const labelColor = analysis ? analysis.color : '#999'; 
+        const labelText = analysis ? analysis.name : '...'; 
 
-        // 填充顶部文字
-        if (prepStatusDiv) {
-            prepStatusDiv.innerHTML = labelText;
-            prepStatusDiv.style.color = labelColor;
-        }
+        if (prepStatusDiv) { 
+            prepStatusDiv.innerHTML = labelText; 
+            prepStatusDiv.style.color = labelColor; 
+        } 
 
-        // 填充底部按钮
-        prepActionDiv.innerHTML = `
-            <button class="move-btn" onclick="event.stopPropagation(); this.disabled=true; startCooking('${sid}')">
-                🔥 开始烹饪
-            </button>
-        `;
-    } else if (prepActionDiv) {
-        // 占位
-        prepActionDiv.innerHTML = '<div style="height:36px;"></div>';
-        if (prepStatusDiv) prepStatusDiv.innerHTML = '';
-    }
+        const btnDisabled = isBusy ? 'disabled style="background:#bdc3c7; cursor:not-allowed;"' : ''; 
+        const btnText = isBusy ? '⏳ 等待空闲' : '🔥 开始烹饪'; 
 
-    // 5. 渲染烹饪机器状态
-    const cookMachine = el.querySelector('.cook-machine');
-    const status = el.querySelector('.dish-status');
-    const barContainer = el.querySelector('.progress-bar-container');
-    const barFill = el.querySelector('.progress-bar-fill');
-    const cleanBtn = el.querySelector('.clean-btn');
+        prepActionDiv.innerHTML = ` 
+            <button class="move-btn" ${btnDisabled} onclick="event.stopPropagation(); this.disabled=true; startCooking('${sid}')"> 
+                ${btnText} 
+            </button> 
+        `; 
+    } else if (prepActionDiv) { 
+        prepActionDiv.innerHTML = '<div style="height:36px;"></div>'; 
+        if (prepStatusDiv) prepStatusDiv.innerHTML = ''; 
+    } 
 
-    if (cookMachine) {
-        cookMachine.className = 'cook-machine';
-        if (s.isBroken || (s.maintenance && s.maintenance >= 10)) cookMachine.classList.add('maintenance');
+    // 渲染烹饪机器 (保持原有逻辑，省略重复代码...) 
+    // ... 这里直接使用原有的 cookMachine 渲染代码 ... 
+    const cookMachine = el.querySelector('.cook-machine'); 
+    const status = el.querySelector('.dish-status'); 
+    const barContainer = el.querySelector('.progress-bar-container'); 
+    const barFill = el.querySelector('.progress-bar-fill'); 
+    const cleanBtn = el.querySelector('.clean-btn'); 
+
+    if (cookMachine) { 
+        cookMachine.className = 'cook-machine'; 
+        if (s.isBroken || (s.maintenance && s.maintenance >= 10)) cookMachine.classList.add('maintenance'); 
         
-        if (s.stage === 'COOKING') {
-            cookMachine.classList.add('active');
-            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Cooking" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
-            status.innerText = '烹饪中...';
-            status.style.color = '#e67e22';
-            barContainer.style.display = 'block';
-            barFill.style.width = s.progress + '%';
-        } else if (s.stage === 'FINISHED') {
-            cookMachine.classList.add('finished');
-            const dishName = s.recipe ? s.recipe.name : 'unknown';
-            const dishIcon = s.recipe ? s.recipe.icon : '✅';
+        if (s.stage === 'COOKING') { 
+            cookMachine.classList.add('active'); 
+            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Cooking" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`; 
+            status.innerText = '烹饪中...'; 
+            status.style.color = '#e67e22'; 
+            barContainer.style.display = 'block'; 
+            barFill.style.width = s.progress + '%'; 
+        } else if (s.stage === 'FINISHED') { 
+            cookMachine.classList.add('finished'); 
+            const dishName = s.recipe ? s.recipe.name : 'unknown'; 
+            const dishIcon = s.recipe ? s.recipe.icon : '✅'; 
             
-            // [新增] 如果剩余份数 > 1，显示数量角标
-            let badgeHtml = '';
-            if (s.servingsLeft > 1) {
-                badgeHtml = `<div style="position:absolute; top:25px; right:25px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;">x${s.servingsLeft}</div>`;
-            }
+            let badgeHtml = ''; 
+            if (s.servingsLeft > 1) { 
+                badgeHtml = `<div style="position:absolute; top:25px; right:25px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;">x${s.servingsLeft}</div>`; 
+            } 
 
-            cookMachine.innerHTML = `
-                <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            cookMachine.innerHTML = ` 
+                <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;"> 
                     <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
                          style="width:64px; height:64px; object-fit:contain;" 
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                    <span style="display:none; font-size:42px;">${dishIcon}</span>
-                    ${badgeHtml}
-                </div>
-            `;
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"> 
+                    <span style="display:none; font-size:42px;">${dishIcon}</span> 
+                    ${badgeHtml} 
+                </div> 
+            `; 
             
-            status.innerText = '点击取餐!';
-            status.style.color = '#2ecc71';
-            barContainer.style.display = 'none';
-        } else {
-            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Idle" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
-            status.innerText = '空闲';
-            status.style.color = '#ccc';
-            barContainer.style.display = 'none';
-        }
-    }
+            status.innerText = '点击取餐!'; 
+            status.style.color = '#2ecc71'; 
+            barContainer.style.display = 'none'; 
+        } else { 
+            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Idle" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`; 
+            status.innerText = '空闲'; 
+            status.style.color = '#ccc'; 
+            barContainer.style.display = 'none'; 
+        } 
+    } 
     
-    // 6. 维护按钮
-    if (cleanBtn && s.maintenance >= 8) {
-        cleanBtn.style.display = 'block';
-        cleanBtn.innerText = s.maintenance >= 10 ? '🆘' : '🧽';
-        cleanBtn.style.backgroundColor = s.maintenance >= 10 ? '#c0392b' : '#f39c12';
-    }
+    if (cleanBtn && s.maintenance >= 8) { 
+        cleanBtn.style.display = 'block'; 
+        cleanBtn.innerText = s.maintenance >= 10 ? '🆘' : '🧽'; 
+        cleanBtn.style.backgroundColor = s.maintenance >= 10 ? '#c0392b' : '#f39c12'; 
+    } 
 }
 
 function initRealBusinessHUD() {
@@ -4574,6 +4686,11 @@ function updateBalanceDisplay() {
 
 function switchScreen(screenId) {
     console.log(`[UI] Switching to: ${screenId}`);
+    
+    stopShopMusic(); // [新增] 切屏时停止商店音乐
+    
+    // [核心修复] 切换界面时，强制清空手持物品
+    if (typeof resetHand === 'function') resetHand();
     
     // 1. 获取关键元素
     const container = document.getElementById('game-container');
@@ -5010,11 +5127,8 @@ function handleStationClick(sid, event, zone) {
     // 如果点击的是备菜区，或者点击的是整个工位且手里拿着食材
     if (zone === 'prep' || (!zone && holdingThing?.type === 'INGREDIENT')) {
         if (holdingThing && holdingThing.type === 'INGREDIENT') {
-            // 只有当工位不忙碌时才允许放食材
-            if (s.stage === 'COOKING' || s.stage === 'FINISHED') {
-                 triggerFeedback(event.clientX, event.clientY, "工位忙碌!", "red");
-                 return;
-            }
+            // [核心修改] 移除“工位忙碌”拦截，允许在烹饪时备菜
+            // 原来的 if (s.stage === 'COOKING' || s.stage === 'FINISHED') ... 已删除
             
             // [修改] 实时扣除库存 
             const ingId = holdingThing.val.id; 
@@ -5032,10 +5146,17 @@ function handleStationClick(sid, event, zone) {
             }
 
             s.currentIngredients.push(ingId);
-            s.stage = 'PREP_ING'; 
+            
+            // [核心修改] 仅当工位空闲时才改变状态，防止打断 COOKING 状态
+            if (s.stage === 'IDLE') {
+                s.stage = 'PREP_ING';
+            }
             
             playSfx(200, 'sine', 0.1);
             renderStation(sid, 'prep');
+            
+            // [核心修复] 投放完成后，立即清空鼠标手持状态
+            resetHand();
             return;
         }
     }
@@ -5088,13 +5209,24 @@ function handleStationClick(sid, event, zone) {
                 // 仅刷新显示，不重置
                 renderStation(sid);
             } else {
-                // 是最后一份：执行原本的清空逻辑
-                s.stage = 'IDLE';
-                s.currentIngredients = [];
-                s.dishResult = null;
-                s.recipe = null;
-                s.progress = 0;
-                s.servingsLeft = 0; // 清零
+                // --- [核心修复] 取走最后一份菜 --- 
+                
+                // 1. 判断备菜区是否有食材 
+                if (s.currentIngredients.length > 0) { 
+                    s.stage = 'PREP_ING'; // 如果有备菜，转为备菜状态 
+                } else { 
+                    s.stage = 'IDLE'; // 如果没备菜，转为空闲 
+                } 
+                
+                // 2. [关键] 绝对不要清空 s.currentIngredients !!! 
+                // s.currentIngredients = []; // <--- 已删除此行 
+                
+                // 3. 重置烹饪相关数据 
+                s.dishResult = null; 
+                s.recipe = null; 
+                s.progress = 0; 
+                s.servingsLeft = 0; 
+                
                 if (s.timer) clearInterval(s.timer);
                 playSfx(1000, 'sine', 0.2);
                 renderStation(sid);
@@ -5268,6 +5400,27 @@ window.onload = () => {
 
     loadGameState();
     updateBalanceDisplay();
+
+    // [核心修改] 检查是否有新征程参数
+    const ngParamsRaw = localStorage.getItem('ng_params');
+    if (ngParamsRaw) {
+        try {
+            const ngParams = JSON.parse(ngParamsRaw);
+            // 如果是 Day 1 且没有历史记录（刚重置完），则应用启动资金
+            if (game.level === 1 && (!game.history || game.history.length === 0)) {
+                if (typeof ngParams.startCoins === 'number') {
+                    game.coins = ngParams.startCoins;
+                    window.tempCoins = game.coins; // 同步给商店/备菜临时变量
+                    console.log(`[New Journey] Inherited coins: ¥${game.coins}`);
+                }
+            }
+        } catch(e) {
+            console.error("Error parsing ng_params", e);
+        }
+    }
+    
+    updateBalanceDisplay(); // 立即刷新 UI 显示金额
+
     initRealBusinessHUD();
 
     initGameBackground();
@@ -5484,18 +5637,32 @@ if (btnEndGame) {
 }
 
 function showResult(msg) {
+    playResultSfx(); // [新增] 播放成绩单音效
+    
+    // [修复] 结算时停止所有工位的音效 (如炒菜声)
+    if (typeof stations === 'object') {
+        Object.values(stations).forEach(s => {
+            if (s.audio) {
+                s.audio.pause();
+                s.audio = null;
+            }
+        });
+    }
+
     try {
         game.isLive = false;
         game.isPaused = false;
         document.getElementById('pause-overlay').style.display = 'none';
         document.getElementById('overlay').style.display = 'flex';
         updateGameBackground();
-        document.getElementById('modal-title').innerText = "💰 今日结算";
         
+        const modalTitle = document.getElementById('modal-title');
+        if (modalTitle) modalTitle.innerText = "💰 今日结算";
+        
+        // 1. 渲染图表 (保持原有的图表逻辑)
         let chartHtml = '<div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">';
         chartHtml += '<div style="font-size:14px; color:#666; margin-bottom:10px;">近7日营收趋势</div>';
         
-        // 数据准备
         const historySource = Array.isArray(game.history) ? game.history : [];
         const uniqueHistory = [];
         historySource.forEach(h => {
@@ -5505,15 +5672,14 @@ function showResult(msg) {
                 uniqueHistory.push(h);
             }
         });
-        
         const historySlice = uniqueHistory.slice(-7);
         
         if (historySlice.length < 1) {
             chartHtml += '<div style="text-align:center; color:#999; padding:30px;">暂无数据</div>';
         } else {
             const width = 340;
-            const height = 120; // SVG 固定画布高度
-            const padding = { top: 15, bottom: 20, left: 10, right: 10 }; // 底部留白给文字
+            const height = 120;
+            const padding = { top: 15, bottom: 20, left: 10, right: 10 };
             
             const revenues = historySlice.map(h => Number.isFinite(h.revenue) ? h.revenue : 0);
             const maxRev = Math.max(...revenues, 100);
@@ -5528,65 +5694,94 @@ function showResult(msg) {
             });
             
             let pathD = `M ${points[0].x} ${points[0].y}`;
-            points.forEach((p, i) => {
-                if (i === 0) return;
-                pathD += ` L ${p.x} ${p.y}`;
-            });
+            points.forEach((p, i) => { if (i > 0) pathD += ` L ${p.x} ${p.y}`; });
             
-            // [核心修复]
-            // 1. 在 chart-container 的 style 中增加了 "border: none !important;"，去除了容器自带的灰色边框
-            // 2. 这里的 <line> 是唯一的 X 轴，位于 y = height - padding.bottom
             chartHtml += `
-        <div class="chart-container" style="margin-bottom: 25px; height: auto; border: none !important; box-shadow: none;">
-            <div id="chart-tooltip" class="chart-tooltip"></div>
-            <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:auto; display:block; overflow:visible;">
-                <line x1="${padding.left}" y1="${padding.top}" x2="${width-padding.right}" y2="${padding.top}" stroke="#eee" stroke-width="1" stroke-dasharray="4"/>
-                
-                <line x1="${padding.left}" y1="${height-padding.bottom}" x2="${width-padding.right}" y2="${height-padding.bottom}" stroke="#eee" stroke-width="1"/>
-                
-                <path d="${pathD}" class="chart-line" />
-                
-                ${points.map(p => `
-                    <text x="${p.x}" y="${height - 5}" class="chart-label" style="font-size:10px; fill:#999; text-anchor:middle;">D${p.day}</text>
-                `).join('')}
-                ${points.map(p => `
-                    <circle cx="${p.x}" cy="${p.y}" r="4" class="chart-point" 
-                        onmouseover="showTooltip(event, 'Day ${p.day}\\n营收: ¥${p.val}')" 
-                        onmouseout="hideTooltip()" />
-                `).join('')}
-            </svg>
-        </div>`;
+            <div class="chart-container" style="margin-bottom: 25px; height: auto; border: none !important; box-shadow: none;">
+                <div id="chart-tooltip" class="chart-tooltip"></div>
+                <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:auto; display:block; overflow:visible;">
+                    <line x1="${padding.left}" y1="${padding.top}" x2="${width-padding.right}" y2="${padding.top}" stroke="#eee" stroke-width="1" stroke-dasharray="4"/>
+                    <line x1="${padding.left}" y1="${height-padding.bottom}" x2="${width-padding.right}" y2="${height-padding.bottom}" stroke="#eee" stroke-width="1"/>
+                    <path d="${pathD}" class="chart-line" />
+                    ${points.map(p => `<text x="${p.x}" y="${height - 5}" class="chart-label" style="font-size:10px; fill:#999; text-anchor:middle;">D${p.day}</text>`).join('')}
+                    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" class="chart-point" onmouseover="showTooltip(event, 'Day ${p.day}\\n营收: ¥${p.val}')" onmouseout="hideTooltip()" />`).join('')}
+                </svg>
+            </div>`;
+        }
+        chartHtml += '</div>';
+        
+        const descEl = document.getElementById('modal-desc');
+        if (descEl) descEl.innerHTML = msg + chartHtml;
+        
+        // --- [核心修复] 按钮逻辑重构 ---
+        // 修改：直接获取容器，而不是依赖可能被删除的 modal-btn
+        const container = document.querySelector('#overlay .modal-actions');
+        
+        if (container) {
+            container.innerHTML = ''; // 清空旧按钮
+            
+            // 重新设置容器样式
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.gap = '12px';
+            container.style.marginTop = '20px';
+
+            // 1. 进驻新城市按钮 (仅当资金达标时显示)
+            if (game.coins >= game.targetRevenue) {
+                const expandBtn = document.createElement('button');
+                expandBtn.innerHTML = "🏆 资金达标！查看通关考评";
+                expandBtn.onclick = () => {
+                    document.getElementById('overlay').style.display = 'none';
+                    showAchievementDetails();
+                };
+                // 金色样式
+                expandBtn.style.cssText = "background:linear-gradient(135deg, #f1c40f, #e67e22); color:white; padding:12px 20px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size:16px; box-shadow:0 4px 10px rgba(241,196,15,0.4); width:100%; animation: pulseGold 2s infinite;";
+                container.appendChild(expandBtn);
+            }
+
+            // 2. 标准操作行 (返回首页 + 继续营业)
+            const actionRow = document.createElement('div');
+            actionRow.style.cssText = "display:flex; gap:10px; width:100%;";
+
+            // [修复] 补回“返回首页”按钮
+            const btnHome = document.createElement('button');
+            btnHome.innerText = "🏠 返回首页";
+            btnHome.onclick = () => hideResultModal();
+            btnHome.style.cssText = "flex:1; background:transparent; border:1px solid #ccc; color:#666; padding:12px; border-radius:12px; cursor:pointer; font-weight:bold; font-size:15px;";
+            
+            // [修复] “继续营业”按钮
+            const btnContinue = document.createElement('button');
+            btnContinue.id = "btn-continue-next"; // [关键] 赋予ID，供startNextLevel查找
+            btnContinue.innerText = "📅 开始第 " + (game.level + 1) + " 天";
+            // [关键] 传入正确的ID 'btn-continue-next'
+            btnContinue.onclick = () => startNextLevel('btn-continue-next');
+            btnContinue.style.cssText = "flex:2; background:#2ecc71; color:white; padding:12px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size:16px; box-shadow:0 4px 0 #27ae60;";
+
+            actionRow.appendChild(btnHome);
+            actionRow.appendChild(btnContinue);
+            container.appendChild(actionRow);
         }
         
-        chartHtml += '</div>';
-        document.getElementById('modal-desc').innerHTML = msg + chartHtml;
-        const btn = document.getElementById('modal-btn');
-        if (btn) {
-            btn.innerText = "开始明天营业";
-            btn.onclick = () => startNextLevel('modal-btn');
-        }
-        // 动画逻辑
+        // 触发图表动画
         requestAnimationFrame(() => {
-            const path = document.querySelector('#modal-desc .chart-line');
-            if (path) {
-                const len = path.getTotalLength();
-                path.style.strokeDasharray = len;
-                path.style.strokeDashoffset = len;
-                // 强制重绘
-                path.getBoundingClientRect();
-                path.style.transition = 'stroke-dashoffset 0.5s ease-out';
-                path.style.strokeDashoffset = '0';
-            }
             const points = document.querySelectorAll('#modal-desc .chart-point');
             points.forEach((p, i) => {
                 p.style.animationDelay = `${(i + 1) * 50}ms`;
                 p.classList.add('animate');
             });
+            const line = document.querySelector('#modal-desc .chart-line');
+            if(line) {
+                const len = line.getTotalLength();
+                line.style.strokeDasharray = len;
+                line.style.strokeDashoffset = len;
+                line.getBoundingClientRect();
+                line.style.transition = 'stroke-dashoffset 1s ease';
+                line.style.strokeDashoffset = '0';
+            }
         });
+        
     } catch (e) {
         console.error('Result modal render error:', e);
-        const fallback = document.getElementById('modal-desc');
-        if (fallback) fallback.innerHTML = msg;
     }
 }
 
@@ -5842,52 +6037,40 @@ let selectedRegionId = null;
 let selectedDistrictId = null;
 let locationStep = 1;
 
-const WORLD_REGIONS = [
-    {
-        id: 'cn-shenzhen',
-        country: '中国',
-        city: '深圳',
-        flag: '🇨🇳',
-        unlocked: true,
-        districts: [
-            { id: 'cbd', name: 'CBD 商务区', unlocked: true, unlockCost: 0, customerProfile: { type: '白领精英', spend: '高', patience: '低' } },
-            { id: 'downtown', name: '市中心', unlocked: true, unlockCost: 5000, customerProfile: { type: '居民家庭', spend: '中', patience: '中' } },
-            { id: 'campus', name: '大学城', unlocked: true, unlockCost: 2000, customerProfile: { type: '大学生', spend: '低', patience: '高' } },
-            { id: 'resort', name: '度假区', unlocked: false, unlockCost: 10000, customerProfile: { type: '游客', spend: '极高', patience: '中' } }
-        ]
+const WORLD_REGIONS = [ 
+    { 
+        id: 'cn', 
+        country: '中国', 
+        city: '中华美食总店', 
+        flag: '🇨🇳', 
+        desc: '梦开始的地方，拥有最挑剔也最懂吃的食客。', 
+        isStarter: true, 
+        unlocked: true, 
+        districts: [ 
+            { id: 'main', name: '总店·商业街', unlocked: true, unlockCost: 0, customerProfile: { type: '街坊邻居', spend: '中', patience: '中' } } 
+        ] 
     },
-    {
-        id: 'cn-shanghai',
-        country: '中国',
-        city: '上海',
-        flag: '🇨🇳',
-        unlocked: true,
-        districts: [
-            { id: 'bund', name: '外滩商务圈', unlocked: true, unlockCost: 15000, customerProfile: { type: '国际游客', spend: '极高', patience: '低' } },
-            { id: 'lujiazui', name: '陆家嘴金融区', unlocked: true, unlockCost: 20000, customerProfile: { type: '金融新贵', spend: '高', patience: '极低' } }
-        ]
+    { 
+        id: 'jp', 
+        country: '日本', 
+        city: '东京分店', 
+        flag: '🇯🇵', 
+        desc: '快节奏的都市，食客偏好精致且快速的料理。', 
+        unlocked: true, 
+        districts: [ 
+            { id: 'shibuya', name: '涩谷·十字街头', unlocked: true, unlockCost: 5000, customerProfile: { type: '上班族', spend: '中', patience: '低' } } 
+        ] 
     },
-    {
-        id: 'cn-beijing',
-        country: '中国',
-        city: '北京',
-        flag: '🇨🇳',
-        unlocked: true,
-        districts: [
-            { id: 'cbd', name: '国贸 CBD', unlocked: true, unlockCost: 18000, customerProfile: { type: '商务人士', spend: '高', patience: '低' } },
-            { id: 'zhongguancun', name: '中关村商圈', unlocked: true, unlockCost: 12000, customerProfile: { type: '极客', spend: '中', patience: '中' } }
-        ]
-    },
-    {
-        id: 'jp-tokyo',
-        country: '日本',
-        city: '东京',
-        flag: '🇯🇵',
-        unlocked: false,
-        districts: [
-            { id: 'shinjuku', name: '新宿商务区', unlocked: false, unlockCost: 30000, customerProfile: { type: '上班族', spend: '中', patience: '低' } },
-            { id: 'shibuya', name: '涩谷商业街', unlocked: false, unlockCost: 35000, customerProfile: { type: '时尚青年', spend: '高', patience: '中' } }
-        ]
+    { 
+        id: 'fr', 
+        country: '法国', 
+        city: '巴黎分店', 
+        flag: '🇫🇷', 
+        desc: '浪漫之都，这里的人们愿意为顶级美味等待。', 
+        unlocked: true, 
+        districts: [ 
+            { id: 'champ', name: '香榭丽舍·旗舰店', unlocked: true, unlockCost: 8000, customerProfile: { type: '美食家', spend: '极高', patience: '高' } } 
+        ] 
     }
 ];
 
@@ -5916,28 +6099,63 @@ function renderLocationStep1() {
     selectedRegionId = null;
     selectedDistrictId = null;
     
-    // Hide side panel initially
     closeDistrictPanel();
+
+    // 1. 渲染【我的分店】区域
+    // 从 legacy_shops_list 数组读取所有旧店
+    const legacyList = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]');
+    
+    if (legacyList.length > 0) {
+        // 加个标题
+        const myTitle = document.createElement('div');
+        myTitle.style.width = '100%';
+        myTitle.style.color = '#f1c40f';
+        myTitle.style.marginBottom = '10px';
+        myTitle.style.fontWeight = 'bold';
+        myTitle.innerText = "── 我的商业版图 ──";
+        dock.appendChild(myTitle);
+
+        legacyList.forEach(shop => {
+            const legacyCard = document.createElement('div');
+            legacyCard.className = 'region-card';
+            legacyCard.style.border = '2px solid #f1c40f';
+            legacyCard.style.background = 'linear-gradient(135deg, rgba(241,196,15,0.2), rgba(0,0,0,0.4))';
+            
+            let statusIcon = '🟢';
+            let statusText = '运营正常';
+            if (shop.health < 50) { statusIcon = '⚠️'; statusText = '急需维护'; }
+            if (shop.accumulatedCash > 0) statusText = `待收: ¥${shop.accumulatedCash}`;
+
+            legacyCard.innerHTML = `
+                <div class="r-flag">🏠</div>
+                <div class="r-name">${shop.name}</div>
+                <div class="r-desc" style="color:#f1c40f;">${statusIcon} ${statusText}</div>
+            `;
+            
+            // 点击弹出管理
+            legacyCard.onclick = () => showLegacyManageModal(shop);
+            dock.appendChild(legacyCard);
+        });
+    }
+
+    // 2. 渲染【新征程】区域
+    const newTitle = document.createElement('div');
+    newTitle.style.width = '100%';
+    newTitle.style.color = '#fff';
+    newTitle.style.margin = '20px 0 10px 0';
+    newTitle.style.fontWeight = 'bold';
+    newTitle.innerText = "── 开拓新市场 ──";
+    dock.appendChild(newTitle);
 
     WORLD_REGIONS.forEach(region => {
         const card = document.createElement('div');
         card.className = 'region-card' + (region.unlocked ? '' : ' locked');
         
-        const flag = document.createElement('div');
-        flag.className = 'r-flag';
-        flag.textContent = region.flag;
-        
-        const name = document.createElement('div');
-        name.className = 'r-name';
-        name.innerText = region.city;
-        
-        const country = document.createElement('div');
-        country.className = 'r-desc';
-        country.innerText = region.country;
-        
-        card.appendChild(flag);
-        card.appendChild(name);
-        card.appendChild(country);
+        card.innerHTML = `
+            <div class="r-flag">${region.flag}</div>
+            <div class="r-name">${region.city}</div>
+            <div class="r-desc">${region.country}</div>
+        `;
 
         if (region.unlocked) {
             card.onclick = () => {
@@ -5948,7 +6166,7 @@ function renderLocationStep1() {
             };
         } else {
             card.onclick = () => {
-                 playSfx(150, 'sawtooth', 0.2); // Error
+                 playSfx(150, 'sawtooth', 0.2); 
                  showToast('该地区尚未解锁', 1000);
             };
         }
@@ -6053,20 +6271,45 @@ function confirmNewJourney() {
     const district = region.districts.find(d => d.id === selectedDistrictId);
     if (!district) return;
     
-    // [核心修改] 检查余额是否足够支付搬迁费用
+    // 检查余额
     if (game.coins < district.unlockCost) {
         showToast('钱包余额不足', 1500);
         return;
     }
 
     const branchName = region.city + ' - ' + district.name;
+
+    // [核心修改] 计算剩余资金 (继承给新店)
+    const remainingCoins = game.coins - district.unlockCost;
+
+    // [核心修改] 1. 保存旧店数据到列表 (压栈)
+    // 唯一 ID 防止重复
+    const shopId = Date.now().toString(36) + Math.random().toString(36).substr(2);
     
-    if (confirm(`确定要花费 ¥${district.unlockCost} 进驻 [${branchName}] 吗？\n这将开启新的挑战，当前进度将重置。`)) { // 注意：这里重置了所有数据。如果想保留剩余金币到下一关，需要修改 Reset 逻辑， // 但通常“新征程”意味着白手起家（或带一点启动资金），这里保持重置逻辑。
-        GameStateManager.resetAllData();
-        const newGameParams = { 
-            location: selectedLocationId, 
+    const shopToArchive = {
+        id: shopId,
+        name: game.branchName || "上一家分店", // 假设 game 对象里有当前店名，没有就默认
+        baseIncome: calculateLegacyDailyIncome(),
+        accumulatedCash: 0,
+        health: 100
+    };
+
+    // 读取列表 -> push -> 保存
+    let legacyList = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]');
+    legacyList.push(shopToArchive);
+    localStorage.setItem('legacy_shops_list', JSON.stringify(legacyList));
+
+    if (confirm(`确认花费 ¥${district.unlockCost} 进驻 [${branchName}]？\n\n剩余资金 ¥${remainingCoins} 将作为新店启动资金。\n旧店将转为托管模式。`)) {
+        
+        // [核心修改] 传入 true，告诉管理器不要删除 legacy_shops_list
+        GameStateManager.resetAllData(true);
+        
+        // [核心修改] 2. 将剩余资金写入新游戏参数
+        const newGameParams = {
+            location: selectedLocationId,
             branchName: branchName,
-            startBonus: 0 // Optional: pass some bonus if needed
+            startCoins: remainingCoins, // 继承剩余资金
+            isNGPlus: true // 标记为"多周目/分店模式"
         };
         localStorage.setItem('ng_params', JSON.stringify(newGameParams));
         location.reload();
@@ -6103,12 +6346,9 @@ function settleDay(reason = "营业结束") {
     msg += `当日合格率: ${rateHtml}`;
     logSystemEvent('SETTLEMENT_TRIGGER', { day: game.level, revenue: game.dailyRevenue });
 
-    // [核心修改] 胜利条件：必须是“手里的现金”超过目标，而不是历史累计赚过多少
-    if (game.coins >= game.targetRevenue) {
-        showAchievementDetails();
-    } else {
-        showResult(msg);
-    }
+    // [核心修复] 无论是否有钱，统一显示标准结算弹窗 
+    // 不再跳转到 showAchievementDetails，避免逻辑断层 
+    showResult(msg);
 }
 
 function resetHand() {
@@ -6509,6 +6749,9 @@ window.confirmPrep = async function() {
     game.dailyInventory = { ...window.tempInventory }; 
     game.coins = window.tempCoins; 
 
+    // [核心修改] 触发旧店后台结算 (不再直接发钱)
+    processLegacyShopDailyTick();
+
     // [核心修改] 3. & 4. 切换到游戏视图
     // 先手动隐藏 prep-modal (因为它可能不在 switchScreen 的管理列表里)
     const prepModal = document.getElementById('prep-modal');
@@ -6578,23 +6821,35 @@ function showPrepModal() {
     // [核心修改] 确保样式为 absolute 
     modal.className = 'prep-overlay'; // CSS中已改为 absolute 
     modal.style.cssText = 'display: flex !important; pointer-events: auto !important; opacity: 1 !important; visibility: visible !important;'; 
-    // [核心修改] Day 1 特殊文案处理 
-    const isDayOne = game.level === 1; 
-    let introText = ""; 
-    let trendText = ""; 
-    let tagHtml = ""; 
-    if (isDayOne) { 
-        // Day 1 剧情模式 
-        introText = "🎉 新店开业大吉！<br><span style='font-size:0.6em; opacity:0.9; font-weight:400'>隔壁市场老板送来贺礼，今日食材<b>全场免费</b>！</span>"; 
-        tagHtml = `<div class="prep-trend-tag" style="background:rgba(46, 204, 113, 0.2); color:#2ecc71; border-color:#2ecc71;">🎁 新手福利：无限食材</div>`; 
-        trendText = "今日无需担心成本，尽情练习烹饪吧！"; 
-        
-        // Day 1 自动给一点初始库存，避免玩家一个都不点就进去了（虽然无限，但视觉上需要有点东西） 
-        if (Object.keys(window.tempInventory).length === 0) { 
-            window.tempInventory['tomato'] = 5; 
-            window.tempInventory['egg'] = 5; 
-            window.tempInventory['onion'] = 5; 
-        } 
+    // [核心修改] Day 1 特殊文案处理
+    const isDayOne = game.level === 1;
+    // [新增] 检查是否为分店模式
+    const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
+    const isNewBranch = ngParams.isNGPlus === true;
+
+    let introText = "";
+    let trendText = "";
+    let tagHtml = "";
+
+    if (isDayOne) {
+        if (isNewBranch) {
+            // [核心修改] 分店开业文案
+            introText = `🚀 <b>${ngParams.branchName || '新分店'}</b> 盛大开业！<br><span style='font-size:0.6em; opacity:0.9'>利用启动资金，快速在新城市站稳脚跟吧。</span>`;
+            tagHtml = `<div class="prep-trend-tag" style="background:rgba(241, 196, 15, 0.2); color:#f1c40f; border-color:#f1c40f;">🚩 商业版图扩张</div>`;
+            trendText = "新环境，新挑战！注意观察本地客人口味。";
+        } else {
+            // 纯新手文案 (保持不变)
+            introText = "🎉 新店开业大吉！<br><span style='font-size:0.6em; opacity:0.9; font-weight:400'>隔壁市场老板送来贺礼，今日食材<b>全场免费</b>！</span>";
+            tagHtml = `<div class="prep-trend-tag" style="background:rgba(46, 204, 113, 0.2); color:#2ecc71; border-color:#2ecc71;">🎁 新手福利：无限食材</div>`;
+            trendText = "今日无需担心成本，尽情练习烹饪吧！";
+        }
+
+        // Day 1 自动给一点初始库存
+        if (Object.keys(window.tempInventory).length === 0) {
+            window.tempInventory['tomato'] = 5;
+            window.tempInventory['egg'] = 5;
+            window.tempInventory['onion'] = 5;
+        }
     } else { 
         // 常规模式 (原代码) 
         const trend = game.dailyTrend || 'balanced'; 
@@ -6644,6 +6899,7 @@ function showPrepModal() {
         </div> 
     `; 
     renderPrepUI(); 
+    playShopMusic(); // [新增] 播放集市音乐
 }
 
 function renderPrepUI() { 
@@ -6819,6 +7075,171 @@ function checkAndPlayPantryAnimation() {
         }, 1800);
     };
     door.appendChild(handle);
+}
+
+// --- 分店托管系统核心逻辑 ---
+// 计算旧店评分 (每日基础产出)
+function calculateLegacyDailyIncome() {
+    const inv = game.inventory;
+    let baseIncome = 0;
+    
+    // 评分算法：Omni系列权重极高，K-MES是必要条件
+    if (inv.pot >= 3) baseIncome += 150;
+    if (inv.pot >= 5) baseIncome += 250; // Omni 3.0
+    if (inv.pot >= 7) baseIncome += 350; // 小锅
+    
+    baseIncome += (inv.expansion * 150); // 装修加成
+
+    // 自动化系数 (没有 MES 系统效率极低)
+    let automation = 0.1;
+    if (inv.belt >= 2) automation = 0.6;
+    if (inv.belt >= 3) automation = 1.0;
+    
+    return Math.floor(baseIncome * automation);
+}
+
+// 每日后台结算 (在新的一天开始时调用)
+function processLegacyShopDailyTick() {
+    // 读取列表
+    const raw = localStorage.getItem('legacy_shops_list');
+    if (!raw) return;
+
+    let list = JSON.parse(raw);
+    if (!Array.isArray(list) || list.length === 0) return;
+    
+    let totalAdded = 0;
+
+    // 遍历所有店铺进行结算
+    list.forEach(shop => {
+        // 1. 设备老化逻辑 (每天掉 10% 耐久)
+        shop.health = Math.max(0, shop.health - 10);
+
+        // 2. 效率折损
+        let efficiency = 1.0;
+        if (shop.health <= 0) efficiency = 0;
+        else if (shop.health < 50) efficiency = 0.5;
+
+        const todayIncome = Math.floor(shop.baseIncome * efficiency);
+
+        // 3. 资金累积
+        shop.accumulatedCash += todayIncome;
+        totalAdded += todayIncome;
+        
+        console.log(`[Legacy Shop: ${shop.name}] Health: ${shop.health}%, Added: ¥${todayIncome}, Pool: ¥${shop.accumulatedCash}`);
+    });
+
+    // 保存更新后的列表
+    localStorage.setItem('legacy_shops_list', JSON.stringify(list));
+
+    // 汇总提示
+    if (totalAdded > 0) {
+        showToast(`收到 ${list.length} 家分店日报：今日共营收 ¥${totalAdded} (请去地图查收)`, 3000);
+    }
+}
+
+// [新增] 显示分店管理弹窗
+function showLegacyManageModal(shopData) {
+    const overlay = document.getElementById('overlay');
+    // 临时提高层级
+    overlay.style.zIndex = '4000';
+
+    const title = document.getElementById('modal-title');
+    const desc = document.getElementById('modal-desc');
+    const actions = document.querySelector('#overlay .modal-actions');
+
+    if (!overlay || !title || !desc || !actions) return;
+
+    title.innerText = `🏠 分店管理：${shopData.name}`;
+    title.style.color = "#f1c40f";
+    
+    // 进度条颜色
+    const healthColor = shopData.health > 50 ? '#2ecc71' : '#e74c3c';
+
+    desc.innerHTML = `
+        <div style="text-align:left; width:100%;">
+            <div style="margin-bottom:15px; padding:10px; background:#f9f9f9; border-radius:8px;">
+                <strong>💰 待收营收：</strong> <span style="font-size:24px; font-weight:bold; color:#f1c40f;">¥${shopData.accumulatedCash}</span>
+            </div>
+            <div style="margin-bottom:15px;">
+                <strong>🔧 设备健康度：</strong> <span style="color:${healthColor}; font-weight:bold;">${shopData.health}%</span>
+                <div style="width:100%; height:10px; background:#eee; border-radius:5px; margin-top:5px;">
+                    <div style="width:${shopData.health}%; height:100%; background:${healthColor}; border-radius:5px; transition:width 0.3s;"></div>
+                </div>
+                <div style="font-size:12px; color:#666; margin-top:5px;">${shopData.health < 50 ? '⚠️ 设备故障频发，产出效率减半！' : '✅ 设备运转良好'}</div>
+            </div>
+        </div>
+    `;
+
+    // 重写按钮
+    actions.innerHTML = '';
+
+    const btnCollect = document.createElement('button');
+    btnCollect.innerText = "🛠️ 视察并收款";
+    btnCollect.style.background = "#2ecc71";
+    btnCollect.style.color = "white";
+    btnCollect.style.padding = "12px 30px";
+    btnCollect.style.border = "none";
+    btnCollect.style.borderRadius = "10px";
+    btnCollect.style.fontSize = "16px";
+    btnCollect.style.fontWeight = "bold";
+    btnCollect.style.cursor = "pointer";
+
+    if (shopData.accumulatedCash <= 0 && shopData.health >= 90) {
+        btnCollect.disabled = true;
+        btnCollect.innerText = "暂无收益";
+        btnCollect.style.background = "#ccc";
+    }
+
+    btnCollect.onclick = () => {
+        // 1. 加钱
+        if (shopData.accumulatedCash > 0) {
+            game.coins += shopData.accumulatedCash;
+            if (typeof playRevenueSound === 'function') playRevenueSound();
+            showToast(`成功提取分红: +¥${shopData.accumulatedCash}`, 2000);
+            shopData.accumulatedCash = 0;
+        }
+
+        // 2. 维修 (重置健康度)
+        if (shopData.health < 100) {
+            shopData.health = 100;
+            playSfx(300, 'noise', 0.5); 
+            showToast("设备维护完成，效率恢复 100%", 2000);
+        }
+
+        // 3. 保存回数组
+        // 需要在数组里找到这个对象并更新
+        let list = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]');
+        const idx = list.findIndex(s => s.id === shopData.id || s.name === shopData.name);
+        if (idx !== -1) {
+            list[idx] = shopData;
+            localStorage.setItem('legacy_shops_list', JSON.stringify(list));
+        }
+
+        updateBalanceDisplay();
+        
+        overlay.style.display = 'none'; 
+        overlay.style.zIndex = ''; 
+        
+        renderLocationStep1(); // 刷新地图
+    };
+
+    const btnClose = document.createElement('button');
+    btnClose.innerText = "返回";
+    btnClose.style.marginLeft = "10px";
+    btnClose.style.background = "transparent";
+    btnClose.style.border = "1px solid #ccc";
+    btnClose.style.padding = "12px 20px";
+    btnClose.style.borderRadius = "10px";
+    btnClose.style.cursor = "pointer";
+    btnClose.onclick = () => {
+        overlay.style.display = 'none';
+        overlay.style.zIndex = '';
+    };
+
+    actions.appendChild(btnCollect);
+    actions.appendChild(btnClose);
+
+    overlay.style.display = 'flex';
 }
 </script>
 
