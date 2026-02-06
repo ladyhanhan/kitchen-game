@@ -756,6 +756,34 @@
     flex-direction: column;
     justify-content: flex-start;
     transform: translateX(16px);
+}
+
+/* [核心修复] 烹饪区卡片专用位移 - 根据装修等级隔离样式 */
+.station-card.cook-card {
+    /* 1. 基础重置 (所有等级通用) */
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* --- 星级后厨 (Lv2) --- */
+.kitchen-lv2 .station-card.cook-card,
+.kitchen-lv2 #s_s1 .station-card.cook-card,
+.kitchen-lv2 #s_s2 .station-card.cook-card,
+.kitchen-lv2 #s_s3 .station-card.cook-card {
+    transform: translate(16px, 40px) !important;
+}
+
+/* --- 标准后厨 (Lv0) & 扩容后厨 (Lv1) --- */
+/* [可微调] 当前设置为 translate(16px, 20px)，请根据视觉效果调整 Y 轴数值 */
+.kitchen-lv0 .station-card.cook-card,
+.kitchen-lv0 #s_s1 .station-card.cook-card,
+.kitchen-lv1 .station-card.cook-card,
+.kitchen-lv1 #s_s1 .station-card.cook-card,
+.kitchen-lv1 #s_s2 .station-card.cook-card {
+    transform: translate(16px, 20px) !important;
 } 
 
 /* Card Header - 完全透明 */ 
@@ -1562,12 +1590,13 @@
             top: 40px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            padding: 15px 25px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            /* [修改] 弱化背景，去除按钮感 */
+            background: rgba(255, 255, 255, 0.05); /* 更淡的背景 */
+            backdrop-filter: blur(8px); /* 减弱模糊 */
+            padding: 10px 25px; /* 减少内边距 */
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* 弱化边框 */
+            box-shadow: none; /* 移除阴影 */
             max-width: 400px;
             text-align: center;
             z-index: 10;
@@ -2298,17 +2327,7 @@
         will-change: filter;
         animation: bgBlur 2.0s ease 0.5s forwards;
     }
-    /* [优化] 独立幕帘层：替代原伪元素，避免被背景模糊影响边缘 */
-    .prep-curtain {
-        position: absolute; inset: 0;
-        background: rgba(0, 0, 0, 0.7); /* 加深蒙层 */
-        backdrop-filter: blur(4px); /* 叠加毛玻璃 */
-        z-index: 0; /* 位于背景之上，内容之下 */
-        transform: scaleY(0); 
-        transform-origin: top;
-        animation: curtainDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) 2.0s forwards;
-        pointer-events: none;
-    }
+    /* .prep-curtain styles moved to bottom */
 
     /* 沉浸式文案样式 */
     .prep-intro-text {
@@ -2360,8 +2379,6 @@
         padding-left: 15px; border-left: 6px solid #f1c40f; 
         display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start;
         /* 动画：延迟淡入 */
-        opacity: 0;
-        animation: uiFadeIn 0.5s ease 2.8s forwards;
     } 
     .prep-header-content { display: flex; flex-direction: column; }
     
@@ -2391,9 +2408,6 @@
         flex: 1; overflow-y: auto; padding: 5px 15px; 
         display: flex; flex-direction: column; gap: 20px; 
         /* 滚动条规避：内容区域内部滚动 */
-        /* 动画：延迟淡入 */
-        opacity: 0;
-        animation: uiFadeIn 0.5s ease 2.8s forwards;
     } 
     .prep-grid::-webkit-scrollbar { width: 6px; } 
     .prep-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; } 
@@ -2450,10 +2464,6 @@
         box-shadow: 0 -4px 25px rgba(0,0,0,0.4); 
         width: 100%; max-width: 1200px; margin: 0 auto; 
         box-sizing: border-box;
-        /* 动画：底部上滑 */
-        opacity: 0;
-        transform: translateY(100%);
-        animation: footerSlideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 3.0s forwards;
     } 
     .pf-info { display: flex; flex-direction: column; } 
     .pf-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; } 
@@ -2521,6 +2531,668 @@
     line-height: 1;
     cursor: help;
     opacity: 0.85;
+}
+    /* --- 地图界面重构样式 --- */
+    #map-screen {
+        /* [核心修改] 改为顶部对齐 + 居中，不再挤到底部 */
+        justify-content: flex-start !important;
+        align-items: center !important;
+        padding-top: 120px !important; /* 留出顶部标题空间 */
+        background: #000 url('assets/bg/餐厅解锁地图.jpg') no-repeat center center / cover !important;
+    }
+
+    /* [核心修改] 移除深色大面板背景，保留布局功能 */
+    .region-dock {
+        width: 90%;
+        max-width: 1100px;
+        height: auto;
+        max-height: 80vh;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 40px 50px !important; /* 调整间距 */
+        align-items: flex-start !important; /* 强制左对齐 */
+        display: flex;
+        flex-direction: column;
+        gap: 30px; /* 上下分区的间距 */
+        overflow-y: auto; /* 内容过多可滚动 */
+        margin: 0 auto;
+    }
+
+    /* 标题增加背景条以保证在地图上的可读性 */
+    .region-dock h3 {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
+        background: rgba(0, 0, 0, 0.4); /* 轻微黑底 */
+        padding: 8px 16px;
+        border-radius: 8px;
+        display: inline-block;
+        backdrop-filter: blur(4px);
+        border-left: 4px solid #f1c40f; /* 装饰线 */
+    }
+    /* [核心修改] “拓展新版图”区域改为左对齐 */
+    .new-territory-container {
+        justify-content: flex-start !important;
+        padding-left: 10px;
+    }
+
+    /* 横向滚动容器通用样式 */
+    .map-scroll-row {
+        display: flex;
+        flex-wrap: wrap; /* [核心] 允许换行，防止遮挡 */
+        gap: 20px;
+        width: 100%;
+        padding-bottom: 10px;
+        justify-content: center; /* 卡片居中排列 */
+    }
+
+    /* 国家卡片样式优化 */
+    .region-card {
+        min-width: 180px; /* 加宽 */
+        height: 140px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        position: relative;
+        overflow: visible; /* 允许角标溢出 */
+    }
+    .region-card:hover {
+        transform: translateY(-5px) scale(1.02) !important;
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.5);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .region-card .r-flag {
+        font-size: 56px;
+        margin-bottom: 5px;
+    }
+    .region-card .r-name {
+        font-size: 20px;
+        font-weight: 800;
+        color: #fff;
+    }
+    .region-card .r-desc {
+        font-size: 13px;
+        color: rgba(255,255,255,0.7);
+    }
+
+    /* 当前所在地的高亮样式 */
+    .region-card.current-location {
+        border: 2px solid #2ecc71;
+        background: rgba(46, 204, 113, 0.15);
+        box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
+    }
+    .current-badge {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2ecc71;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 2px 10px;
+        border-radius: 10px;
+        white-space: nowrap;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    /* --- 地图 UI v3.0：水晶轻量化 --- */
+    /* 1. 顶部资产区：完全透明，仅布局 */
+    .region-dock {
+        position: absolute;
+        top: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95%;
+        max-width: 1200px;
+        z-index: 3510;
+        display: flex;
+        flex-direction: column;
+        pointer-events: none; /* 容器穿透 */
+    }
+
+    /* 标题样式：轻量化标签 */
+    .map-section-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        padding: 6px 16px;
+        border-radius: 20px;
+        align-self: flex-start;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .empire-scroll-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        width: 100%;
+        pointer-events: auto;
+        justify-content: flex-start; /* 左对齐更自然 */
+    }
+
+    /* [核心] 帝国卡片：清透水晶风格 */
+    .empire-card {
+        /* 去除深色背景，改用高亮白透 */
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 16px;
+        padding: 12px;
+        min-width: 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 柔和阴影 */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* 悬停高光 */
+    .empire-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255,255,255,0.2);
+    }
+
+    /* 文字增强：确保在地图背景上可见 */
+    .empire-name {
+        font-size: 14px;
+        font-weight: 900;
+        color: #fff;
+        text-align: center;
+        margin: 4px 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8); /* 强投影 */
+        line-height: 1.2;
+    }
+    .empire-info-row {
+        font-size: 11px;
+        color: #fff;
+        font-weight: 700;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        background: rgba(0,0,0,0.3);
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-top: 4px;
+    }
+
+    /* 状态角标优化 */
+    .card-badge {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        font-size: 10px;
+        font-weight: 800;
+        color: #fff;
+        text-align: center;
+        padding: 2px 0;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    .badge-live {
+        background: linear-gradient(90deg, rgba(46, 204, 113, 0.8), rgba(39, 174, 96, 0.8));
+    }
+    .badge-money {
+        background: linear-gradient(90deg, rgba(241, 196, 15, 0.8), rgba(243, 156, 18, 0.8));
+    }
+
+    /* 2. 底部导航栏：悬浮胶囊风格 */
+    .map-bottom-bar {
+        position: absolute;
+        bottom: 30px; /* 悬浮，不贴底 */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95%;
+        max-width: 800px;
+        height: 90px;
+        
+        /* 完全去除死板背景，改用渐变遮罩或纯透明 */
+        background: rgba(20, 20, 20, 0.4); /* 极淡黑底用于衬托 */
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px; /* 大圆角 */
+        display: flex;
+        align-items: center;
+        justify-content: center; /* 居中排列 */
+        padding: 0 20px;
+        gap: 15px;
+        z-index: 3550;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .map-bottom-label {
+        position: absolute;
+        top: -30px;
+        left: 20px;
+        font-size: 14px;
+        color: rgba(255,255,255,0.9);
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* 国家 Tab：透明水晶块 */
+    .country-tab {
+        flex: 1;
+        max-width: 120px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+    .country-tab:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .country-tab.active {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: #fff;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    .tab-flag {
+        font-size: 24px;
+        line-height: 1;
+        margin-bottom: 2px;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+    }
+    .tab-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .more-countries {
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        font-weight: 600;
+        padding: 0 15px;
+        border-left: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* 3. 商圈面板：统一清透风格 */
+    .district-panel-container {
+        /* 覆写旧样式 */
+        background: rgba(30, 30, 30, 0.6) !important; /* 降低不透明度 */
+        backdrop-filter: blur(30px) !important; /* 强模糊 */
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.6) !important;
+        border-radius: 30px !important;
+    }
+    .district-item {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    .district-item:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+    .current-indicator {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 12px;
+        height: 12px;
+        background: #2ecc71;
+        border-radius: 50%;
+        border: 2px solid #1a1a1a;
+        box-shadow: 0 0 5px #2ecc71;
+    }
+/* --- 商业版图 UI v3.5 微调 --- */ 
+/* 1. 底部标题：横向 + 无阴影 */
+.map-bottom-title { 
+    writing-mode: horizontal-tb !important; /* 强制横向 */
+    text-orientation: mixed !important; 
+    text-shadow: none !important; /* 去除阴影 */
+    height: auto !important; 
+    margin-right: 25px !important; 
+    padding-right: 25px !important; 
+    border-right: 1px solid rgba(255, 255, 255, 0.2) !important; 
+    letter-spacing: 1px !important; 
+    font-size: 18px !important; 
+    color: #ffffff !important; 
+    display: flex; 
+    align-items: center; 
+    margin-left: -18px !important; /* 向左平移 */
+} 
+
+/* 2. 底部 Tab 文字：浅色 + 无阴影 */
+.tab-name { 
+    color: rgba(255, 255, 255, 0.7) !important; /* 浅色 */
+    text-shadow: none !important; /* 去除阴影 */
+    font-weight: 600 !important; 
+} 
+.country-tab.active .tab-name { 
+    color: #fff !important; /* 选中时高亮 */
+} 
+
+/* 3. 帝国卡片文字：辅助信息去除阴影 */
+.empire-country-tag, .empire-info-row { 
+    text-shadow: none !important; 
+    color: rgba(255, 255, 255, 0.9) !important; 
+    font-weight: bold !important; /* 加粗 */
+} 
+/* 只有店名保留阴影，增强辨识度 */
+.empire-name { 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6) !important; 
+} 
+
+/* 新增：等待开放按钮样式 */ 
+.country-tab.waiting { 
+    opacity: 0.4; 
+    cursor: not-allowed; 
+    background: rgba(255, 255, 255, 0.02); 
+    border-color: rgba(255, 255, 255, 0.05); 
+}
+        /* 底部标题布局优化：支持双行 */ 
+    .map-bottom-title { 
+        flex-direction: column !important; /* 改为垂直排列 */ 
+        align-items: flex-start !important; /* 左对齐 */ 
+        justify-content: center !important; 
+        line-height: 1.2 !important; 
+        padding-right: 20px !important; /* 调整间距 */ 
+    } 
+    .map-bottom-main-text { 
+        font-size: 18px; 
+        font-weight: 800; 
+        color: #f1c40f; 
+    } 
+    .map-bottom-sub-text { 
+        font-size: 11px; 
+        color: rgba(255, 255, 255, 0.5); 
+        font-weight: normal; 
+        letter-spacing: 0.5px; 
+    }
+/* [新增] 底部导航双行标题样式 */
+        .map-bottom-main-text {
+            display: block;
+            font-size: 18px;
+            line-height: 1.2;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+        .map-bottom-sub-text {
+            display: block;
+            font-size: 11px;
+            line-height: 1.2;
+            color: #bdc3c7;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+    
+    /* 街坊情报站 */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* [新增] 动画辅助类 */
+    .animate__animated {
+        animation-duration: 0.5s;
+        animation-fill-mode: both;
+    }
+    .animate__fadeIn {
+        animation-name: fadeIn;
+    }
+    .animate__fadeInUp {
+        animation-name: fadeInUp;
+    }
+    .animate__fadeOut {
+        animation-name: fadeOut;
+    }
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    /* --- [新增] 集市流程控制样式 --- */
+    /* 采购界面元素的初始隐藏状态 */
+    .prep-ui-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease;
+    }
+    .prep-ui-visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* [修改] 移除自动动画，初始状态设为 scaleY(0) */
+    .prep-curtain {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 0;
+        transform: scaleY(0); /* 初始收起 */
+        transform-origin: top;
+        pointer-events: none;
+    }
+    /* [新增] 激活时才播放下拉动画 */
+    .prep-curtain.active {
+        animation: curtainDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    /* [优化] 开始买菜按钮 - 视觉升级 */
+    .btn-start-shopping {
+        /* 基础尺寸与 btn-start-day 保持一致 */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        padding: 12px 36px; /* 加大尺寸 */
+        background: #2ecc71; /* 保持经典绿 */
+        color: white;
+        border-radius: 50px; /* 大圆角 */
+        font-size: 18px;     /* 加大字号 */
+        font-weight: 800;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    /* Hover 态：轻微上浮 + 变亮 */
+    .btn-start-shopping:hover {
+        transform: translateY(-2px);
+        background: #27ae60;
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+    }
+    /* Active 态：按下缩放 */
+    .btn-start-shopping:active {
+        transform: translateY(1px) scale(0.98);
+        box-shadow: 0 2px 10px rgba(46, 204, 113, 0.3);
+    }
+    @keyframes pulse-green {
+        0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+    }
+
+    /* [重构] 居中无闪烁对话框 */
+    #market-chatter-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5000; /* 极高层级，在集市 UI 之上 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.3); /* 轻微压暗背景 */
+        backdrop-filter: blur(2px); /* 轻微模糊背景突出对话 */
+        opacity: 0;
+        animation: fadeIn 0.5s forwards;
+    }
+
+    .chatter-box-centered {
+        width: 90%;
+        max-width: 600px;
+        /* [核心] 设定固定高度，防止按钮出现时跳动 */
+        height: 260px;
+        background: rgba(20, 20, 20, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        backdrop-filter: blur(12px);
+        transform: translateY(20px);
+        animation: slideUpFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        text-align: left;
+        cursor: pointer;
+        position: relative;
+        /* [新增] 使用 Flex 布局垂直分布内容 */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .chatter-speaker {
+        font-size: 18px;
+        font-weight: 800;
+        color: #f1c40f;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .chatter-text {
+        font-size: 20px;
+        line-height: 1.6;
+        color: #ecf0f1;
+        font-weight: 500;
+        /* [新增] 自动占据剩余空间，确保布局分布 */
+        flex: 1;
+        display: flex;
+        align-items: flex-start; /* 文字顶对齐 */
+        padding-top: 10px;
+    }
+
+    .chatter-hint {
+        /* [新增] 固定底部高度，无论放文字还是按钮，高度一致 */
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; /* 靠右对齐 */
+        
+        /* 字体样式 */
+        margin-top: 0;
+        font-size: 12px;
+        color: rgba(255,255,255,0.4);
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    @keyframes slideUpFade {
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+/* --- [修复] 灶台位置与动画逻辑 --- */
+/* 1. 调整灶台位置：下移 28px + 16px = 44px */
+.cook-machine .stove-bg {
+    position: absolute;
+    bottom: -87px !important; /* Modified to -87px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px !important;
+    height: auto !important;
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+}
+
+/* --- [核心修复] 灶台静止与动画分离 --- */
+/* 1. 强制父容器静止 (覆盖旧的 active/finished 样式) */
+.cook-machine.active, .cook-machine.finished {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important; /* 移除容器级发光，防止灶台发光 */
+}
+
+/* 2. 烹饪状态：只让锅抖动 */
+.cook-machine.active .pot-main {
+    animation: machineWork 0.5s infinite;
+}
+
+/* 3. 出餐状态：只让菜品容器放大+发光 (排除灶台) */
+.cook-machine.finished > div {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.9));
+    transition: transform 0.2s;
+}
+
+/* 确保锅具和菜品悬浮在灶台之上 */
+.cook-machine > img:not(.stove-bg),
+.cook-machine > div {
+    position: relative;
+    z-index: 2;
+}
+
+/* --- [核心修复] 烹饪区布局防抖动优化 --- */
+/* 1. 进度条改为绝对定位 (彻底解决位移问题) */
+.progress-bar-container {
+    position: absolute !important;
+    bottom: 45px; /* 固定在文字上方 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80% !important;
+    z-index: 10;
+    margin-top: 0 !important; /* 移除外边距 */
+}
+
+/* 2. 状态文字位置微调 (配合进度条) */
+.dish-status {
+    position: absolute !important;
+    bottom: 15px; /* 固定在底部 */
+    left: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+/* 3. 机器容器恢复原位 (不刻意下移) */
+.cook-machine {
+    top: 0 !important;
+    margin-top: -15px !important;
+    margin-bottom: 0 !important;
+    overflow: visible !important; /* 保持灶台溢出可见 */
+}
+
+/* 4. 容器布局恢复 */
+.station-cook-zone {
+    justify-content: flex-start !important; /* 保持顶对齐 */
+    padding-top: 36px !important; /* [调整] 20px -> 36px (整体下移 16px) */
+    padding-bottom: 70px !important; /* [新增] 底部留白，给绝对定位的进度条/文字留出空间 */
+    position: relative; /* 确保绝对定位子元素参考此容器 */
 }
     </style>
 </head>
@@ -2680,8 +3352,8 @@
     <div id="map-screen" role="dialog" aria-modal="true" aria-labelledby="location-title">
         <button class="glass-btn btn-outline-glass loc-back-btn" onclick="closeLocationSelection()">返回</button>
         <div class="loc-header-float">
-            <h2 id="location-title">🗺️ 选择新分店位置</h2>
-            <div class="loc-subtitle">扩张你的商业帝国，选择下一个挑战地点</div>
+            <h2 id="location-title">我的店铺</h2>
+            <div class="loc-subtitle">商业版图全景管理</div>
         </div>
         
         <div class="region-dock" id="region-dock-container">
@@ -2699,9 +3371,8 @@
                 <!-- Step 2: Districts -->
             </div>
             <div class="panel-actions">
-                 <button id="btn-confirm-loc" class="glass-btn btn-primary-glass" onclick="confirmNewJourney()">确认进驻</button>
-                 <button class="glass-btn btn-outline-glass" onclick="closeDistrictPanel()">返回选择城市</button>
-                 <button class="glass-btn btn-outline-glass" onclick="closeLocationSelection()">返回成绩单</button>
+                 <button id="btn-confirm-loc" class="glass-btn btn-primary-glass" onclick="confirmNewJourney()">请选择新店位置</button>
+                 <button class="glass-btn btn-outline-glass" onclick="closeDistrictPanel()">返回管理店铺</button>
             </div>
         </div>
     </div>
@@ -2811,7 +3482,6 @@
         <div class="panel-actions">
              <button id="btn-confirm-loc" class="glass-btn btn-primary-glass" onclick="confirmNewJourney()">确认进驻</button>
              <button class="glass-btn btn-outline-glass" onclick="closeDistrictPanel()">返回选择城市</button>
-             <button class="glass-btn btn-outline-glass" onclick="closeLocationSelection()">返回成绩单</button>
         </div>
     </div>
 </div>
@@ -3009,10 +3679,39 @@ function setGameBgVisual(filter, overlay) {
     }
 }
 
-async function setGameBgImage(url) {
-    if (!gameBg.root || !url || url === gameBg.currentUrl) return;
-    const ok = await preloadImage(url);
-    const nextUrl = ok ? url : gameBg.currentUrl;
+// [新增] 根据国家和装修等级获取背景图路径
+function getDynamicKitchenBg() {
+    // 1. 获取当前区域 (默认为 cn)
+    const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
+    const region = (ngParams.location || 'cn:main').split(':')[0];
+    // 2. 获取当前装修等级 (0:标准, 1:扩容, 2:星级)
+    const expansion = game.inventory.expansion || 0;
+    // 3. 构建文件名规范
+    // 格式: assets/bg/kitchen_{国家代码}_lv{等级}.jpg
+    // 例如: assets/bg/kitchen_cn_lv0.jpg (中国标准)
+    // 例如: assets/bg/kitchen_jp_lv2.jpg (日本星级)
+    return `assets/bg/kitchen_${region}_lv${expansion}.jpg`;
+}
+
+async function setGameBgImage(url, fallbackUrl = null) {
+    if (!gameBg.root || !url) return;
+    if (url === gameBg.currentUrl) return;
+
+    // 1. 尝试加载目标图片
+    let ok = await preloadImage(url);
+    let finalUrl = url;
+
+    // 2. 如果失败且有备用图，尝试加载备用图
+    if (!ok && fallbackUrl) {
+        console.warn(`Background [${url}] not found, using fallback: ${fallbackUrl}`);
+        ok = await preloadImage(fallbackUrl);
+        finalUrl = fallbackUrl;
+    }
+
+    // 3. 如果都失败，保持当前图片不变
+    const nextUrl = ok ? finalUrl : gameBg.currentUrl;
+    if (nextUrl === gameBg.currentUrl) return;
+
     const nextIdx = (gameBg.activeIdx + 1) % 2;
     const nextLayer = gameBg.layers[nextIdx];
     const curLayer = gameBg.layers[gameBg.activeIdx];
@@ -3020,10 +3719,8 @@ async function setGameBgImage(url) {
 
     nextLayer.style.backgroundImage = `url('${nextUrl}')`;
     
-    // [新增] 根据背景图类型设置显示模式
-    // 家庭厨房(游戏内) -> contain + top (game-mode)
-    // 门店后厨(首页) -> cover + center (default)
-    if (nextUrl.includes('家庭厨房.jpeg')) {
+    // 显示模式判断 (只要是厨房背景都用 contain)
+    if (nextUrl.includes('kitchen_') || nextUrl.includes('家庭厨房')) {
         nextLayer.classList.add('game-mode');
     } else {
         nextLayer.classList.remove('game-mode');
@@ -3062,8 +3759,10 @@ function updateGameBackground(stateStage = null) {
 
     if (game.isPaused) {
         setGameBgVisual('grayscale(0.35) brightness(0.72) contrast(1.05)', 0.60);
-        // [修复] 暂停时保持游戏背景，不要切换到首页背景
-        setGameBgImage(GAME_BG_PLAY);
+        // [核心修复] 暂停时也要显示当前的动态背景，而不是回退到 GAME_BG_PLAY
+        const targetBg = getDynamicKitchenBg();
+        const defaultBg = 'assets/bg/家庭厨房.jpeg';
+        setGameBgImage(targetBg, defaultBg);
         return;
     }
 
@@ -3074,7 +3773,11 @@ function updateGameBackground(stateStage = null) {
     else if (stage === 'SPOILED') setGameBgVisual('grayscale(0.25) brightness(0.90) contrast(1.10)', 0.52);
     else setGameBgVisual('saturate(1.02) brightness(1) contrast(1.02)', 0.34);
 
-    setGameBgImage(GAME_BG_PLAY);
+    // [核心修改] 使用动态背景逻辑
+    const targetBg = getDynamicKitchenBg();
+    const defaultBg = 'assets/bg/家庭厨房.jpeg'; // 兜底默认图
+    // 尝试设置动态背景，如果文件不存在则回退到默认图
+    setGameBgImage(targetBg, defaultBg);
 }
 
 function playSfx(f, t='sine', d=0.1) {
@@ -3363,6 +4066,99 @@ function stopMusic() {
 
 /* Removed old createCoinBuffer definition */
 
+const MARKET_GOSSIP_CONFIG = {
+    // 蔬菜类
+    vege: {
+        up: [
+            {
+                speakers: ["买菜阿姨", "摊贩老板"],
+                lines: [
+                    "老板，这青菜怎么一天一个价啊？",
+                    "哎哟大姐，听说台风要来了，进货难啊。",
+                    "真是的，看来这几天得省着点吃叶子菜了。"
+                ]
+            },
+            {
+                speakers: ["邻居王婶", "路人"],
+                lines: [
+                    "你看那边的西红柿，个头是挺大，就是贵。",
+                    "是啊，最近不仅西红柿，连土豆都涨价了。",
+                    "算了算了，还是回家煮挂面吧。"
+                ]
+            }
+        ],
+        down: [
+            {
+                speakers: ["种菜老农", "顾客"],
+                lines: [
+                    "自家种的大萝卜，便宜卖啦！",
+                    "哟，今天这萝卜看着真水灵，价格也公道。",
+                    "那可不，今年大丰收，地里都堆不下了。"
+                ]
+            }
+        ]
+    },
+    // 肉类
+    meat: {
+        up: [
+            {
+                speakers: ["张大妈", "李大爷"],
+                lines: [
+                    "哎哟，今天的猪肉摊怎么没人排队？",
+                    "那价格标得吓死人，谁买得起啊！",
+                    "看来今天得少吃点肉，改吃豆腐咯。"
+                ]
+            }
+        ],
+        down: [
+            {
+                speakers: ["甚至路人", "肉铺老板"],
+                lines: [
+                    "老板，今天的五花肉怎么这么便宜？",
+                    "进货价跌啦，薄利多销嘛！",
+                    "太好了，给我切两斤，回家包饺子！"
+                ]
+            }
+        ]
+    },
+    // 海鲜类
+    seafood: {
+        up: [
+            {
+                speakers: ["渔夫", "食客"],
+                lines: [
+                    "这两天风浪太大，船都出不去。",
+                    "那今天的鱼肯定少得可怜吧？",
+                    "是啊，有钱都未必抢得到鲜货。"
+                ]
+            }
+        ],
+        down: [
+            {
+                speakers: ["海鲜贩子", "主妇"],
+                lines: [
+                    "开渔啦！新鲜的大虾，跳楼价！",
+                    "真的吗？给我来两斤，正好做油焖大虾。",
+                    "好嘞，您拿好，个个都活蹦乱跳的。"
+                ]
+            }
+        ]
+    },
+    // 通用/其他
+    general: {
+        normal: [
+            {
+                speakers: ["早起路人", "清洁工"],
+                lines: [
+                    "今天的集市还是这么热闹啊。",
+                    "是啊，早起的鸟儿有虫吃。",
+                    "希望能买到新鲜的食材做顿好的。"
+                ]
+            }
+        ]
+    }
+};
+
 const SHOP_CONFIG = {
     expansion: {
         name: "店铺装修",
@@ -3370,21 +4166,21 @@ const SHOP_CONFIG = {
         basePrice: 0,
         levels: [
             {
-                name: "标准后厨",
+                name: "中式·标准后厨", // [修改] 增加区域前缀
                 stations: 1,
                 slots: 2,
                 effectText: "基础配置：1个灶台，2个订单位，适合起步经营。",
                 price: 0
             },
             {
-                name: "扩容后厨",
+                name: "中式·扩容后厨", // [修改] 增加区域前缀
                 stations: 2,
                 slots: 3,
                 effectText: "升级配置：解锁第2个灶台，接单上限提升至3单。",
                 price: 800
             },
             {
-                name: "星级后厨",
+                name: "中式·星级后厨", // [修改] 增加区域前缀
                 stations: 3,
                 slots: 5,
                 effectText: "顶级配置：解锁第3个灶台，接单上限提升至5单，火力全开。",
@@ -3540,10 +4336,207 @@ function changeShopPage(delta) {
     renderShop();
 }
 
+function generateDailyGossip() {
+    if (!MARKET_GOSSIP_CONFIG) return;
+
+    // 1. 确定今日行情趋势 (假设 game.dailyTrend 已在 generateDailyOrders 中生成)
+    // 如果没有 dailyTrend，则随机选一个
+    const trendType = game.dailyTrend || 'balanced';
+
+    // 映射趋势到配置键值
+    // balanced -> general
+    // meat -> meat, vege -> vege, seafood -> seafood (up/down 随机)
+
+    let category = 'general';
+    let direction = 'normal';
+
+    if (trendType === 'balanced') {
+        category = 'general';
+        direction = 'normal';
+    } else {
+        // 简单映射：如果有明确趋势，这里暂时随机涨跌来生成八卦
+        // (在更复杂的逻辑中，应读取实际价格波动，这里简化为随机以配合 gameplay)
+        category = trendType;
+        direction = Math.random() > 0.5 ? 'up' : 'down';
+
+        // 容错：如果配置里没有这个分类，回退到 general
+        if (!MARKET_GOSSIP_CONFIG[category]) category = 'general';
+    }
+
+    const configGroup = MARKET_GOSSIP_CONFIG[category];
+    const list = configGroup[direction] || configGroup['normal'] || MARKET_GOSSIP_CONFIG['general']['normal'];
+    
+    // 随机抽取一段对话对象
+    const dialogueObj = list[Math.floor(Math.random() * list.length)];
+
+    // 构造对话数据
+    game.dailyGossip = {
+        category: category,
+        speakers: dialogueObj.speakers, // 数组
+        lines: dialogueObj.lines,       // 数组
+        currentLineIndex: 0
+    };
+    console.log("今日情报生成:", game.dailyGossip);
+}
+
+// 启动对话流程
+function startMarketChatterFlow() {
+    const gossip = game.dailyGossip;
+    // 如果没有情报，直接显示采购界面
+    if (!gossip || !gossip.lines || gossip.lines.length === 0) {
+        revealPrepUI();
+        return;
+    }
+    
+    gossip.currentLineIndex = 0; // 重置进度
+    
+    // 1. 创建一次性 DOM (居中 + 无闪烁)
+    const container = document.createElement('div');
+    container.id = 'market-chatter-container';
+    container.onclick = window.advanceChatter; // 绑定点击推进事件
+    
+    // 初始内容
+    container.innerHTML = `
+        <div class="chatter-box-centered">
+            <div class="chatter-speaker" id="chat-speaker">...</div>
+            <div class="chatter-text" id="chat-text">...</div>
+            <div class="chatter-hint">点击屏幕继续 ▶</div>
+        </div>
+    `;
+    
+    document.getElementById('prep-modal').appendChild(container);
+    
+    // 2. 渲染第一句
+    updateChatterContent();
+}
+
+// 更新对话内容 (只改文字，不改 DOM)
+function updateChatterContent() {
+    const gossip = game.dailyGossip;
+    const speakerEl = document.getElementById('chat-speaker');
+    const textEl = document.getElementById('chat-text');
+    // 获取提示区域容器
+    const hintEl = document.querySelector('.chatter-hint');
+    
+    // 检查是否越界
+    if (gossip.currentLineIndex < gossip.lines.length) {
+        const line = gossip.lines[gossip.currentLineIndex];
+        const speaker = gossip.speakers[gossip.currentLineIndex % gossip.speakers.length];
+        
+        if (speakerEl) speakerEl.innerHTML = `<span>🗣️</span> ${speaker}`;
+        if (textEl) textEl.innerText = line;
+        
+        // 播放打字音效
+        if(typeof playSfx === 'function') playSfx(800, 'sine', 0.05);
+
+        // [核心逻辑] 判断是否是最后一句
+        const isLastLine = gossip.currentLineIndex === gossip.lines.length - 1;
+        
+        if (isLastLine) {
+            // 如果是最后一句，显示“开始买菜”按钮
+            // 阻止容器整体点击（通过 logic 处理），引导用户点按钮
+            if (hintEl) {
+                hintEl.innerHTML = `
+                    <button class="btn-start-shopping" onclick="event.stopPropagation(); playSfx(400, 'triangle', 0.1); finishChatterAndShop()">
+                        开始买菜
+                    </button>
+                `;
+            }
+        } else {
+            // 普通对话，显示点击继续
+            if (hintEl) hintEl.innerHTML = '点击屏幕继续 ▶';
+        }
+    }
+}
+
+// 点击推进逻辑
+window.advanceChatter = function() {
+    const gossip = game.dailyGossip;
+    
+    // 如果已经是最后一句，点击屏幕（非按钮区域）不应跳过
+    // 这里我们设定：最后一句必须点按钮
+    if (gossip.currentLineIndex >= gossip.lines.length - 1) {
+        return;
+    }
+    
+    gossip.currentLineIndex++;
+    updateChatterContent();
+};
+
+// [新增] 结束对话并开始采购
+window.finishChatterAndShop = function() {
+    // 1. 获取容器
+    const container = document.getElementById('market-chatter-container');
+    
+    if (container) {
+        // 2. 先执行淡出动画
+        container.style.transition = 'opacity 0.3s ease'; // 确保有过渡
+        container.style.opacity = '0';
+        
+        // 3. [核心修改] 等待 300ms 动画结束后，再移除 DOM 并触发黑幕
+        setTimeout(() => {
+            container.remove();
+            // 只有对话框彻底消失后，才开始拉黑幕
+            revealPrepUI();
+        }, 300);
+    } else {
+        // 容错：如果找不到容器直接开始
+        revealPrepUI();
+    }
+};
+
+// 显示采购界面 (Fade In)
+function revealPrepUI() {
+    // 1. 触发黑幕 (持续 0.8s)
+    const curtain = document.querySelector('.prep-curtain');
+    if (curtain) curtain.classList.add('active');
+
+    // 2. [核心修改] 延迟 800ms，等待黑幕完全盖住屏幕后，再显示 UI
+    setTimeout(() => {
+        const header = document.querySelector('.prep-header');
+        const grid = document.getElementById('prep-grid');
+        const footer = document.getElementById('prep-footer');
+
+        const reveal = (el) => {
+            if (el) {
+                el.classList.remove('prep-ui-hidden');
+                el.classList.add('prep-ui-visible');
+            }
+        };
+
+        reveal(header);
+        reveal(grid);
+        reveal(footer);
+
+        // 恢复 Footer 滑入动画
+        if (footer) {
+            footer.style.animation = 'footerSlideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+        }
+    }, 800); // 对应 CSS 动画时长
+}
+
+// [已废弃] 旧的 renderMarketChatter，保留作为兼容或移除
+function renderMarketChatter_deprecated(onComplete) {
+    // ...
+}
+
+// [新增] 辅助函数：打开商店UI
+function openShopUI() {
+    const shopOverlay = document.getElementById('shop-overlay');
+    if (!shopOverlay) return;
+    renderShop();
+    updateBalanceDisplay();
+    shopOverlay.style.display = 'flex';
+}
+
 function renderShop() {
     playShopMusic(); // [新增] 播放商店音乐
     const overlay = document.getElementById('shop-overlay');
     if (!overlay) return;
+
+    // [新增] 获取当前区域 ID (例如 'cn', 'jp')
+    const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
+    const currentRegion = (ngParams.location || 'cn:main').split(':')[0];
 
     const currentTab = SHOP_TABS.find(t => t.id === currentShopTab) || SHOP_TABS[0];
     const types = currentTab.types;
@@ -3562,31 +4555,34 @@ function renderShop() {
             const isDigital = levelData.isDigital;
             let iconHtml = getShopItemIcon(key);
 
-            // 图片加载逻辑
+            // [核心修改] 图片加载逻辑重构
             if (key === 'pot') {
+                // 厨具保持原逻辑，使用 itemName 加载
                 const targetPots = ['基础铁锅', '专业不粘锅', '多段控温精钢锅', 'Omni 1.0', 'Omni 2.0', 'Omni 3.0', '单边小锅', '小锅'];
-                if (targetPots.includes(itemName)) {
-                    const fallbackId = `fallback-pot-${levelIdx}-${key}`; // 唯一ID防止冲突
+                // 简单的模糊匹配防止改名失效
+                if (targetPots.some(t => itemName.includes(t)) || true) {
+                    const fallbackId = `fallback-pot-${levelIdx}-${key}`;
                     iconHtml = `
                         <img src="assets/equipment/${itemName}.png" 
                              alt="${itemName}" 
-                             style="width: 100%; height: 100%; object-fit: contain;"
+                             style="width: 100%; height: 100%; object-fit: contain;" 
                              onerror="this.style.display='none'; document.getElementById('${fallbackId}').style.display='flex';">
                         <span id="${fallbackId}" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-size:50px;">${getShopItemIcon(key)}</span>
                     `;
                 }
             } else if (key === 'expansion') {
-                const targetExpansions = ['标准后厨', '扩容后厨', '星级后厨'];
-                if (targetExpansions.includes(itemName)) {
-                    const fallbackId = `fallback-exp-${levelIdx}-${key}`;
-                    iconHtml = `
-                        <img src="assets/equipment/${itemName}.png" 
-                             alt="${itemName}" 
-                             style="width: 100%; height: 100%; object-fit: contain;"
-                             onerror="this.style.display='none'; document.getElementById('${fallbackId}').style.display='flex';">
-                        <span id="${fallbackId}" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-size:50px;">${getShopItemIcon(key)}</span>
-                    `;
-                }
+                // [核心升级] 装修图片：根据 国家 + 等级 动态加载
+                // 文件名格式: kitchen_cn_lv0.png
+                const dynamicImgName = `kitchen_${currentRegion}_lv${levelIdx}`;
+                const fallbackId = `fallback-exp-${levelIdx}-${key}`;
+                
+                iconHtml = `
+                    <img src="assets/equipment/${dynamicImgName}.png" 
+                         alt="${itemName}" 
+                         style="width: 100%; height: 100%; object-fit: contain;" 
+                         onerror="this.style.display='none'; document.getElementById('${fallbackId}').style.display='flex';">
+                    <span id="${fallbackId}" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-size:50px;">${getShopItemIcon(key)}</span>
+                `;
             }
             
             let digitalBadge = isDigital ? `<span class="digital-badge">DIGITAL</span>` : '';
@@ -3600,7 +4596,7 @@ function renderShop() {
                 const btnClass = canAfford ? 'can-buy' : 'disabled';
                 const btnText = canAfford ? `购买 (¥${price})` : `余额不足 (¥${price})`;
                 // 购买后刷新页面，保持当前页码
-                btnHtml = `<button class="shop-btn-buy ${btnClass}" onclick="buyUpgrade('${key}', this)">${btnText}</button>`;
+                btnHtml = `<button class="shop-btn-buy ${btnClass}" onclick="playSfx(400, 'triangle', 0.1); buyUpgrade('${key}', this)">${btnText}</button>`;
             } else {
                  btnHtml = `<button class="shop-btn-buy disabled">需前置等级</button>`;
             }
@@ -3819,6 +4815,7 @@ let game = {
     dailyDishCount: 0, dailyQualitySum: 0,
     activeOrders: [],
     orderQueue: [], // 每日预生成订单队列
+    dailyGossip: null, // [新增] 每日街坊情报
     dailyInventory: {}, // Daily stock levels
     logs: [], // 系统日志
     history: [], // Stores {day, revenue, rate}
@@ -4562,52 +5559,67 @@ function renderStation(sid, updateMode = 'full') {
 
     // 渲染烹饪机器 (保持原有逻辑，省略重复代码...) 
     // ... 这里直接使用原有的 cookMachine 渲染代码 ... 
-    const cookMachine = el.querySelector('.cook-machine'); 
-    const status = el.querySelector('.dish-status'); 
-    const barContainer = el.querySelector('.progress-bar-container'); 
-    const barFill = el.querySelector('.progress-bar-fill'); 
-    const cleanBtn = el.querySelector('.clean-btn'); 
+    const cookMachine = el.querySelector('.cook-machine');
+    const status = el.querySelector('.dish-status');
+    const barContainer = el.querySelector('.progress-bar-container');
+    const barFill = el.querySelector('.progress-bar-fill');
+    const cleanBtn = el.querySelector('.clean-btn');
 
-    if (cookMachine) { 
-        cookMachine.className = 'cook-machine'; 
-        if (s.isBroken || (s.maintenance && s.maintenance >= 10)) cookMachine.classList.add('maintenance'); 
+    if (cookMachine) {
+        cookMachine.className = 'cook-machine';
+        if (s.isBroken || (s.maintenance && s.maintenance >= 10)) cookMachine.classList.add('maintenance');
         
-        if (s.stage === 'COOKING') { 
-            cookMachine.classList.add('active'); 
-            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Cooking" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`; 
-            status.innerText = '烹饪中...'; 
-            status.style.color = '#e67e22'; 
-            barContainer.style.display = 'block'; 
-            barFill.style.width = s.progress + '%'; 
-        } else if (s.stage === 'FINISHED') { 
-            cookMachine.classList.add('finished'); 
-            const dishName = s.recipe ? s.recipe.name : 'unknown'; 
-            const dishIcon = s.recipe ? s.recipe.icon : '✅'; 
-            
-            let badgeHtml = ''; 
-            if (s.servingsLeft > 1) { 
-                badgeHtml = `<div style="position:absolute; top:25px; right:25px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;">x${s.servingsLeft}</div>`; 
-            } 
+        // 1. [修复] 动态计算灶台图片 (使用新命名规范)
+        // 格式: stove_{region}_lv{level}_{suffix}.png
+        const expansionLevel = game.inventory.expansion || 0;
+        // 获取当前国家 (默认为 cn)
+        const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
+        const region = (ngParams.location || 'cn:main').split(':')[0];
+        
+        // 计算后缀 (01:中间/标准, 02:左/二号, 03:右/三号)
+        let suffix = '01'; // 默认中间位
+        if (sid === 's2') suffix = '02';
+        if (sid === 's3') suffix = '03';
+        
+        // 特殊修正：标准后厨(lv0) 只有 01 号图，即使是 s2/s3 位置(虽然逻辑上不会出现)也用 01
+        if (expansionLevel === 0) suffix = '01';
+        // 扩容后厨(lv1) 只有 01 和 02，没有 03
+        if (expansionLevel === 1 && suffix === '03') suffix = '01';
 
-            cookMachine.innerHTML = ` 
-                <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;"> 
-                    <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
-                         style="width:64px; height:64px; object-fit:contain;" 
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"> 
-                    <span style="display:none; font-size:42px;">${dishIcon}</span> 
-                    ${badgeHtml} 
-                </div> 
-            `; 
+        const stoveImageName = `stove_${region}_lv${expansionLevel}_${suffix}.png`;
+        
+        // 构建灶台 HTML
+        // [关键] 移除了 onerror="this.style.display='none'"，这样如果路径错误会显示破图图标，方便调试
+        const stoveHtml = `<img src="assets/equipment/${stoveImageName}" class="stove-bg" alt="灶台">`;
+
+        // 2. 根据状态组合 HTML
+        if (s.stage === 'COOKING') {
+            cookMachine.classList.add('active');
+            cookMachine.innerHTML = `${stoveHtml}<img src="assets/equipment/${potName}.png" alt="Cooking" class="pot-main" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            status.innerText = '烹饪中...';
+            status.style.color = '#e67e22';
+            barContainer.style.display = 'block';
+            barFill.style.width = s.progress + '%';
+        } else if (s.stage === 'FINISHED') {
+            cookMachine.classList.add('finished');
+            const dishName = s.recipe ? s.recipe.name : 'unknown';
+            const dishIcon = s.recipe ? s.recipe.icon : '✅';
             
-            status.innerText = '点击取餐!'; 
-            status.style.color = '#2ecc71'; 
-            barContainer.style.display = 'none'; 
-        } else { 
-            cookMachine.innerHTML = `<img src="assets/equipment/${potName}.png" alt="Idle" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`; 
-            status.innerText = '空闲'; 
-            status.style.color = '#ccc'; 
-            barContainer.style.display = 'none'; 
-        } 
+            let badgeHtml = '';
+            if (s.servingsLeft > 1) {
+                badgeHtml = `<div style="position:absolute; top:25px; right:25px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;">x${s.servingsLeft}</div>`;
+            }
+
+            cookMachine.innerHTML = `${stoveHtml}<div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;"><img src="assets/dishes/${dishName}.png" alt="${dishName}" style="width:64px; height:64px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span style="display:none; font-size:42px;">${dishIcon}</span>${badgeHtml}</div>`;
+            status.innerText = '点击取餐!';
+            status.style.color = '#2ecc71';
+            barContainer.style.display = 'none';
+        } else {
+            cookMachine.innerHTML = `${stoveHtml}<img src="assets/equipment/${potName}.png" alt="Idle" class="pot-main" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            status.innerText = '空闲';
+            status.style.color = '#ccc';
+            barContainer.style.display = 'none';
+        }
     } 
     
     if (cleanBtn && s.maintenance >= 8) { 
@@ -5055,6 +6067,11 @@ function initStations() {
     
     // 获取当前解锁数量 (1, 2, 或 3)
     const expLvl = (game.inventory && game.inventory.expansion) ? game.inventory.expansion : 0;
+    
+    // [核心修改] 根据装修等级添加 CSS 类名，用于隔离样式
+    kitchen.classList.remove('kitchen-lv0', 'kitchen-lv1', 'kitchen-lv2');
+    kitchen.classList.add('kitchen-lv' + expLvl);
+
     // 安全获取配置，防止报错
     const unlockedCount = (SHOP_CONFIG && SHOP_CONFIG.expansion) ? SHOP_CONFIG.expansion.levels[expLvl].stations : 1;
 
@@ -5482,7 +6499,9 @@ window.onload = () => {
 
             const cover = document.getElementById('cover') || document.getElementById('start-screen');
             if (cover) cover.style.display = 'none'; // 隐藏封面
-            showPrepModal(); // 仅弹出补货窗口
+            
+            // [新增] 插入街坊情报环节
+            showPrepModal();
         };
     }
 
@@ -6029,6 +7048,10 @@ function showLocationSelection() {
 }
 
 function closeLocationSelection() {
+    // [核心修复] 退出时清理底部栏
+    const oldBar = document.getElementById('map-bottom-bar');
+    if (oldBar) oldBar.remove();
+    
     switchScreen('start-screen');
 }
 
@@ -6043,35 +7066,35 @@ const WORLD_REGIONS = [
         country: '中国', 
         city: '中华美食总店', 
         flag: '🇨🇳', 
-        desc: '梦开始的地方，拥有最挑剔也最懂吃的食客。', 
-        isStarter: true, 
-        unlocked: true, 
+        desc: '梦开始的地方', 
+        isStarter: true, // 标记为初始 
+        unlocked: true,  // 默认解锁 
         districts: [ 
             { id: 'main', name: '总店·商业街', unlocked: true, unlockCost: 0, customerProfile: { type: '街坊邻居', spend: '中', patience: '中' } } 
         ] 
-    },
+    }, 
     { 
         id: 'jp', 
         country: '日本', 
         city: '东京分店', 
         flag: '🇯🇵', 
-        desc: '快节奏的都市，食客偏好精致且快速的料理。', 
+        desc: '精致快节奏', 
         unlocked: true, 
         districts: [ 
             { id: 'shibuya', name: '涩谷·十字街头', unlocked: true, unlockCost: 5000, customerProfile: { type: '上班族', spend: '中', patience: '低' } } 
         ] 
-    },
+    }, 
     { 
         id: 'fr', 
         country: '法国', 
         city: '巴黎分店', 
         flag: '🇫🇷', 
-        desc: '浪漫之都，这里的人们愿意为顶级美味等待。', 
+        desc: '浪漫与顶级美味', 
         unlocked: true, 
         districts: [ 
             { id: 'champ', name: '香榭丽舍·旗舰店', unlocked: true, unlockCost: 8000, customerProfile: { type: '美食家', spend: '极高', patience: '高' } } 
         ] 
-    }
+    } 
 ];
 
 function getRegionById(id) {
@@ -6090,106 +7113,170 @@ function playLocationSelectSound() {
     osc.start(); osc.stop(audioCtx.currentTime + 0.1);
 }
 
-function renderLocationStep1() {
-    const dock = document.getElementById('region-dock-container');
-    if (!dock) return;
-    dock.innerHTML = '';
+// [核心修复] 根据区域和等级获取店铺外观图标
+function getShopImage(region, expansionLevel) {
+    // 默认区域处理 (防止旧存档缺少 regionId)
+    const r = region || 'cn';
+    const lv = expansionLevel || 0;
     
-    // Reset selection state
-    selectedRegionId = null;
-    selectedDistrictId = null;
+    // 新命名规范: assets/equipment/kitchen_cn_lv0.png
+    return `assets/equipment/kitchen_${r}_lv${lv}.png`;
+}
+
+function renderLocationStep1() { 
+    const dock = document.getElementById('region-dock-container'); 
+    if (!dock) return; 
     
-    closeDistrictPanel();
+    // 清理旧内容 
+    dock.innerHTML = ''; 
+    const oldBar = document.getElementById('map-bottom-bar'); 
+    if (oldBar) oldBar.remove(); 
 
-    // 1. 渲染【我的分店】区域
-    // 从 legacy_shops_list 数组读取所有旧店
-    const legacyList = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]');
+    // 数据准备 
+    const legacyList = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]'); 
+    const currentParams = JSON.parse(localStorage.getItem('ng_params') || '{}'); 
+    const currentName = currentParams.branchName || "中国 · 总店商业街"; 
+    const currentLocId = currentParams.location ? currentParams.location.split(':')[0] : 'cn'; 
     
-    if (legacyList.length > 0) {
-        // 加个标题
-        const myTitle = document.createElement('div');
-        myTitle.style.width = '100%';
-        myTitle.style.color = '#f1c40f';
-        myTitle.style.marginBottom = '10px';
-        myTitle.style.fontWeight = 'bold';
-        myTitle.innerText = "── 我的商业版图 ──";
-        dock.appendChild(myTitle);
-
-        legacyList.forEach(shop => {
-            const legacyCard = document.createElement('div');
-            legacyCard.className = 'region-card';
-            legacyCard.style.border = '2px solid #f1c40f';
-            legacyCard.style.background = 'linear-gradient(135deg, rgba(241,196,15,0.2), rgba(0,0,0,0.4))';
-            
-            let statusIcon = '🟢';
-            let statusText = '运营正常';
-            if (shop.health < 50) { statusIcon = '⚠️'; statusText = '急需维护'; }
-            if (shop.accumulatedCash > 0) statusText = `待收: ¥${shop.accumulatedCash}`;
-
-            legacyCard.innerHTML = `
-                <div class="r-flag">🏠</div>
-                <div class="r-name">${shop.name}</div>
-                <div class="r-desc" style="color:#f1c40f;">${statusIcon} ${statusText}</div>
-            `;
-            
-            // 点击弹出管理
-            legacyCard.onclick = () => showLegacyManageModal(shop);
-            dock.appendChild(legacyCard);
-        });
-    }
-
-    // 2. 渲染【新征程】区域
-    const newTitle = document.createElement('div');
-    newTitle.style.width = '100%';
-    newTitle.style.color = '#fff';
-    newTitle.style.margin = '20px 0 10px 0';
-    newTitle.style.fontWeight = 'bold';
-    newTitle.innerText = "── 开拓新市场 ──";
-    dock.appendChild(newTitle);
-
-    WORLD_REGIONS.forEach(region => {
-        const card = document.createElement('div');
-        card.className = 'region-card' + (region.unlocked ? '' : ' locked');
+    // 构建列表 
+    const currentShopObj = { 
+        isCurrent: true, 
+        name: currentName, 
+        regionId: currentLocId, 
+        expansion: game.inventory.expansion || 0, 
+        income: calculateLegacyDailyIncome() 
+    }; 
+    const allShops = [currentShopObj, ...legacyList]; 
+    
+    // --- A. 顶部：我的店铺 --- 
+    // [修改] 移除冗余的 sectionTitle，直接渲染容器 
+    const empireContainer = document.createElement('div'); 
+    empireContainer.className = 'empire-scroll-container'; 
+    // 增加一点顶部间距，避免稍微挡住大标题 
+    empireContainer.style.marginTop = "10px"; 
+    
+    allShops.forEach(shop => { 
+        const regionInfo = getRegionById(shop.regionId) || WORLD_REGIONS[0]; 
+        const card = document.createElement('div'); 
+        card.className = 'empire-card'; 
         
-        card.innerHTML = `
-            <div class="r-flag">${region.flag}</div>
-            <div class="r-name">${region.city}</div>
-            <div class="r-desc">${region.country}</div>
-        `;
-
-        if (region.unlocked) {
-            card.onclick = () => {
-                document.querySelectorAll('.region-card').forEach(c => c.style.borderColor = 'rgba(255, 255, 255, 0.2)');
-                card.style.borderColor = '#f1c40f';
-                playLocationSelectSound();
-                renderLocationStep2(region.id);
-            };
-        } else {
-            card.onclick = () => {
-                 playSfx(150, 'sawtooth', 0.2); 
-                 showToast('该地区尚未解锁', 1000);
-            };
-        }
+        const isLive = shop.isCurrent; 
+        // [核心修复] 传入 regionId 以匹配新文件名
+        const imgSrc = getShopImage(shop.regionId, shop.expansion || 0);
         
-        dock.appendChild(card);
-    });
+        // 计算托管收益
+        const level = (shop.expansion || 0);
+        const managedRevenue = 100 + (50 * level);
+
+        // 样式逻辑
+        let borderColor = isLive ? '#2ecc71' : '#bdc3c7'; 
+        card.style.borderColor = borderColor; 
+        
+        let badgeHtml = ''; 
+        if (isLive) badgeHtml = `<div class="card-badge badge-live">营业中</div>`; 
+        else badgeHtml = `<div class="card-badge" style="background:#34495e;">托管中</div>`; 
+        
+        card.innerHTML = ` 
+            ${badgeHtml} 
+            <div style="width:60px; height:60px; margin: 10px 0 5px; display:flex; align-items:center; justify-content:center;"> 
+                <img src="${imgSrc}" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 4px rgba(0,0,0,0.4));" onerror="this.style.display='none'"> 
+            </div> 
+            <div class="empire-country-tag"> 
+                <span>${regionInfo.flag}</span> ${regionInfo.country} 
+            </div> 
+            <div class="empire-name">${shop.name}</div> 
+            <div class="empire-info-row"> 
+                ${isLive ? `预计 ¥${shop.income}/日` : `收益 ¥${managedRevenue}/日`} 
+            </div> 
+        `; 
+        
+        card.onclick = isLive ? 
+            () => { playSfx(400,'sine',0.1); closeLocationSelection(); } : 
+            () => { playSfx(400,'sine',0.1); showLegacyManageModal(shop); };
+            
+        empireContainer.appendChild(card); 
+    }); 
+    dock.appendChild(empireContainer); 
+    
+    // --- B. 底部：拓展版图 Tab 栏 --- 
+    const mapScreen = document.getElementById('map-screen'); 
+    const bottomBar = document.createElement('div'); 
+    bottomBar.id = 'map-bottom-bar'; 
+    bottomBar.className = 'map-bottom-bar'; 
+    
+    // [修改] 标题：样式类已更新为横向 
+    const barTitle = document.createElement('div'); 
+    barTitle.className = 'map-bottom-title'; 
+    barTitle.innerHTML = `
+        <div class="map-bottom-main-text">拓展新版图</div>
+        <div class="map-bottom-sub-text">选择新分店位置</div>
+    `;
+    bottomBar.appendChild(barTitle); 
+    
+    // 排序 
+    const sortOrder = ['fr', 'cn', 'jp']; 
+    const sortedRegions = [...WORLD_REGIONS].sort((a, b) => sortOrder.indexOf(a.id) - sortOrder.indexOf(b.id)); 
+    
+    sortedRegions.forEach(region => { 
+        // const isCurrent = (region.id === currentLocId); 
+        const tab = document.createElement('div'); 
+        tab.className = 'country-tab'; // 默认不选中
+        
+        tab.innerHTML = ` 
+            <div class="tab-flag">${region.flag}</div> 
+            <div class="tab-name">${region.country}</div> 
+        `; 
+        
+        if (region.unlocked) { 
+            tab.onclick = () => { 
+                playLocationSelectSound(); 
+                // [Update] 统一Tab选中态
+                document.querySelectorAll('.country-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                renderLocationStep2(region.id); 
+            }; 
+        } else { 
+            tab.style.opacity = '0.5'; 
+            tab.style.filter = 'grayscale(1)'; 
+            tab.onclick = () => { playSfx(150, 'sawtooth', 0.2); showToast('该地区尚未解锁', 1000); }; 
+        } 
+        bottomBar.appendChild(tab); 
+    }); 
+    
+    // [新增] "等待开放" 按钮 
+    const waitingTab = document.createElement('div'); 
+    waitingTab.className = 'country-tab waiting'; 
+    waitingTab.innerHTML = ` 
+        <div class="tab-flag" style="filter:grayscale(1); opacity:0.6;">🔜</div> 
+        <div class="tab-name">等待开放</div> 
+    `; 
+    waitingTab.onclick = () => { showToast('更多国家敬请期待...', 1000); }; 
+    bottomBar.appendChild(waitingTab); 
+    
+    mapScreen.appendChild(bottomBar); 
 }
 
 function renderLocationStep2(regionId) {
     const list = document.getElementById('district-list-container');
     const sidePanel = document.getElementById('district-panel');
-    const dock = document.getElementById('region-dock-container'); // Add dock reference
+    const dock = document.getElementById('region-dock-container');
     if (!list || !sidePanel) return;
     
     const region = getRegionById(regionId);
     if (!region) return;
 
     selectedRegionId = regionId;
-    selectedDistrictId = null; 
+    selectedDistrictId = null;
+
+    // [核心修改] 获取当前所在的确切商圈 ID (如 'cn:main')
+    const currentParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
+    // 默认为 cn:main (因为第一关没有 ng_params 时就是在这里)
+    const myCurrentLocationId = currentParams.location || 'cn:main';
 
     // Update Header
     document.getElementById('dp-flag').textContent = region.flag;
-    document.getElementById('dp-city-name').textContent = region.city;
+    document.getElementById('dp-city-name').textContent = region.country; // 只显示国家名
 
     // Show Panel & Hide Dock
     sidePanel.classList.add('active');
@@ -6197,19 +7284,38 @@ function renderLocationStep2(regionId) {
     
     list.innerHTML = '';
 
+    // 预先重置按钮状态
+    const confirmBtn = document.getElementById('btn-confirm-loc');
+    confirmBtn.innerText = "请选择新店位置";
+    confirmBtn.disabled = true;
+    confirmBtn.classList.add('disabled');
+
     region.districts.forEach(district => {
         const item = document.createElement('div');
         item.className = 'district-item';
         
-        // [核心修改] 判断是否买得起：使用 game.coins (钱包余额)
+        const thisLocId = region.id + ':' + district.id;
+        const isMyCurrentSpot = (thisLocId === myCurrentLocationId);
         const isAffordable = game.coins >= district.unlockCost;
         const isUnlocked = district.unlocked && region.unlocked;
+        
+        // [核心修改] 状态标签逻辑
+        let tagHtml = '';
+        if (!isUnlocked) {
+            tagHtml = '<span class="di-tag tag-locked">未开放</span>';
+        } else if (isMyCurrentSpot) {
+            // [核心修改] 显示“已进驻”
+            tagHtml = '<span class="di-tag" style="background:#2ecc71; color:white;">✅ 已进驻</span>';
+        } else if (!isAffordable) {
+            tagHtml = '<span class="di-tag tag-expensive">资金不足</span>';
+        } else {
+            tagHtml = '<span class="di-tag tag-open">可进驻</span>';
+        }
         
         let html = `
             <div class="di-header">
                 <span class="di-name">${district.name}</span>
-                ${!isUnlocked ? '<span class="di-tag tag-locked">未开放</span>' : 
-                  (!isAffordable && district.unlockCost > 0 ? '<span class="di-tag tag-expensive">资金不足</span>' : '<span class="di-tag tag-open">可进驻</span>')}
+                ${tagHtml}
             </div>
             <div class="di-info">
                 <div>💰 费用: ¥${district.unlockCost}</div>
@@ -6223,21 +7329,37 @@ function renderLocationStep2(regionId) {
 
         if (isUnlocked) {
             item.onclick = () => {
-                if (!isAffordable) {
-                    playSfx(150, 'sawtooth', 0.2);
-                    showToast(`资金不足！需要 ¥${district.unlockCost}`, 1500);
-                    return;
-                }
-                
                 playLocationSelectSound();
                 selectedDistrictId = district.id;
-                selectedLocationId = region.id + ':' + district.id;
+                selectedLocationId = thisLocId;
                 
+                // 高亮选中
                 document.querySelectorAll('.district-item').forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
+                
+                // [核心修改] 更新按钮状态
+                if (isMyCurrentSpot) {
+                    confirmBtn.innerText = "当前正在营业";
+                    confirmBtn.disabled = true;
+                    confirmBtn.style.background = "#bdc3c7";
+                    confirmBtn.style.cursor = "default";
+                } else if (!isAffordable) {
+                    confirmBtn.innerText = "资金不足";
+                    confirmBtn.disabled = true;
+                    confirmBtn.style.background = "#bdc3c7";
+                } else {
+                    confirmBtn.innerText = `确认进驻 (¥${district.unlockCost})`;
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = "rgba(241, 196, 15, 0.9)"; // 恢复金色
+                    confirmBtn.style.cursor = "pointer";
+                }
             };
             
-            if (!isAffordable) {
+            // 即使已进驻，也保持高亮可见，但不置灰（除非没解锁）
+            if (isMyCurrentSpot) {
+                item.style.border = "1px solid #2ecc71";
+                item.style.background = "rgba(46, 204, 113, 0.1)";
+            } else if (!isAffordable) {
                 item.style.opacity = '0.7';
             }
         } else {
@@ -6254,62 +7376,66 @@ function renderLocationStep2(regionId) {
 
 window.closeDistrictPanel = function() {
     const sidePanel = document.getElementById('district-panel');
-    const dock = document.getElementById('region-dock-container'); // Add dock reference
+    const dock = document.getElementById('region-dock-container');
+    
+    // 1. Hide Panel
     if (sidePanel) sidePanel.classList.remove('active');
-    if (dock) dock.classList.remove('hidden'); // Show dock
+    
+    // 2. Restore Dock
+    if (dock) {
+        dock.classList.remove('hidden');
+    }
+    
+    // 3. Logic Closure
     selectedRegionId = null;
-    document.querySelectorAll('.region-card').forEach(c => c.style.borderColor = 'rgba(255,255,255,0.2)');
+    selectedDistrictId = null;
+    
+    // 4. Reset UI State
+    document.querySelectorAll('.district-item').forEach(i => i.classList.remove('active'));
+    // [新增] 移除底部 Tab 选中态
+    document.querySelectorAll('.country-tab').forEach(t => t.classList.remove('active'));
 };
 
 function confirmNewJourney() {
-    if (!selectedRegionId || !selectedDistrictId) {
-        showToast('请先选择一个地区和商圈', 1500);
-        return;
-    }
+    if (!selectedRegionId || !selectedDistrictId) { showToast('请先选择区域', 1500); return; }
     
     const region = getRegionById(selectedRegionId);
     const district = region.districts.find(d => d.id === selectedDistrictId);
     if (!district) return;
     
-    // 检查余额
-    if (game.coins < district.unlockCost) {
-        showToast('钱包余额不足', 1500);
-        return;
-    }
+    if (game.coins < district.unlockCost) { showToast('资金不足', 1500); return; }
 
-    const branchName = region.city + ' - ' + district.name;
-
-    // [核心修改] 计算剩余资金 (继承给新店)
+    const newBranchName = region.country + ' · ' + district.name;
     const remainingCoins = game.coins - district.unlockCost;
 
-    // [核心修改] 1. 保存旧店数据到列表 (压栈)
-    // 唯一 ID 防止重复
-    const shopId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-    
+    const currentParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
+    const currentShopName = currentParams.branchName || "中国 · 总店商业街";
+    // [核心修复] 获取当前 regionId (例如 'cn')
+    const currentLoc = currentParams.location || 'cn:main';
+    const currentRegionId = currentLoc.split(':')[0];
+
     const shopToArchive = {
-        id: shopId,
-        name: game.branchName || "上一家分店", // 假设 game 对象里有当前店名，没有就默认
+        id: Date.now().toString(),
+        name: currentShopName,
+        regionId: currentRegionId, // [关键] 保存国家ID
         baseIncome: calculateLegacyDailyIncome(),
         accumulatedCash: 0,
-        health: 100
+        health: 100,
+        expansion: game.inventory.expansion || 0
     };
 
-    // 读取列表 -> push -> 保存
     let legacyList = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]');
     legacyList.push(shopToArchive);
     localStorage.setItem('legacy_shops_list', JSON.stringify(legacyList));
 
-    if (confirm(`确认花费 ¥${district.unlockCost} 进驻 [${branchName}]？\n\n剩余资金 ¥${remainingCoins} 将作为新店启动资金。\n旧店将转为托管模式。`)) {
-        
-        // [核心修改] 传入 true，告诉管理器不要删除 legacy_shops_list
+    if (confirm(`确认花费 ¥${district.unlockCost} 进驻 [${newBranchName}]？\n\n剩余资金 ¥${remainingCoins} 将带入新店。\n当前店铺 [${currentShopName}] 将转为托管模式。`)) {
         GameStateManager.resetAllData(true);
         
-        // [核心修改] 2. 将剩余资金写入新游戏参数
         const newGameParams = {
             location: selectedLocationId,
-            branchName: branchName,
-            startCoins: remainingCoins, // 继承剩余资金
-            isNGPlus: true // 标记为"多周目/分店模式"
+            branchName: newBranchName,
+            startCoins: remainingCoins,
+            isNGPlus: true
         };
         localStorage.setItem('ng_params', JSON.stringify(newGameParams));
         location.reload();
@@ -6524,6 +7650,7 @@ function startNextLevel(btnId = 'modal-btn') {
             });
         }
         
+        // [新增] 插入街坊情报环节
         showPrepModal();
     })
     .catch(error => {
@@ -6804,26 +7931,32 @@ window.confirmPrep = async function() {
  showToast(`DAY ${game.level} 开始营业啦`, 2000); 
  };
 
-function showPrepModal() { 
-    // ... 初始化代码 ... 
-    document.querySelectorAll('#cover, #start-screen, .loading-screen').forEach(el => el.style.display = 'none'); 
-    window.tempInventory = Object.assign({}, game.dailyInventory || {}); 
-    window.tempCoins = (game.coins !== undefined) ? game.coins : 500; 
-    window.startCoins = window.tempCoins; 
-    initDailyInventory(); 
-    let modal = document.getElementById('prep-modal'); 
-    if (!modal) { 
-        modal = document.createElement('div'); 
-        modal.id = 'prep-modal'; 
-        // [核心修改] 挂载到游戏容器内部 
-        document.getElementById('game-container').appendChild(modal); 
-    } 
-    // [核心修改] 确保样式为 absolute 
-    modal.className = 'prep-overlay'; // CSS中已改为 absolute 
-    modal.style.cssText = 'display: flex !important; pointer-events: auto !important; opacity: 1 !important; visibility: visible !important;'; 
-    // [核心修改] Day 1 特殊文案处理
+function showPrepModal() {
+    // 1. 基础清理
+    document.querySelectorAll('#cover, #start-screen, .loading-screen').forEach(el => el.style.display = 'none');
+    
+    // 2. 数据初始化
+    window.tempInventory = Object.assign({}, game.dailyInventory || {});
+    window.tempCoins = (game.coins !== undefined) ? game.coins : 500;
+    window.startCoins = window.tempCoins;
+    initDailyInventory();
+
+    // 3. 创建/获取 Modal 容器
+    let modal = document.getElementById('prep-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'prep-modal';
+        document.getElementById('game-container').appendChild(modal);
+    }
+    modal.className = 'prep-overlay';
+    modal.style.cssText = 'display: flex !important; pointer-events: auto !important; opacity: 1 !important; visibility: visible !important;';
+
+    // 4. 生成情报数据
+    generateDailyGossip();
+
+    // 5. 渲染基本结构 (注意：Grid 和 Footer 加上了 prep-ui-hidden 类，初始不可见)
+    // Day 1 特殊文案处理
     const isDayOne = game.level === 1;
-    // [新增] 检查是否为分店模式
     const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
     const isNewBranch = ngParams.isNGPlus === true;
 
@@ -6833,73 +7966,80 @@ function showPrepModal() {
 
     if (isDayOne) {
         if (isNewBranch) {
-            // [核心修改] 分店开业文案
             introText = `🚀 <b>${ngParams.branchName || '新分店'}</b> 盛大开业！<br><span style='font-size:0.6em; opacity:0.9'>利用启动资金，快速在新城市站稳脚跟吧。</span>`;
             tagHtml = `<div class="prep-trend-tag" style="background:rgba(241, 196, 15, 0.2); color:#f1c40f; border-color:#f1c40f;">🚩 商业版图扩张</div>`;
             trendText = "新环境，新挑战！注意观察本地客人口味。";
         } else {
-            // 纯新手文案 (保持不变)
             introText = "🎉 新店开业大吉！<br><span style='font-size:0.6em; opacity:0.9; font-weight:400'>隔壁市场老板送来贺礼，今日食材<b>全场免费</b>！</span>";
             tagHtml = `<div class="prep-trend-tag" style="background:rgba(46, 204, 113, 0.2); color:#2ecc71; border-color:#2ecc71;">🎁 新手福利：无限食材</div>`;
             trendText = "今日无需担心成本，尽情练习烹饪吧！";
         }
-
         // Day 1 自动给一点初始库存
         if (Object.keys(window.tempInventory).length === 0) {
             window.tempInventory['tomato'] = 5;
             window.tempInventory['egg'] = 5;
             window.tempInventory['onion'] = 5;
         }
-    } else { 
-        // 常规模式 (原代码) 
-        const trend = game.dailyTrend || 'balanced'; 
-        const gossipLib = { 
-            'meat': [ "💪 隔壁健身房：今天要大口吃肉！", "🥩 菜贩老张：猪牛价格看涨！", "🔥 今日宜：开荤 | 忌：减肥" ], 
-            'veggie': [ "🥬 社区王大妈：最近流行吃素养生。", "🥗 朋友圈：#挑战一日吃素", "🍃 今日宜：清淡 | 忌：油腻" ], 
-            'seafood': [ "🌊 码头消息：刚上岸的鲜货！", "🦐 食客：好久没吃海鲜了。", "🥢 今日宜：尝鲜 | 忌：冷冻" ], 
-            'rice': [ "🍚 写字楼：加班太累，想吃饱饭。", "🥢 学生党：老板，米饭要大碗！", "🌾 今日宜：碳水 | 忌：节食" ], 
-            'balanced': [ "☀️ 天气预报：今日风和日丽。", "📅 经验：按平时备货即可。", "⚖️ 今日宜：稳扎稳打" ] 
-        }; 
-        const msgs = gossipLib[trend] || gossipLib['balanced']; 
-        introText = "晨光熹微，市集喧嚣...<br><span style='font-size:0.6em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span>"; 
-        tagHtml = `<div class="prep-trend-tag">${msgs[Math.floor(Math.random() * msgs.length)]}</div>`; 
-        trendText = "Morning Market · 今日食材行情看板"; 
-    } 
-    modal.innerHTML = ` 
-        <div class="prep-bg"></div> 
-        <div class="prep-curtain"></div> 
+    } else {
+        const trend = game.dailyTrend || 'balanced';
+        const gossipLib = {
+            'meat': [ "💪 隔壁健身房：今天要大口吃肉！", "🥩 菜贩老张：猪牛价格看涨！", "🔥 今日宜：开荤 | 忌：减肥" ],
+            'veggie': [ "🥬 社区王大妈：最近流行吃素养生。", "🥗 朋友圈：#挑战一日吃素", "🍃 今日宜：清淡 | 忌：油腻" ],
+            'seafood': [ "🌊 码头消息：刚上岸的鲜货！", "🦐 食客：好久没吃海鲜了。", "🥢 今日宜：尝鲜 | 忌：冷冻" ],
+            'rice': [ "🍚 写字楼：加班太累，想吃饱饭。", "🥢 学生党：老板，米饭要大碗！", "🌾 今日宜：碳水 | 忌：节食" ],
+            'balanced': [ "☀️ 天气预报：今日风和日丽。", "📅 经验：按平时备货即可。", "⚖️ 今日宜：稳扎稳打" ]
+        };
+        const msgs = gossipLib[trend] || gossipLib['balanced'];
+        introText = "晨光熹微，市集喧嚣...<br><span style='font-size:0.6em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span>";
+        tagHtml = `<div class="prep-trend-tag">${msgs[Math.floor(Math.random() * msgs.length)]}</div>`;
+        trendText = "Morning Market · 今日食材行情看板";
+    }
+
+    modal.innerHTML = `
+        <div class="prep-bg"></div>
+        <div class="prep-curtain"></div>
         
-        <div class="prep-intro-text">${introText}</div> 
+        <div class="prep-intro-text">${introText}</div>
         
-        <div class="prep-container"> 
-            <div class="prep-header"> 
-                <div class="prep-header-content"> 
-                    ${tagHtml} 
-                    <h1 class="prep-title">清晨集市</h1> 
-                    <div class="prep-subtitle">${trendText}</div> 
-                </div> 
-                <button class="btn-back" onclick="switchScreen('start-screen')"><span>↩</span> 返回</button> 
-            </div> 
+        <div class="prep-container">
+            <div class="prep-header prep-ui-hidden">
+                <div class="prep-header-content">
+                    ${tagHtml}
+                    <h1 class="prep-title">清晨集市</h1>
+                    <div class="prep-subtitle">${trendText}</div>
+                </div>
+                <button class="btn-back" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')"><span>↩</span> 返回</button>
+            </div>
             
-            <div id="prep-grid" class="prep-grid"></div> 
+            <div id="prep-grid" class="prep-grid prep-ui-hidden"></div>
             
-            <div class="prep-footer"> 
-                <div style="display:flex; gap:20px;"> 
-                    <div class="pf-info"> 
-                        <span class="pf-label">钱包余额</span> 
-                        <span class="pf-val highlight" id="prep-wallet-display">¥${window.tempCoins}</span> 
-                    </div> 
-                    <div class="pf-info"> 
-                        <span class="pf-label">预计花费</span> 
-                        <span class="pf-val" id="prep-cost-display">¥0</span> 
-                    </div> 
-                </div> 
-                <button class="btn-start-day" onclick="window.confirmPrep()"><span>🌤️</span> 开门营业</button> 
-            </div> 
-        </div> 
-    `; 
-    renderPrepUI(); 
-    playShopMusic(); // [新增] 播放集市音乐
+            <div id="prep-footer" class="prep-footer prep-ui-hidden">
+                <div style="display:flex; gap:20px;">
+                    <div class="pf-info">
+                        <span class="pf-label">钱包余额</span>
+                        <span class="pf-val highlight" id="prep-wallet-display">¥${window.tempCoins}</span>
+                    </div>
+                    <div class="pf-info">
+                        <span class="pf-label">预计花费</span>
+                        <span class="pf-val" id="prep-cost-display">¥0</span>
+                    </div>
+                </div>
+                <button class="btn-start-day" onclick="playSfx(400, 'triangle', 0.1); window.confirmPrep()"><span>🌤️</span> 开门营业</button>
+            </div>
+        </div>
+    `;
+
+    // 6. 渲染商品内容 (此时虽然不可见但已存在 DOM 中)
+    renderPrepUI();
+    
+    // 7. 播放音乐 (与集市共享)
+    playShopMusic();
+
+    // 8. [关键] 启动对话流程
+    // 延时从 500ms 改为 2200ms，等待 Intro Text (2.5s) 播放大半后再出现
+    setTimeout(() => {
+        startMarketChatterFlow();
+    }, 2200);
 }
 
 function renderPrepUI() { 
@@ -7109,38 +8249,29 @@ function processLegacyShopDailyTick() {
     
     let totalAdded = 0;
 
-    // 遍历所有店铺进行结算
+    // 遍历所有店铺进行结算 (新逻辑：无维护模式，纯收益)
     list.forEach(shop => {
-        // 1. 设备老化逻辑 (每天掉 10% 耐久)
-        shop.health = Math.max(0, shop.health - 10);
-
-        // 2. 效率折损
-        let efficiency = 1.0;
-        if (shop.health <= 0) efficiency = 0;
-        else if (shop.health < 50) efficiency = 0.5;
-
-        const todayIncome = Math.floor(shop.baseIncome * efficiency);
-
-        // 3. 资金累积
-        shop.accumulatedCash += todayIncome;
-        totalAdded += todayIncome;
+        // 收益公式：基础100 + 等级加成 (50 * expansion)
+        // expansion: 0 (标准), 1 (扩建), 2 (星级)
+        const level = (shop.expansion || 0);
+        const revenue = 100 + (50 * level);
         
-        console.log(`[Legacy Shop: ${shop.name}] Health: ${shop.health}%, Added: ¥${todayIncome}, Pool: ¥${shop.accumulatedCash}`);
+        totalAdded += revenue;
     });
 
-    // 保存更新后的列表
-    localStorage.setItem('legacy_shops_list', JSON.stringify(list));
-
-    // 汇总提示
+    // 直接汇入总资产
     if (totalAdded > 0) {
-        showToast(`收到 ${list.length} 家分店日报：今日共营收 ¥${totalAdded} (请去地图查收)`, 3000);
+        game.coins += totalAdded;
+        if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
+        
+        // 汇总提示
+        showToast(`${list.length} 家星级厨房共营收 ¥${totalAdded}`, 4000);
     }
 }
 
-// [新增] 显示分店管理弹窗
+// [新增] 显示分店详情弹窗 (新版：仅展示信息)
 function showLegacyManageModal(shopData) {
     const overlay = document.getElementById('overlay');
-    // 临时提高层级
     overlay.style.zIndex = '4000';
 
     const title = document.getElementById('modal-title');
@@ -7149,23 +8280,32 @@ function showLegacyManageModal(shopData) {
 
     if (!overlay || !title || !desc || !actions) return;
 
-    title.innerText = `🏠 分店管理：${shopData.name}`;
-    title.style.color = "#f1c40f";
+    title.innerText = `🏢 分店详情：${shopData.name}`;
+    title.style.color = "#2ecc71";
     
-    // 进度条颜色
-    const healthColor = shopData.health > 50 ? '#2ecc71' : '#e74c3c';
+    // 计算当前等级收益
+    const level = (shopData.expansion || 0);
+    const dailyRevenue = 100 + (50 * level);
+    
+    // 等级描述
+    const levelNames = ["标准厨房", "扩建厨房", "星级厨房"];
+    const levelName = levelNames[level] || "标准厨房";
 
     desc.innerHTML = `
-        <div style="text-align:left; width:100%;">
-            <div style="margin-bottom:15px; padding:10px; background:#f9f9f9; border-radius:8px;">
-                <strong>💰 待收营收：</strong> <span style="font-size:24px; font-weight:bold; color:#f1c40f;">¥${shopData.accumulatedCash}</span>
+        <div style="text-align:left; width:100%; padding: 10px;">
+            <div style="margin-bottom:15px; padding:15px; background:#f0f3f5; border-radius:12px;">
+                <div style="font-size:14px; color:#7f8c8d; margin-bottom:5px;">当前规模</div>
+                <div style="font-size:18px; font-weight:bold; color:#2c3e50;">${levelName}</div>
             </div>
-            <div style="margin-bottom:15px;">
-                <strong>🔧 设备健康度：</strong> <span style="color:${healthColor}; font-weight:bold;">${shopData.health}%</span>
-                <div style="width:100%; height:10px; background:#eee; border-radius:5px; margin-top:5px;">
-                    <div style="width:${shopData.health}%; height:100%; background:${healthColor}; border-radius:5px; transition:width 0.3s;"></div>
-                </div>
-                <div style="font-size:12px; color:#666; margin-top:5px;">${shopData.health < 50 ? '⚠️ 设备故障频发，产出效率减半！' : '✅ 设备运转良好'}</div>
+            
+            <div style="margin-bottom:15px; padding:15px; background:#fff8e1; border-radius:12px; border:1px solid #ffe0b2;">
+                <div style="font-size:14px; color:#f39c12; margin-bottom:5px;">每日托管收益</div>
+                <div style="font-size:24px; font-weight:bold; color:#e67e22;">¥${dailyRevenue}</div>
+                <div style="font-size:12px; color:#d35400; margin-top:5px;">* 收益已自动汇入总资产</div>
+            </div>
+            
+            <div style="font-size:13px; color:#95a5a6; line-height:1.5;">
+                <p>该分店由专业团队全权托管，每日自动结算收益。</p>
             </div>
         </div>
     `;
@@ -7173,72 +8313,24 @@ function showLegacyManageModal(shopData) {
     // 重写按钮
     actions.innerHTML = '';
 
-    const btnCollect = document.createElement('button');
-    btnCollect.innerText = "🛠️ 视察并收款";
-    btnCollect.style.background = "#2ecc71";
-    btnCollect.style.color = "white";
-    btnCollect.style.padding = "12px 30px";
-    btnCollect.style.border = "none";
-    btnCollect.style.borderRadius = "10px";
-    btnCollect.style.fontSize = "16px";
-    btnCollect.style.fontWeight = "bold";
-    btnCollect.style.cursor = "pointer";
-
-    if (shopData.accumulatedCash <= 0 && shopData.health >= 90) {
-        btnCollect.disabled = true;
-        btnCollect.innerText = "暂无收益";
-        btnCollect.style.background = "#ccc";
-    }
-
-    btnCollect.onclick = () => {
-        // 1. 加钱
-        if (shopData.accumulatedCash > 0) {
-            game.coins += shopData.accumulatedCash;
-            if (typeof playRevenueSound === 'function') playRevenueSound();
-            showToast(`成功提取分红: +¥${shopData.accumulatedCash}`, 2000);
-            shopData.accumulatedCash = 0;
-        }
-
-        // 2. 维修 (重置健康度)
-        if (shopData.health < 100) {
-            shopData.health = 100;
-            playSfx(300, 'noise', 0.5); 
-            showToast("设备维护完成，效率恢复 100%", 2000);
-        }
-
-        // 3. 保存回数组
-        // 需要在数组里找到这个对象并更新
-        let list = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]');
-        const idx = list.findIndex(s => s.id === shopData.id || s.name === shopData.name);
-        if (idx !== -1) {
-            list[idx] = shopData;
-            localStorage.setItem('legacy_shops_list', JSON.stringify(list));
-        }
-
-        updateBalanceDisplay();
-        
-        overlay.style.display = 'none'; 
-        overlay.style.zIndex = ''; 
-        
-        renderLocationStep1(); // 刷新地图
-    };
-
     const btnClose = document.createElement('button');
-    btnClose.innerText = "返回";
-    btnClose.style.marginLeft = "10px";
-    btnClose.style.background = "transparent";
-    btnClose.style.border = "1px solid #ccc";
-    btnClose.style.padding = "12px 20px";
-    btnClose.style.borderRadius = "10px";
+    btnClose.innerText = "关闭";
+    btnClose.style.background = "#34495e";
+    btnClose.style.color = "white";
+    btnClose.style.border = "none";
+    btnClose.style.padding = "12px 40px";
+    btnClose.style.borderRadius = "25px";
+    btnClose.style.fontSize = "16px";
     btnClose.style.cursor = "pointer";
+    btnClose.style.boxShadow = "0 4px 10px rgba(52, 73, 94, 0.3)";
+    
     btnClose.onclick = () => {
+        playSfx(300, 'sine', 0.1);
         overlay.style.display = 'none';
         overlay.style.zIndex = '';
     };
 
-    actions.appendChild(btnCollect);
     actions.appendChild(btnClose);
-
     overlay.style.display = 'flex';
 }
 </script>
