@@ -2329,6 +2329,165 @@
     }
     /* .prep-curtain styles moved to bottom */
 
+    /* [重构] 聊天流容器 - 稍微上移，给底部立绘留空间 */
+    #chat-history-container {
+        position: absolute;
+        bottom: 12%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 95%;
+        max-width: 900px; /* 加宽容器 */
+        display: flex;
+        flex-direction: column;
+        gap: 25px; /* 增加行间距 */
+        justify-content: flex-end;
+        z-index: 5001;
+        pointer-events: none;
+    }
+    /* 单条消息行 */
+    .chat-row {
+        display: flex;
+        align-items: flex-start; /* [修改] 改为顶部对齐，确保气泡间距一致 */
+        gap: 15px;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: msgSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    
+    /* 左侧角色 (A) */
+    .chat-row.left {
+        flex-direction: row;
+        padding-right: 60px;
+    }
+    
+    /* 右侧角色 (B) */
+    .chat-row.right {
+        flex-direction: row-reverse;
+        padding-left: 60px;
+    }
+    
+    /* [重构] 立绘容器：作为定位基准 */
+    .chat-portrait-box {
+        position: relative; /* 关键：为绝对定位的图片提供坐标系 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end; /* 内容底部对齐 */
+        width: 100px; /* 稍微占宽一点，防止气泡贴太死 */
+        flex-shrink: 0;
+        height: 140px; /* 给容器一个基础高度，确保布局不塌陷 */
+        z-index: 10; /* [关键] 确保立绘在气泡之上 */
+    }
+
+    /* [重构] 立绘图片：巨大化 + 绝对定位 */
+    .chat-portrait-img {
+        position: absolute;
+        bottom: 20px; /* 稍微上移，给底部的名字留位置 */
+        left: 50%;
+        transform: translateX(-50%); /* 水平居中 */
+        width: 220px;  /* [放大] 宽度极大增加 */
+        height: 240px; /* [放大] 高度极大增加 */
+        object-fit: contain;
+        object-position: bottom center; /* 确保脚部/底部对齐 */
+        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: none; /* 防止大图挡住点击 */
+        z-index: 20; /* 极高层级 */
+    }
+
+    /* 名字条：保持在最底部 */
+    .chat-role-name {
+        position: relative;
+        z-index: 25; /* 名字在立绘之上 */
+        font-size: 13px;
+        color: rgba(255,255,255,0.95);
+        text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+        background: rgba(0,0,0,0.6);
+        padding: 4px 10px;
+        border-radius: 12px;
+        margin-top: auto; /* 推到底部 */
+        border: 1px solid rgba(255,255,255,0.2);
+        max-width: 100px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* 立绘占位符 - 兼容旧逻辑 */
+    .chat-portrait-placeholder {
+        width: 80px; /* [预留] 宽度增加 */
+        height: 100px; /* [预留] 高度增加，模拟半身像比例 */
+        border-radius: 12px; /* 改为圆角矩形 */
+        background: #eee;
+        color: #fff;
+        font-size: 32px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid rgba(255,255,255,0.3);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
+    }
+    
+    /* 气泡本体 - 加大 */
+    .chat-bubble {
+        background: #fff;
+        color: #2c3e50;
+        padding: 18px 24px; /* [修改] 增加内边距 */
+        border-radius: 20px;
+        font-size: 22px; /* [修改] 增大字号 */
+        font-weight: 500;
+        line-height: 1.5;
+        position: relative;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        max-width: 100%;
+        min-height: 50px; /* 确保最小高度 */
+        display: flex;
+        flex-direction: column; /* [修改] 改为纵向布局，确保按钮在文字下方 */
+        align-items: flex-start;
+        pointer-events: auto;
+    }
+    
+    /* [调整] 左侧角色气泡：立绘在左，文字向右避让 */
+    .chat-row.left .chat-bubble {
+        margin-left: -40px; /* 保持气泡向左钻入立绘底部 */
+        margin-right: 20px;
+        border-bottom-left-radius: 4px;
+        z-index: 5;
+        
+        /* [核心修改] 进一步加大左侧 padding (60px -> 85px) */
+        padding-left: 85px;  
+        padding-right: 24px; /* 右侧保持标准 */
+    }
+    /* [调整] 右侧角色气泡：立绘在右，文字向左避让 */
+    .chat-row.right .chat-bubble {
+        margin-right: -40px; /* 保持气泡向右钻入立绘底部 */
+        margin-left: 20px;
+        border-bottom-right-radius: 4px;
+        z-index: 5;
+        background: #e1f5fe;
+
+        /* [核心修改] 右侧大幅增加 padding，防止文字被右边的退休教师挡住 */
+        padding-right: 60px; /* 原来是统一的24px，现在右侧加宽 */
+        padding-left: 24px;  /* 左侧保持标准 */
+    }
+    
+    /* 进场动画 */
+    @keyframes msgSlideUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 嵌入在最后一条消息里的按钮容器 */
+    .chat-action-area {
+        margin-top: 25px; /* [修改] 增加顶部间距，让按钮离文字更远 */
+        width: 100%; /* 确保占满宽度 */
+        display: flex;
+        justify-content: flex-end;
+    }
+
     /* 沉浸式文案样式 */
     .prep-intro-text {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -2401,6 +2560,19 @@
     }
     .btn-back:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-1px); color: #fff; border-color: #fff; }
     .btn-back:active { transform: translateY(0); opacity: 0.8; } 
+
+    /* [新增] 深色背景适配样式 */
+    .btn-back.dark {
+        color: #555; /* 深灰色文本 */
+        border-color: rgba(0, 0, 0, 0.15); /* 浅灰边框 */
+        background: rgba(255, 255, 255, 0.5); /* 半透明白色背景增强对比 */
+        text-shadow: none;
+    }
+    .btn-back.dark:hover {
+        background: rgba(255, 255, 255, 0.8);
+        color: #000;
+        border-color: rgba(0, 0, 0, 0.3);
+    }
     .prep-title { font-size: 32px; font-weight: 900; color: #fff; letter-spacing: 2px; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); } 
     .prep-subtitle { font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 4px; font-weight: 400; letter-spacing: 1px; } 
     
@@ -3790,6 +3962,32 @@ function playSfx(f, t='sine', d=0.1) {
     o.start(); o.stop(audioCtx.currentTime + d);
 }
 
+// [新增] IM 气泡音效 (模拟清脆的水滴/气泡声)
+function playChatBubbleSound() {
+    if (!sfxEnabled) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(sfxGain);
+    
+    // 频率滑音：从 300Hz 快速升至 600Hz，模拟气泡破裂
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(350, t);
+    osc.frequency.exponentialRampToValueAtTime(700, t + 0.12);
+    
+    // 包络：快速起音，自然衰减
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.15, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    
+    osc.start(t);
+    osc.stop(t + 0.2);
+}
+
 // [新增] 随机播放生气音效
 function playRandomAngrySound() {
     if (!sfxEnabled) return;
@@ -4066,97 +4264,162 @@ function stopMusic() {
 
 /* Removed old createCoinBuffer definition */
 
-const MARKET_GOSSIP_CONFIG = {
-    // 蔬菜类
-    vege: {
-        up: [
-            {
-                speakers: ["买菜阿姨", "摊贩老板"],
-                lines: [
-                    "老板，这青菜怎么一天一个价啊？",
-                    "哎哟大姐，听说台风要来了，进货难啊。",
-                    "真是的，看来这几天得省着点吃叶子菜了。"
-                ]
-            },
-            {
-                speakers: ["邻居王婶", "路人"],
-                lines: [
-                    "你看那边的西红柿，个头是挺大，就是贵。",
-                    "是啊，最近不仅西红柿，连土豆都涨价了。",
-                    "算了算了，还是回家煮挂面吧。"
-                ]
-            }
-        ],
-        down: [
-            {
-                speakers: ["种菜老农", "顾客"],
-                lines: [
-                    "自家种的大萝卜，便宜卖啦！",
-                    "哟，今天这萝卜看着真水灵，价格也公道。",
-                    "那可不，今年大丰收，地里都堆不下了。"
-                ]
-            }
-        ]
-    },
-    // 肉类
-    meat: {
-        up: [
-            {
-                speakers: ["张大妈", "李大爷"],
-                lines: [
-                    "哎哟，今天的猪肉摊怎么没人排队？",
-                    "那价格标得吓死人，谁买得起啊！",
-                    "看来今天得少吃点肉，改吃豆腐咯。"
-                ]
-            }
-        ],
-        down: [
-            {
-                speakers: ["甚至路人", "肉铺老板"],
-                lines: [
-                    "老板，今天的五花肉怎么这么便宜？",
-                    "进货价跌啦，薄利多销嘛！",
-                    "太好了，给我切两斤，回家包饺子！"
-                ]
-            }
-        ]
-    },
-    // 海鲜类
-    seafood: {
-        up: [
-            {
-                speakers: ["渔夫", "食客"],
-                lines: [
-                    "这两天风浪太大，船都出不去。",
-                    "那今天的鱼肯定少得可怜吧？",
-                    "是啊，有钱都未必抢得到鲜货。"
-                ]
-            }
-        ],
-        down: [
-            {
-                speakers: ["海鲜贩子", "主妇"],
-                lines: [
-                    "开渔啦！新鲜的大虾，跳楼价！",
-                    "真的吗？给我来两斤，正好做油焖大虾。",
-                    "好嘞，您拿好，个个都活蹦乱跳的。"
-                ]
-            }
-        ]
-    },
-    // 通用/其他
-    general: {
-        normal: [
-            {
-                speakers: ["早起路人", "清洁工"],
-                lines: [
-                    "今天的集市还是这么热闹啊。",
-                    "是啊，早起的鸟儿有虫吃。",
-                    "希望能买到新鲜的食材做顿好的。"
-                ]
-            }
-        ]
-    }
+const MARKET_GOSSIP_CONFIG = { 
+    // --- 🍖 肉类爆发 (王屠户的主场) --- 
+    meat: { 
+        rush: [ 
+            { 
+                speakers: ["撸铁阿姨", "王屠户"], 
+                lines: [ 
+                    "王老板，最近深蹲重量上去了，太费体能。", 
+                    "嚯，大姐，看你这肌肉线条，比好多小伙子都结实！", 
+                    "那是，三分练七分吃，教练让我必须加餐。", 
+                    "懂行！这块最嫩的牛里脊归你了，高蛋白低脂肪！" 
+                ] 
+            }, 
+            { 
+                speakers: ["外卖骑手", "王屠户"], 
+                lines: [ 
+                    "这倒春寒太厉害，跑了一上午单，手都冻僵了。", 
+                    "辛苦辛苦！赶紧进棚子里暖和暖和。", 
+                    "今晚收工早，想吃顿热乎的肉菜驱驱寒。", 
+                    "来二斤五花肉，回去炖个红烧肉，吃完保证浑身冒汗！" 
+                ] 
+            }, 
+            { 
+                speakers: ["项目经理", "王屠户"], 
+                lines: [ 
+                    "老王，最近团队赶项目，大家都熬红了眼。", 
+                    "看出来了，你这黑眼圈都快掉地上了。", 
+                    "今晚聚餐，我答应给大家搞顿全肉宴补补元气。", 
+                    "没问题！这些大排骨全包给你，让大家吃个爽！" 
+                ] 
+            } 
+        ] 
+    }, 
+
+    // --- 🥬 蔬菜爆发 (林大婶的主场) --- 
+    vege: { 
+        rush: [ 
+            { 
+                speakers: ["全职老爸", "林大婶"], 
+                lines: [ 
+                    "大婶，我家那两个神兽最近太难伺候了。", 
+                    "怎么？又不爱吃饭啦？", 
+                    "是啊，天热没胃口，看到肉就摇头，愁死我了。", 
+                    "试试这刚摘的番茄和黄瓜，做个凉拌或者罗宋汤，酸酸甜甜孩子最爱！" 
+                ] 
+            }, 
+            { 
+                speakers: ["程序员", "林大婶"], 
+                lines: [ 
+                    "大婶，最近加班熬夜，脸上疯狂爆痘。", 
+                    "哎哟，年轻人要注意身体，这是虚火太旺了。", 
+                    "是啊，想吃点清淡的，把身体调理一下。", 
+                    "听婶子的，多吃苦瓜和芹菜，降火排毒最有效。" 
+                ] 
+            }, 
+            { 
+                speakers: ["退休教师", "林大婶"], 
+                lines: [ 
+                    "小林啊，最近体检报告出来了，医生让控制血脂。", 
+                    "那肉摊那边您最近可得少去了。", 
+                    "是啊，以后就是‘素食主义’喽，得讲究科学饮食。", 
+                    "放心，我这儿的蔬菜都是有机的，健康着呢！" 
+                ] 
+            } 
+        ] 
+    }, 
+
+    // --- 🦐 海鲜爆发 (老张头的主场) --- 
+    seafood: { 
+        rush: [ 
+            { 
+                speakers: ["焦虑老爸", "老张头"], 
+                lines: [ 
+                    "老张，孩子马上中考了，我看他背书背得头疼。", 
+                    "兄弟别急，这时候得吃点海里的补补脑。", 
+                    "我也听说DHA好，是不是得多吃鱼？", 
+                    "没错！今天的鲈鱼特别鲜，清蒸给孩子吃最灵！" 
+                ] 
+            }, 
+            { 
+                speakers: ["探店博主", "老张头"], 
+                lines: [ 
+                    "张大爷！听说第一批渔船刚靠岸？", 
+                    "你这小丫头鼻子真灵，刚卸下来的货。", 
+                    "我要拍一期‘开渔第一鲜’的视频，要最好的货！", 
+                    "必须有，看这皮皮虾和梭子蟹，镜头怼近点，鲜得跳起来！" 
+                ] 
+            }, 
+            { 
+                speakers: ["背包客", "老张头"], 
+                lines: [ 
+                    "大爷，我做攻略说来这里必须吃海鲜大餐。", 
+                    "那肯定，靠山吃山靠海吃海嘛。", 
+                    "但是怕景区饭店太贵，想买了回民宿自己煮。", 
+                    "那你来对地方了，我这价格公道，童叟无欺！" 
+                ] 
+            } 
+        ] 
+    }, 
+
+    // --- 🌶️ 辣味/重口爆发 (杂货店老板的主场) --- 
+    spicy: { 
+        rush: [ 
+            { 
+                speakers: ["创业青年", "杂货店老板"], 
+                lines: [ 
+                    "老板，最近压力大得睡不着，头发大把掉。", 
+                    "年轻人不容易啊，是不是心里憋得慌？", 
+                    "是啊，就想找个刺激点的法子发泄一下。", 
+                    "拿这包特辣火锅底料回去，辣出一身大汗，什么烦恼都忘光了！" 
+                ] 
+            }, 
+            { 
+                speakers: ["南方游客", "杂货店老板"], 
+                lines: [ 
+                    "这梅雨天什么时候是个头？感觉被子里都能拧出水。", 
+                    "还得半个月呢，这湿气钻得人骨头疼。", 
+                    "有没有什么本地的土法子去去湿？", 
+                    "简单，多吃辣椒花椒，以毒攻毒，湿气全跑光！" 
+                ] 
+            } 
+        ] 
+    }, 
+
+    // --- 😐 平稳/无明显倾向 (通用) --- 
+    general: { 
+        normal: [ 
+            { 
+                speakers: ["集市管理员", "滑板少年"], 
+                lines: [ 
+                    "喂！那边的，集市里不许滑滑板！", 
+                    "不好意思大叔，我这就下来走。", 
+                    "小心撞到老人家，去外面的广场玩。", 
+                    "知道啦，我就进来买根烤肠，马上走！" 
+                ] 
+            }, 
+            { 
+                speakers: ["老顾客", "包子铺老板"], 
+                lines: [ 
+                    "老板，老规矩，两个素包一杯豆浆。", 
+                    "好嘞，我看您今天气色不错啊。", 
+                    "嗨，刚在公园打完太极，浑身舒坦。", 
+                    "得嘞，趁热吃，健康长寿！" 
+                ] 
+            }, 
+            { 
+                speakers: ["小女孩", "妈妈"], 
+                lines: [ 
+                    "妈妈，我想买那盆小多肉植物！", 
+                    "我们是来买菜的，不是逛花鸟市场的。", 
+                    "就买一盆嘛，我会自己浇水的。", 
+                    "行吧，那你要说话算话，不能养死了。" 
+                ] 
+            } 
+        ] 
+    } 
 };
 
 const SHOP_CONFIG = {
@@ -4338,151 +4601,167 @@ function changeShopPage(delta) {
 
 function generateDailyGossip() {
     if (!MARKET_GOSSIP_CONFIG) return;
-
-    // 1. 确定今日行情趋势 (假设 game.dailyTrend 已在 generateDailyOrders 中生成)
-    // 如果没有 dailyTrend，则随机选一个
-    const trendType = game.dailyTrend || 'balanced';
-
-    // 映射趋势到配置键值
-    // balanced -> general
-    // meat -> meat, vege -> vege, seafood -> seafood (up/down 随机)
-
+    // 1. 随机决定今日趋势
+    // 权重：各 20% (肉/菜/海鲜/辣/无事发生)
+    const rand = Math.random();
     let category = 'general';
-    let direction = 'normal';
+    if (rand < 0.2) category = 'vege';
+    else if (rand < 0.4) category = 'meat';
+    else if (rand < 0.6) category = 'seafood';
+    else if (rand < 0.8) category = 'spicy';
+    else category = 'general';
 
-    if (trendType === 'balanced') {
-        category = 'general';
-        direction = 'normal';
-    } else {
-        // 简单映射：如果有明确趋势，这里暂时随机涨跌来生成八卦
-        // (在更复杂的逻辑中，应读取实际价格波动，这里简化为随机以配合 gameplay)
-        category = trendType;
-        direction = Math.random() > 0.5 ? 'up' : 'down';
+    // 2. [核心] 将趋势存入全局变量，供 generateDailyOrders 使用
+    // 如果是 general，则趋势为 'balanced' (均衡)
+    game.dailyTrend = (category === 'general') ? 'balanced' : category;
+    // 3. 从配置中抽取文案
+    // 只有非 general 才有 'rush' 状态，general 对应 normal
+    let typeKey = (category === 'general') ? 'normal' : 'rush';
+    // 容错读取
+    const configGroup = MARKET_GOSSIP_CONFIG[category];
+    const list = configGroup[typeKey] || configGroup['normal'] || MARKET_GOSSIP_CONFIG['general']['normal'];
 
-        // 容错：如果配置里没有这个分类，回退到 general
-        if (!MARKET_GOSSIP_CONFIG[category]) category = 'general';
+    if (!list || list.length === 0) {
+        game.dailyGossip = { speakers: ["系统"], lines: ["今日集市风平浪静。"], currentLineIndex: 0 };
+        return;
     }
 
-    const configGroup = MARKET_GOSSIP_CONFIG[category];
-    const list = configGroup[direction] || configGroup['normal'] || MARKET_GOSSIP_CONFIG['general']['normal'];
-    
-    // 随机抽取一段对话对象
     const dialogueObj = list[Math.floor(Math.random() * list.length)];
-
-    // 构造对话数据
+    // 4. 存入情报对象
     game.dailyGossip = {
         category: category,
-        speakers: dialogueObj.speakers, // 数组
-        lines: dialogueObj.lines,       // 数组
+        speakers: dialogueObj.speakers,
+        lines: dialogueObj.lines,
         currentLineIndex: 0
     };
-    console.log("今日情报生成:", game.dailyGossip);
+    console.log(`[情报生成] 趋势锁定: ${game.dailyTrend} (文案: ${category})`);
 }
 
 // 启动对话流程
-function startMarketChatterFlow() {
-    const gossip = game.dailyGossip;
-    // 如果没有情报，直接显示采购界面
-    if (!gossip || !gossip.lines || gossip.lines.length === 0) {
-        revealPrepUI();
-        return;
-    }
+function startMarketChatterFlow() { 
+    const gossip = game.dailyGossip; 
+    // 如果没有情报，直接显示采购界面 
+    if (!gossip || !gossip.lines || gossip.lines.length === 0) { 
+        revealPrepUI(); 
+        return; 
+    } 
     
-    gossip.currentLineIndex = 0; // 重置进度
+    gossip.currentLineIndex = 0; 
+    // 创建全屏点击层 (用于点击屏幕继续) 
+    const layer = document.createElement('div'); 
+    layer.id = 'market-chatter-layer'; 
+    layer.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; z-index:5000;"; 
+    // 点击全屏任意位置触发下一句 
+    layer.onclick = (e) => { 
+        // 防止点击按钮时触发下一句 
+        if(e.target.closest('button')) return; 
+        window.advanceChatter(); 
+    }; 
     
-    // 1. 创建一次性 DOM (居中 + 无闪烁)
-    const container = document.createElement('div');
-    container.id = 'market-chatter-container';
-    container.onclick = window.advanceChatter; // 绑定点击推进事件
-    
-    // 初始内容
-    container.innerHTML = `
-        <div class="chatter-box-centered">
-            <div class="chatter-speaker" id="chat-speaker">...</div>
-            <div class="chatter-text" id="chat-text">...</div>
-            <div class="chatter-hint">点击屏幕继续 ▶</div>
+    // [新增] 顶部返回按钮 (复用 prep-header 样式结构)
+    const headerHtml = `
+        <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:100%; max-width:1200px; padding:15px 20px; box-sizing:border-box; z-index:5002; display:flex; justify-content:flex-end; pointer-events:none;">
+            <button class="btn-back dark" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')" style="pointer-events:auto;"><span>↩</span> 返回</button>
         </div>
     `;
-    
-    document.getElementById('prep-modal').appendChild(container);
-    
-    // 2. 渲染第一句
-    updateChatterContent();
+    layer.innerHTML = headerHtml;
+
+    // 创建消息容器 (存放所有对话) 
+    const listContainer = document.createElement('div'); 
+    listContainer.id = 'chat-history-container'; 
+    layer.appendChild(listContainer); 
+
+    // 插入提示语 
+    const hint = document.createElement('div'); 
+    hint.innerText = "(点击屏幕继续)"; 
+    hint.style.cssText = "position:absolute; bottom:20px; width:100%; text-align:center; color:rgba(255,255,255,0.5); font-size:12px; pointer-events:none; animation:fadeIn 1s infinite alternate;"; 
+    layer.appendChild(hint); 
+    document.getElementById('prep-modal').appendChild(layer); 
+
+    // 播放第一句 
+    appendNextChatMessage(); 
 }
 
-// 更新对话内容 (只改文字，不改 DOM)
-function updateChatterContent() {
-    const gossip = game.dailyGossip;
-    const speakerEl = document.getElementById('chat-speaker');
-    const textEl = document.getElementById('chat-text');
-    // 获取提示区域容器
-    const hintEl = document.querySelector('.chatter-hint');
+// [新增] 追加气泡核心逻辑
+function appendNextChatMessage() { 
+    const gossip = game.dailyGossip; 
+    const container = document.getElementById('chat-history-container'); 
     
-    // 检查是否越界
-    if (gossip.currentLineIndex < gossip.lines.length) {
-        const line = gossip.lines[gossip.currentLineIndex];
-        const speaker = gossip.speakers[gossip.currentLineIndex % gossip.speakers.length];
-        
-        if (speakerEl) speakerEl.innerHTML = `<span>🗣️</span> ${speaker}`;
-        if (textEl) textEl.innerText = line;
-        
-        // 播放打字音效
-        if(typeof playSfx === 'function') playSfx(800, 'sine', 0.05);
+    if (!container || gossip.currentLineIndex >= gossip.lines.length) return; 
+    
+    const line = gossip.lines[gossip.currentLineIndex]; 
+    const isLeft = (gossip.currentLineIndex % 2 === 0); // 偶数行在左(A)，奇数行在右(B) 
+    const speakerName = gossip.speakers[gossip.currentLineIndex % gossip.speakers.length]; 
+    
+    // [核心修改] 强制映射测试图片 
+    // 左边(A) -> 王屠户，右边(B) -> 退休教师 
+    const testImageSrc = isLeft ? "assets/characters/A角-王屠户.png" : "assets/characters/B角-退休教师.png"; 
+    
+    // 颜色生成逻辑 (保留作为回退方案) 
+    const charCode = speakerName.charCodeAt(0); 
+    const colorList = ['#e67e22', '#3498db', '#e74c3c', '#9b59b6', '#1abc9c', '#f1c40f']; 
+    const avatarColor = colorList[charCode % colorList.length]; 
+    const avatarChar = speakerName.charAt(0); 
 
-        // [核心逻辑] 判断是否是最后一句
-        const isLastLine = gossip.currentLineIndex === gossip.lines.length - 1;
-        
-        if (isLastLine) {
-            // 如果是最后一句，显示“开始买菜”按钮
-            // 阻止容器整体点击（通过 logic 处理），引导用户点按钮
-            if (hintEl) {
-                hintEl.innerHTML = `
-                    <button class="btn-start-shopping" onclick="event.stopPropagation(); playSfx(400, 'triangle', 0.1); finishChatterAndShop()">
-                        开始买菜
-                    </button>
-                `;
-            }
-        } else {
-            // 普通对话，显示点击继续
-            if (hintEl) hintEl.innerHTML = '点击屏幕继续 ▶';
-        }
-    }
-}
+    const row = document.createElement('div'); 
+    row.className = `chat-row ${isLeft ? 'left' : 'right'}`; 
+    
+    const portraitHtml = `
+    <div class="chat-portrait-box">
+        <img class="chat-portrait-img" src="${testImageSrc}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="chat-portrait-placeholder" style="background:${avatarColor}; display:none;"> 
+            ${avatarChar} 
+        </div> 
+        <div class="chat-role-name">${speakerName}</div> 
+    </div> 
+    `; 
+
+    let bubbleContent = line; 
+
+    const isLastLine = gossip.currentLineIndex === gossip.lines.length - 1; 
+    if (isLastLine) { 
+        const hint = document.querySelector('#market-chatter-layer > div:last-child'); 
+        if(hint && hint.innerText.includes('点击')) hint.style.display = 'none'; 
+
+        bubbleContent += ` 
+            <div class="chat-action-area"> 
+                <button class="btn-start-shopping" onclick="event.stopPropagation(); playSfx(400, 'triangle', 0.1); finishChatterAndShop()"> 
+                    开始买菜 
+                </button> 
+            </div> 
+        `; 
+    } 
+    row.innerHTML = isLeft ? `${portraitHtml}<div class="chat-bubble">${bubbleContent}</div>` : `${portraitHtml}<div class="chat-bubble">${bubbleContent}</div>`; // 注意：右侧Flex会自动反转顺序，这里HTML结构保持一致即可 
+
+    container.appendChild(row); 
+    playChatBubbleSound(); // [修改] 使用 IM 气泡音效
+} 
 
 // 点击推进逻辑
-window.advanceChatter = function() {
-    const gossip = game.dailyGossip;
+window.advanceChatter = function() { 
+    const gossip = game.dailyGossip; 
+    // 如果已经是最后一句，阻止点击屏幕触发（必须点按钮） 
+    if (gossip.currentLineIndex >= gossip.lines.length - 1) { 
+        return; 
+    } 
     
-    // 如果已经是最后一句，点击屏幕（非按钮区域）不应跳过
-    // 这里我们设定：最后一句必须点按钮
-    if (gossip.currentLineIndex >= gossip.lines.length - 1) {
-        return;
-    }
-    
-    gossip.currentLineIndex++;
-    updateChatterContent();
-};
+    gossip.currentLineIndex++; 
+    appendNextChatMessage(); 
+}; 
 
 // [新增] 结束对话并开始采购
-window.finishChatterAndShop = function() {
-    // 1. 获取容器
-    const container = document.getElementById('market-chatter-container');
-    
-    if (container) {
-        // 2. 先执行淡出动画
-        container.style.transition = 'opacity 0.3s ease'; // 确保有过渡
-        container.style.opacity = '0';
-        
-        // 3. [核心修改] 等待 300ms 动画结束后，再移除 DOM 并触发黑幕
-        setTimeout(() => {
-            container.remove();
-            // 只有对话框彻底消失后，才开始拉黑幕
-            revealPrepUI();
-        }, 300);
-    } else {
-        // 容错：如果找不到容器直接开始
-        revealPrepUI();
-    }
+window.finishChatterAndShop = function() { 
+    const layer = document.getElementById('market-chatter-layer'); 
+    if (layer) { 
+        layer.style.transition = 'opacity 0.3s ease'; 
+        layer.style.opacity = '0'; 
+        setTimeout(() => { 
+            layer.remove(); 
+            revealPrepUI(); 
+        }, 300); 
+    } else { 
+        revealPrepUI(); 
+    } 
 };
 
 // 显示采购界面 (Fade In)
@@ -4923,62 +5202,66 @@ function generateDailyOrders(level) {
         const goal = game.getGoal(level);
         game.orderQueue = [];
         
-        // 1. [关键修改] 先确定当前解锁的菜谱池
+        // 1. 确定当前解锁的菜谱池
         let availableRecipes = [];
-        if (level >= 1) availableRecipes.push(...RECIPES.slice(0, 2)); // 基础
-        if (level >= 3) availableRecipes.push(...RECIPES.slice(2, 6)); // 进阶
-        if (level >= 6) availableRecipes.push(...RECIPES.slice(6, 9)); // 高级
-        if (level >= 9) availableRecipes.push(...RECIPES.slice(9, 12)); // 复杂
-        if (availableRecipes.length === 0) availableRecipes = [RECIPES[0]]; // 兜底
+        if (level >= 1) availableRecipes.push(...RECIPES.slice(0, 2)); // 基础: 番茄炒蛋, 洋葱炒蛋
+        if (level >= 3) availableRecipes.push(...RECIPES.slice(2, 6)); // 进阶: 肉片, 肉丝, 麻婆豆腐, 炖肉
+        if (level >= 6) availableRecipes.push(...RECIPES.slice(6, 9)); // 高级: 虾仁, 牛肉
+        if (level >= 9) availableRecipes.push(...RECIPES.slice(9, 12)); // 复杂: 地三鲜, 炒饭
+        if (availableRecipes.length === 0) availableRecipes = [RECIPES[0]];
 
-        // 2. [关键修改] 根据解锁的菜谱，动态生成有效的趋势列表
-        const validTrends = ['balanced']; // 均衡始终有效
+        // 2. [核心修改] 读取 generateDailyGossip 生成的趋势
+        // 如果没有生成过(比如第一天直接开始)，默认 balanced
+        const todayTrend = game.dailyTrend || 'balanced';
+        console.log(`[订单生成] 当前关卡: ${level}, 今日趋势: ${todayTrend}`);
         
-        // 检查是否有肉类菜谱解锁
-        const hasMeat = availableRecipes.some(r => r.ingredients.includes('pork') || r.ingredients.includes('beef'));
-        if (hasMeat) validTrends.push('meat');
+        // 3. 构建加权卡池
+        let weightedPool = [...availableRecipes];
         
-        // 检查是否有海鲜菜谱解锁
-        const hasSeafood = availableRecipes.some(r => r.ingredients.includes('shrimp'));
-        if (hasSeafood) validTrends.push('seafood');
-        
-        // 检查是否有米饭菜谱解锁
-        const hasRice = availableRecipes.some(r => r.ingredients.includes('rice'));
-        if (hasRice) validTrends.push('rice');
-        
-        // 蔬菜通常都有，但也检查一下
-        const hasVeggie = availableRecipes.some(r => r.ingredients.includes('tomato') || r.ingredients.includes('potato') || r.ingredients.includes('pepper') || r.ingredients.includes('onion'));
-        if (hasVeggie) validTrends.push('veggie');
-
-        // 3. 从有效列表中随机抽取今日趋势
-        const todayTrend = validTrends[Math.floor(Math.random() * validTrends.length)];
-        game.dailyTrend = todayTrend;
-        console.log(`[Trend] Level ${level} Valid Trends: ${validTrends.join(',')} -> Selected: ${todayTrend}`);
-        
-        // 4. 生成订单 (加权逻辑)
+        if (todayTrend !== 'balanced') {
+            // 筛选符合趋势的菜品
+            const trendDishes = availableRecipes.filter(r => {
+                const ings = r.ingredients; // 简写
+                
+                if (todayTrend === 'meat') {
+                    // 猪肉、牛肉、鸡肉(如有)
+                    return ings.includes('pork') || ings.includes('beef');
+                }
+                if (todayTrend === 'vege') {
+                    // 纯素菜或蔬菜占比高的
+                    // 逻辑：必须包含蔬菜，且不含高级肉类(虾/牛)以符合清淡定义，或者就是特定的素菜
+                    // 简单逻辑：只要有番茄、土豆、青椒、洋葱
+                    return ings.includes('tomato') || ings.includes('potato') || ings.includes('pepper') || ings.includes('onion');
+                }
+                if (todayTrend === 'seafood') {
+                    // 虾仁、鱼
+                    return ings.includes('shrimp');
+                }
+                if (todayTrend === 'spicy') {
+                    // [新增] 辣味/重口：青椒、豆腐(麻婆)、洋葱
+                    // 这里的逻辑需要根据你的 RECIPES 定义来
+                    // 假设：麻婆豆腐(tofu), 青椒肉丝(pepper), 葱爆牛肉(onion) 算重口
+                    return ings.includes('pepper') || ings.includes('tofu') || r.name.includes('葱爆');
+                }
+                return false;
+            });
+            // [核心] 疯狂加权：符合趋势的菜品放入池子 4 次
+            // 这样玩家如果按攻略囤货，大概率能碰上；如果不囤，大概率会缺货
+            if (trendDishes.length > 0) {
+                for(let k=0; k<4; k++) {
+                    weightedPool.push(...trendDishes);
+                }
+                console.log(`[订单生成] 已针对 [${todayTrend}] 加权，卡池大小: ${weightedPool.length}`);
+            }
+        }
+        // 4. 生成订单
         for (let i = 0; i < goal; i++) {
             const count = Math.ceil(Math.random() * game.getDishesPerOrder(level));
             const dishes = [];
             
             for(let j=0; j<count; j++) {
-                let pool = [...availableRecipes];
-                
-                // 如果不是均衡日，增加对应菜品的权重
-                if (todayTrend !== 'balanced') {
-                    const trendDishes = availableRecipes.filter(r => {
-                        if (todayTrend === 'meat') return r.ingredients.includes('pork') || r.ingredients.includes('beef');
-                        if (todayTrend === 'veggie') return r.ingredients.includes('tomato') || r.ingredients.includes('potato') || r.ingredients.includes('pepper') || r.ingredients.includes('onion');
-                        if (todayTrend === 'seafood') return r.ingredients.includes('shrimp');
-                        if (todayTrend === 'rice') return r.ingredients.includes('rice');
-                        return false;
-                    });
-                    // 权重 x3
-                    if (trendDishes.length > 0) {
-                        pool.push(...trendDishes, ...trendDishes);
-                    }
-                }
-                
-                const recipe = pool[Math.floor(Math.random() * pool.length)];
+                // 从加权池中抽取
+                const recipe = weightedPool[Math.floor(Math.random() * weightedPool.length)];
                 dishes.push(recipe);
             }
             
@@ -5569,28 +5852,26 @@ function renderStation(sid, updateMode = 'full') {
         cookMachine.className = 'cook-machine';
         if (s.isBroken || (s.maintenance && s.maintenance >= 10)) cookMachine.classList.add('maintenance');
         
-        // 1. [修复] 动态计算灶台图片 (使用新命名规范)
-        // 格式: stove_{region}_lv{level}_{suffix}.png
-        const expansionLevel = game.inventory.expansion || 0;
-        // 获取当前国家 (默认为 cn)
-        const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
-        const region = (ngParams.location || 'cn:main').split(':')[0];
+        // --- [核心修改] 灶台底图生成逻辑 --- 
+        let stoveHtml = ''; 
         
-        // 计算后缀 (01:中间/标准, 02:左/二号, 03:右/三号)
-        let suffix = '01'; // 默认中间位
-        if (sid === 's2') suffix = '02';
-        if (sid === 's3') suffix = '03';
-        
-        // 特殊修正：标准后厨(lv0) 只有 01 号图，即使是 s2/s3 位置(虽然逻辑上不会出现)也用 01
-        if (expansionLevel === 0) suffix = '01';
-        // 扩容后厨(lv1) 只有 01 和 02，没有 03
-        if (expansionLevel === 1 && suffix === '03') suffix = '01';
-
-        const stoveImageName = `stove_${region}_lv${expansionLevel}_${suffix}.png`;
-        
-        // 构建灶台 HTML
-        // [关键] 移除了 onerror="this.style.display='none'"，这样如果路径错误会显示破图图标，方便调试
-        const stoveHtml = `<img src="assets/equipment/${stoveImageName}" class="stove-bg" alt="灶台">`;
+        // 只有非 Omni 系列的设备才显示传统灶台 
+        // (Omni 系列自带底座，不需要灶台图) 
+        if (!potName.includes('Omni')) { 
+            const expansionLevel = game.inventory.expansion || 0; 
+            const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}'); 
+            const region = (ngParams.location || 'cn:main').split(':')[0]; 
+            // 计算位置后缀 
+            let suffix = '01'; 
+            if (sid === 's2') suffix = '02'; 
+            if (sid === 's3') suffix = '03'; 
+            
+            // 修正后缀逻辑 
+            if (expansionLevel === 0) suffix = '01'; 
+            if (expansionLevel === 1 && suffix === '03') suffix = '01'; 
+            const stoveImageName = `stove_${region}_lv${expansionLevel}_${suffix}.png`; 
+            stoveHtml = `<img src="assets/equipment/${stoveImageName}" class="stove-bg" alt="灶台">`; 
+        }
 
         // 2. 根据状态组合 HTML
         if (s.stage === 'COOKING') {
@@ -7961,18 +8242,12 @@ function showPrepModal() {
     const isNewBranch = ngParams.isNGPlus === true;
 
     let introText = "";
-    let trendText = "";
-    let tagHtml = "";
 
     if (isDayOne) {
         if (isNewBranch) {
             introText = `🚀 <b>${ngParams.branchName || '新分店'}</b> 盛大开业！<br><span style='font-size:0.6em; opacity:0.9'>利用启动资金，快速在新城市站稳脚跟吧。</span>`;
-            tagHtml = `<div class="prep-trend-tag" style="background:rgba(241, 196, 15, 0.2); color:#f1c40f; border-color:#f1c40f;">🚩 商业版图扩张</div>`;
-            trendText = "新环境，新挑战！注意观察本地客人口味。";
         } else {
             introText = "🎉 新店开业大吉！<br><span style='font-size:0.6em; opacity:0.9; font-weight:400'>隔壁市场老板送来贺礼，今日食材<b>全场免费</b>！</span>";
-            tagHtml = `<div class="prep-trend-tag" style="background:rgba(46, 204, 113, 0.2); color:#2ecc71; border-color:#2ecc71;">🎁 新手福利：无限食材</div>`;
-            trendText = "今日无需担心成本，尽情练习烹饪吧！";
         }
         // Day 1 自动给一点初始库存
         if (Object.keys(window.tempInventory).length === 0) {
@@ -7981,18 +8256,7 @@ function showPrepModal() {
             window.tempInventory['onion'] = 5;
         }
     } else {
-        const trend = game.dailyTrend || 'balanced';
-        const gossipLib = {
-            'meat': [ "💪 隔壁健身房：今天要大口吃肉！", "🥩 菜贩老张：猪牛价格看涨！", "🔥 今日宜：开荤 | 忌：减肥" ],
-            'veggie': [ "🥬 社区王大妈：最近流行吃素养生。", "🥗 朋友圈：#挑战一日吃素", "🍃 今日宜：清淡 | 忌：油腻" ],
-            'seafood': [ "🌊 码头消息：刚上岸的鲜货！", "🦐 食客：好久没吃海鲜了。", "🥢 今日宜：尝鲜 | 忌：冷冻" ],
-            'rice': [ "🍚 写字楼：加班太累，想吃饱饭。", "🥢 学生党：老板，米饭要大碗！", "🌾 今日宜：碳水 | 忌：节食" ],
-            'balanced': [ "☀️ 天气预报：今日风和日丽。", "📅 经验：按平时备货即可。", "⚖️ 今日宜：稳扎稳打" ]
-        };
-        const msgs = gossipLib[trend] || gossipLib['balanced'];
         introText = "晨光熹微，市集喧嚣...<br><span style='font-size:0.6em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span>";
-        tagHtml = `<div class="prep-trend-tag">${msgs[Math.floor(Math.random() * msgs.length)]}</div>`;
-        trendText = "Morning Market · 今日食材行情看板";
     }
 
     modal.innerHTML = `
@@ -8004,9 +8268,8 @@ function showPrepModal() {
         <div class="prep-container">
             <div class="prep-header prep-ui-hidden">
                 <div class="prep-header-content">
-                    ${tagHtml}
-                    <h1 class="prep-title">清晨集市</h1>
-                    <div class="prep-subtitle">${trendText}</div>
+                    <h1 class="prep-title" style="margin-top:0;">清晨集市</h1>
+                    <div class="prep-subtitle">根据刚才的情报，合理规划采购...</div>
                 </div>
                 <button class="btn-back" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')"><span>↩</span> 返回</button>
             </div>
