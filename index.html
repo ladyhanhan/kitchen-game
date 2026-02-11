@@ -318,7 +318,7 @@
 .order-ticket {
     position: relative;
     width: 140px;
-    min-height: 110px; /* 1 道菜时的基础高度 */
+    min-height: 130px; /* 1 道菜时的基础高度 */
     background: linear-gradient(180deg, #fdfdfd 0%, #f5f5f5 60%, #e8e8e8 100%);
     /* Optimized: Reduced border radius (4px top, 0 bottom for tear effect) */
     border-radius: 4px 4px 0 0;
@@ -1057,6 +1057,35 @@
         .btn-green { background: #2ecc71 !important; box-shadow: 0 var(--btn-sh-y) 0 #27ae60 !important; color: white !important; }
         .btn-green:hover { box-shadow: 0 var(--btn-sh-hover-y) 0 #27ae60 !important; }
         .btn-green:active { box-shadow: 0 var(--btn-sh-active-y) 0 #27ae60 !important; }
+
+        /* [强制修复] 杀掉所有溢出隐藏 */ 
+        .station, .station-card, .station-cook-zone, .cook-station-wrapper { 
+            overflow: visible !important; 
+            transform-style: preserve-3d; /* 尝试修复层级上下文问题 */ 
+        } 
+        /* [强制修复] Omni 巨型设备样式 */ 
+        .omni-equipment-bg { 
+            position: absolute; 
+            bottom: -20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+        
+            /* 尺寸强制放大 */ 
+            width: 140% !important; 
+            height: auto !important; 
+            max-height: none !important; 
+            /* 层级调整：确保在最上层，但不在 UI 之上 */ 
+            z-index: 5; 
+        
+            /* 调试辅助：如果图片透明或错误，能看到占位 */ 
+            min-height: 100px; 
+            pointer-events: none; 
+        } 
+        /* 确保 UI 依然在设备之上 */ 
+        .station-ui-layer, .station-timer, .station-progress, .station-dish-icon { 
+            position: relative; 
+            z-index: 20 !important; 
+        }
 
         .btn-yellow { background: #FCC307 !important; box-shadow: 0 var(--btn-sh-y) 0 #c49606 !important; color: black !important; }
         .btn-yellow:hover { box-shadow: 0 var(--btn-sh-hover-y) 0 #c49606 !important; }
@@ -2319,7 +2348,8 @@
     } 
     .prep-bg { 
         position: absolute; inset: -20px; 
-        background: url('assets/bg/白天菜市场.png') no-repeat center center / cover; 
+        /* background: url('assets/bg/白天菜市场.png') no-repeat center center / cover; */
+        background: #333; /* Default fallback color */
         z-index: 0; 
         transform: scale(1.05);
         /* [优化] 背景渐进模糊 */
@@ -2451,28 +2481,28 @@
         pointer-events: auto;
     }
     
-    /* [调整] 左侧角色气泡：立绘在左，文字向右避让 */
+    /* [调整] 左侧角色气泡：立绘在左，文字向右大幅避让 */
     .chat-row.left .chat-bubble {
-        margin-left: -40px; /* 保持气泡向左钻入立绘底部 */
+        margin-left: -40px;
         margin-right: 20px;
         border-bottom-left-radius: 4px;
         z-index: 5;
         
-        /* [核心修改] 进一步加大左侧 padding (60px -> 85px) */
-        padding-left: 85px;  
-        padding-right: 24px; /* 右侧保持标准 */
+        /* [核心修改] 加大两边留白 */
+        padding-left: 110px !important;  /* 从 85px 进一步加大到 110px */
+        padding-right: 30px !important;  /* 右边也增加一点呼吸感 */
     }
-    /* [调整] 右侧角色气泡：立绘在右，文字向左避让 */
+    /* [调整] 右侧角色气泡：立绘在右，文字向左大幅避让 */
     .chat-row.right .chat-bubble {
-        margin-right: -40px; /* 保持气泡向右钻入立绘底部 */
+        margin-right: -40px;
         margin-left: 20px;
         border-bottom-right-radius: 4px;
         z-index: 5;
         background: #e1f5fe;
 
-        /* [核心修改] 右侧大幅增加 padding，防止文字被右边的退休教师挡住 */
-        padding-right: 60px; /* 原来是统一的24px，现在右侧加宽 */
-        padding-left: 24px;  /* 左侧保持标准 */
+        /* [核心修改] 加大两边留白 */
+        padding-right: 110px !important; /* 增加到 110px 统一遮挡安全区 */
+        padding-left: 30px !important;   /* 左边也增加一点呼吸感 */
     }
     
     /* 进场动画 */
@@ -3324,7 +3354,8 @@
 }
 
 /* 确保锅具和菜品悬浮在灶台之上 */
-.cook-machine > img:not(.stove-bg),
+/* [修复] 排除 .omni-popout-bg，防止它被强制设为 relative */
+.cook-machine > img:not(.stove-bg):not(.omni-popout-bg),
 .cook-machine > div {
     position: relative;
     z-index: 2;
@@ -3365,6 +3396,42 @@
     padding-top: 36px !important; /* [调整] 20px -> 36px (整体下移 16px) */
     padding-bottom: 70px !important; /* [新增] 底部留白，给绝对定位的进度条/文字留出空间 */
     position: relative; /* 确保绝对定位子元素参考此容器 */
+}
+
+/* [安全修改] 仅允许工位容器溢出，这不会影响内部普通灶台的布局 */
+.station {
+    overflow: visible !important;
+    position: relative; /* 确保是定位基准 */
+}
+/* [新增] Omni 专用样式：破框、放大、沉底 */
+/* [修复] 增加权重以覆盖 .cook-machine img 的 width: 100% !important */
+.cook-machine img.omni-popout-bg {
+    position: absolute !important; /* [强制] 确保绝对定位生效，不被通用样式覆盖 */
+    bottom: -56px !important; /* [调整] 再上移 20px (原-76px) */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 181.2% !important; /* [调整] 高度增加40px (154.5% -> 181.2%) */
+    height: auto !important;
+    z-index: 0 !important;
+    pointer-events: none;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+}
+/* [新增] 确保 UI 元素绝对居中且在最上层 (修复图片消失问题) */
+.station-dish-icon {
+    position: absolute !important;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 45px; /* 确保有固定尺寸 */
+    height: 45px;
+    z-index: 100 !important; /* 极高层级 */
+}
+.station-progress {
+    position: absolute !important;
+    bottom: 5px;
+    left: 10%;
+    width: 80%;
+    z-index: 100 !important;
 }
     </style>
 </head>
@@ -4265,20 +4332,20 @@ function stopMusic() {
 /* Removed old createCoinBuffer definition */
 
 const MARKET_GOSSIP_CONFIG = { 
-    // --- 🍖 肉类爆发 (王屠户的主场) --- 
+    // --- 🍖 肉类爆发 (道明叔) --- 
     meat: { 
         rush: [ 
             { 
-                speakers: ["撸铁阿姨", "王屠户"], 
+                speakers: ["撸铁阿姨", "道明叔"], 
                 lines: [ 
-                    "王老板，最近深蹲重量上去了，太费体能。", 
+                    "道明叔，最近深蹲重量上去了，太费体能。", 
                     "嚯，大姐，看你这肌肉线条，比好多小伙子都结实！", 
                     "那是，三分练七分吃，教练让我必须加餐。", 
                     "懂行！这块最嫩的牛里脊归你了，高蛋白低脂肪！" 
                 ] 
             }, 
             { 
-                speakers: ["外卖骑手", "王屠户"], 
+                speakers: ["外卖骑手", "道明叔"], 
                 lines: [ 
                     "这倒春寒太厉害，跑了一上午单，手都冻僵了。", 
                     "辛苦辛苦！赶紧进棚子里暖和暖和。", 
@@ -4287,9 +4354,9 @@ const MARKET_GOSSIP_CONFIG = {
                 ] 
             }, 
             { 
-                speakers: ["项目经理", "王屠户"], 
+                speakers: ["项目经理", "道明叔"], 
                 lines: [ 
-                    "老王，最近团队赶项目，大家都熬红了眼。", 
+                    "道明叔，最近团队赶项目，大家都熬红了眼。", 
                     "看出来了，你这黑眼圈都快掉地上了。", 
                     "今晚聚餐，我答应给大家搞顿全肉宴补补元气。", 
                     "没问题！这些大排骨全包给你，让大家吃个爽！" 
@@ -4297,129 +4364,125 @@ const MARKET_GOSSIP_CONFIG = {
             } 
         ] 
     }, 
-
-    // --- 🥬 蔬菜爆发 (林大婶的主场) --- 
-    vege: { 
-        rush: [ 
-            { 
-                speakers: ["全职老爸", "林大婶"], 
-                lines: [ 
-                    "大婶，我家那两个神兽最近太难伺候了。", 
-                    "怎么？又不爱吃饭啦？", 
-                    "是啊，天热没胃口，看到肉就摇头，愁死我了。", 
-                    "试试这刚摘的番茄和黄瓜，做个凉拌或者罗宋汤，酸酸甜甜孩子最爱！" 
-                ] 
-            }, 
-            { 
-                speakers: ["程序员", "林大婶"], 
-                lines: [ 
-                    "大婶，最近加班熬夜，脸上疯狂爆痘。", 
-                    "哎哟，年轻人要注意身体，这是虚火太旺了。", 
-                    "是啊，想吃点清淡的，把身体调理一下。", 
-                    "听婶子的，多吃苦瓜和芹菜，降火排毒最有效。" 
-                ] 
-            }, 
-            { 
-                speakers: ["退休教师", "林大婶"], 
-                lines: [ 
-                    "小林啊，最近体检报告出来了，医生让控制血脂。", 
-                    "那肉摊那边您最近可得少去了。", 
-                    "是啊，以后就是‘素食主义’喽，得讲究科学饮食。", 
-                    "放心，我这儿的蔬菜都是有机的，健康着呢！" 
-                ] 
-            } 
-        ] 
-    }, 
-
-    // --- 🦐 海鲜爆发 (老张头的主场) --- 
-    seafood: { 
-        rush: [ 
-            { 
-                speakers: ["焦虑老爸", "老张头"], 
-                lines: [ 
-                    "老张，孩子马上中考了，我看他背书背得头疼。", 
-                    "兄弟别急，这时候得吃点海里的补补脑。", 
-                    "我也听说DHA好，是不是得多吃鱼？", 
-                    "没错！今天的鲈鱼特别鲜，清蒸给孩子吃最灵！" 
-                ] 
-            }, 
-            { 
-                speakers: ["探店博主", "老张头"], 
-                lines: [ 
-                    "张大爷！听说第一批渔船刚靠岸？", 
-                    "你这小丫头鼻子真灵，刚卸下来的货。", 
-                    "我要拍一期‘开渔第一鲜’的视频，要最好的货！", 
-                    "必须有，看这皮皮虾和梭子蟹，镜头怼近点，鲜得跳起来！" 
-                ] 
-            }, 
-            { 
-                speakers: ["背包客", "老张头"], 
-                lines: [ 
-                    "大爷，我做攻略说来这里必须吃海鲜大餐。", 
-                    "那肯定，靠山吃山靠海吃海嘛。", 
-                    "但是怕景区饭店太贵，想买了回民宿自己煮。", 
-                    "那你来对地方了，我这价格公道，童叟无欺！" 
-                ] 
-            } 
-        ] 
-    }, 
-
-    // --- 🌶️ 辣味/重口爆发 (杂货店老板的主场) --- 
-    spicy: { 
-        rush: [ 
-            { 
-                speakers: ["创业青年", "杂货店老板"], 
-                lines: [ 
-                    "老板，最近压力大得睡不着，头发大把掉。", 
-                    "年轻人不容易啊，是不是心里憋得慌？", 
-                    "是啊，就想找个刺激点的法子发泄一下。", 
-                    "拿这包特辣火锅底料回去，辣出一身大汗，什么烦恼都忘光了！" 
-                ] 
-            }, 
-            { 
-                speakers: ["南方游客", "杂货店老板"], 
-                lines: [ 
-                    "这梅雨天什么时候是个头？感觉被子里都能拧出水。", 
-                    "还得半个月呢，这湿气钻得人骨头疼。", 
-                    "有没有什么本地的土法子去去湿？", 
-                    "简单，多吃辣椒花椒，以毒攻毒，湿气全跑光！" 
-                ] 
-            } 
-        ] 
-    }, 
-
-    // --- 😐 平稳/无明显倾向 (通用) --- 
-    general: { 
-        normal: [ 
-            { 
-                speakers: ["集市管理员", "滑板少年"], 
-                lines: [ 
-                    "喂！那边的，集市里不许滑滑板！", 
-                    "不好意思大叔，我这就下来走。", 
-                    "小心撞到老人家，去外面的广场玩。", 
-                    "知道啦，我就进来买根烤肠，马上走！" 
-                ] 
-            }, 
-            { 
-                speakers: ["老顾客", "包子铺老板"], 
-                lines: [ 
-                    "老板，老规矩，两个素包一杯豆浆。", 
-                    "好嘞，我看您今天气色不错啊。", 
-                    "嗨，刚在公园打完太极，浑身舒坦。", 
-                    "得嘞，趁热吃，健康长寿！" 
-                ] 
-            }, 
-            { 
-                speakers: ["小女孩", "妈妈"], 
-                lines: [ 
-                    "妈妈，我想买那盆小多肉植物！", 
-                    "我们是来买菜的，不是逛花鸟市场的。", 
-                    "就买一盆嘛，我会自己浇水的。", 
-                    "行吧，那你要说话算话，不能养死了。" 
-                ] 
-            } 
-        ] 
-    } 
+// --- 🥬 蔬菜爆发 (林大婶 - 保持原样) --- 
+vege: { 
+    rush: [ 
+        { 
+            speakers: ["全职老爸", "林大婶"], 
+            lines: [ 
+                "大婶，我家那两个神兽最近太难伺候了。", 
+                "怎么？又不爱吃饭啦？", 
+                "是啊，天热没胃口，看到肉就摇头，愁死我了。", 
+                "试试这刚摘的番茄和黄瓜，做个凉拌或者罗宋汤，酸酸甜甜孩子最爱！" 
+            ] 
+        }, 
+        { 
+            speakers: ["程序员", "林大婶"], 
+            lines: [ 
+                "大婶，最近加班熬夜，脸上疯狂爆痘。", 
+                "哎哟，年轻人要注意身体，这是虚火太旺了。", 
+                "是啊，想吃点清淡的，把身体调理一下。", 
+                "听婶子的，多吃苦瓜和芹菜，降火排毒最有效。" 
+            ] 
+        }, 
+        { 
+            speakers: ["退休教师", "林大婶"], 
+            lines: [ 
+                "小林啊，最近体检报告出来了，医生让控制血脂。", 
+                "那肉摊那边您最近可得少去了。", 
+                "是啊，以后就是‘素食主义’喽，得讲究科学饮食。", 
+                "放心，我这儿的蔬菜都是有机的，健康着呢！" 
+            ] 
+        } 
+    ] 
+}, 
+// --- 🦐 海鲜爆发 (老张头 - 保持原样) --- 
+seafood: { 
+    rush: [ 
+        { 
+            speakers: ["焦虑老爸", "老张头"], 
+            lines: [ 
+                "老张，孩子马上中考了，我看他背书背得头疼。", 
+                "兄弟别急，这时候得吃点海里的补补脑。", 
+                "我也听说DHA好，是不是得多吃鱼？", 
+                "没错！今天的鲈鱼特别鲜，清蒸给孩子吃最灵！" 
+            ] 
+        }, 
+        { 
+            speakers: ["探店博主", "老张头"], 
+            lines: [ 
+                "张大爷！听说第一批渔船刚靠岸？", 
+                "你这小丫头鼻子真灵，刚卸下来的货。", 
+                "我要拍一期‘开渔第一鲜’的视频，要最好的货！", 
+                "必须有，看这皮皮虾和梭子蟹，镜头怼近点，鲜得跳起来！" 
+            ] 
+        }, 
+        { 
+            speakers: ["背包客", "老张头"], 
+            lines: [ 
+                "大爷，我做攻略说来这里必须吃海鲜大餐。", 
+                "那肯定，靠山吃山靠海吃海嘛。", 
+                "但是怕景区饭店太贵，想买了回民宿自己煮。", 
+                "那你来对地方了，我这价格公道，童叟无欺！" 
+            ] 
+        } 
+    ] 
+}, 
+// --- 🌶️ 辣味/重口爆发 (杂货店 -> 左伊姐) --- 
+spicy: { 
+    rush: [ 
+        { 
+            speakers: ["创业青年", "左伊姐"], 
+            lines: [ 
+                "左伊姐，最近压力大得睡不着，头发大把掉。", // 改口叫左伊姐 
+                "年轻人不容易啊，是不是心里憋得慌？", 
+                "是啊，就想找个刺激点的法子发泄一下。", 
+                "拿这包特辣火锅底料回去，辣出一身大汗，什么烦恼都忘光了！" 
+            ] 
+        }, 
+        { 
+            speakers: ["南方游客", "左伊姐"], 
+            lines: [ 
+                "这梅雨天什么时候是个头？感觉被子里都能拧出水。", 
+                "还得半个月呢，这湿气钻得人骨头疼。", 
+                "有没有什么本地的土法子去去湿？", 
+                "简单，多吃辣椒花椒，以毒攻毒，湿气全跑光！" 
+            ] 
+        } 
+    ] 
+}, 
+// --- 😐 平稳/无明显倾向 (通用 - 保持原样) --- 
+general: { 
+    normal: [ 
+        { 
+            speakers: ["集市管理员", "滑板少年"], 
+            lines: [ 
+                "喂！那边的，集市里不许滑滑板！", 
+                "不好意思大叔，我这就下来走。", 
+                "小心撞到老人家，去外面的广场玩。", 
+                "知道啦，我就进来买根烤肠，马上走！" 
+            ] 
+        }, 
+        { 
+            speakers: ["老顾客", "包子铺老板"], 
+            lines: [ 
+                "老板，老规矩，两个素包一杯豆浆。", 
+                "好嘞，我看您今天气色不错啊。", 
+                "嗨，刚在公园打完太极，浑身舒坦。", 
+                "得嘞，趁热吃，健康长寿！" 
+            ] 
+        }, 
+        { 
+            speakers: ["小女孩", "妈妈"], 
+            lines: [ 
+                "妈妈，我想买那盆小多肉植物！", 
+                "我们是来买菜的，不是逛花鸟市场的。", 
+                "就买一盆嘛，我会自己浇水的。", 
+                "行吧，那你要说话算话，不能养死了。" 
+            ] 
+        } 
+    ] 
+} 
 };
 
 const SHOP_CONFIG = {
@@ -4639,46 +4702,101 @@ function generateDailyGossip() {
 
 // 启动对话流程
 function startMarketChatterFlow() { 
-    const gossip = game.dailyGossip; 
-    // 如果没有情报，直接显示采购界面 
-    if (!gossip || !gossip.lines || gossip.lines.length === 0) { 
-        revealPrepUI(); 
-        return; 
+    const layer = document.getElementById('market-chatter-layer'); 
+    if (!layer) {
+        // 如果层不存在，这里可以是一个容错逻辑，或者直接创建它
+        // 但根据新的设计，我们最好在 startMarketChatterFlow 内部确保它的存在
+        const newLayer = document.createElement('div'); 
+        newLayer.id = 'market-chatter-layer'; 
+        newLayer.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; z-index:5000;"; 
+        
+        // 顶部返回按钮
+        const headerHtml = `
+            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:100%; max-width:1200px; padding:15px 20px; box-sizing:border-box; z-index:5002; display:flex; justify-content:flex-end; pointer-events:none;">
+                <button class="btn-back dark" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')" style="pointer-events:auto;"><span>↩</span> 返回</button>
+            </div>
+        `;
+        newLayer.innerHTML = headerHtml;
+
+        // 消息容器
+        const listContainer = document.createElement('div'); 
+        listContainer.id = 'chat-history-container'; 
+        newLayer.appendChild(listContainer); 
+        
+        // 底部提示
+        const hint = document.createElement('div'); 
+        hint.className = 'chat-hint-text';
+        hint.innerText = "(点击屏幕继续) ▶"; 
+        hint.style.cssText = "position:absolute; bottom:20px; width:100%; text-align:center; color:rgba(255,255,255,0.5); font-size:12px; pointer-events:none; animation:fadeIn 1s infinite alternate;"; 
+        newLayer.appendChild(hint); 
+        
+        // 点击事件
+        newLayer.onclick = (e) => { 
+            if(e.target.closest('button')) return; 
+            window.advanceChatter(); 
+        };
+        
+        const prepModal = document.getElementById('prep-modal');
+        if (prepModal) prepModal.appendChild(newLayer);
+    } else {
+        // 重置
+        const container = document.getElementById('chat-history-container'); 
+        if (container) container.innerHTML = ''; 
+        const hint = layer.querySelector('.chat-hint-text');
+        if (hint) {
+            hint.style.display = 'block';
+            hint.innerText = "(点击屏幕继续) ▶"; 
+        }
+        layer.style.display = 'block';
+    }
+
+    // 确保再次获取 (如果是刚创建的)
+    const activeLayer = document.getElementById('market-chatter-layer');
+    if (!activeLayer) return;
+
+    // === 核心逻辑修正：完整的 if...else 结构 ===
+    const hasPlayedMarketIntro = localStorage.getItem('hasPlayedMarketIntro'); 
+    
+    if (!hasPlayedMarketIntro) { 
+        // === 首次进入集市：打招呼剧情 (去除特定名字与沉重词汇) === 
+        game.dailyGossip = { 
+            speakers: ["道明叔", "我", "左伊姐", "我", "老张头", "我"], 
+            lines: [ 
+                "哎哟喂！这不是老掌柜家那丫头吗？好几年没见，出落得越发水灵了！", 
+                "道明叔早呀！我回来接手爷爷的老店啦，今天第一天来进货，您可得多关照我！", 
+                "那必须的！欢迎回来小老板，以后铺子里缺什么调料尽管来找姐，全按底价给你拿！", 
+                "太感谢左伊姐了，有大家在我心里就踏实多了！", 
+                "好好干丫头！老店重新开张，大家伙儿都替你高兴。海鲜找老头子我准没错！", 
+                "嗯！老张头您放心，我一定会把咱们老店的招牌重新擦亮的！" 
+            ], 
+            currentLineIndex: 0 
+        }; 
+        localStorage.setItem('hasPlayedMarketIntro', 'true'); 
+    } else { 
+        // === 非首次进入：随机八卦剧情 === 
+        // 这里直接嵌入随机生成逻辑，确保不依赖外部调用
+        if (typeof MARKET_GOSSIP_CONFIG !== 'undefined') {
+            const categories = Object.keys(MARKET_GOSSIP_CONFIG); 
+            const randomCategory = categories[Math.floor(Math.random() * categories.length)]; 
+            
+            const subCategories = Object.keys(MARKET_GOSSIP_CONFIG[randomCategory]); 
+            const randomSub = subCategories[Math.floor(Math.random() * subCategories.length)]; 
+            
+            const gossipList = MARKET_GOSSIP_CONFIG[randomCategory][randomSub]; 
+            const randomGossip = gossipList[Math.floor(Math.random() * gossipList.length)]; 
+            
+            game.dailyGossip = { 
+                speakers: randomGossip.speakers, 
+                lines: randomGossip.lines, 
+                currentLineIndex: 0 
+            }; 
+        } else {
+             // 容错
+             game.dailyGossip = { speakers: ["系统"], lines: ["今日集市风平浪静。"], currentLineIndex: 0 };
+        }
     } 
-    
-    gossip.currentLineIndex = 0; 
-    // 创建全屏点击层 (用于点击屏幕继续) 
-    const layer = document.createElement('div'); 
-    layer.id = 'market-chatter-layer'; 
-    layer.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; z-index:5000;"; 
-    // 点击全屏任意位置触发下一句 
-    layer.onclick = (e) => { 
-        // 防止点击按钮时触发下一句 
-        if(e.target.closest('button')) return; 
-        window.advanceChatter(); 
-    }; 
-    
-    // [新增] 顶部返回按钮 (复用 prep-header 样式结构)
-    const headerHtml = `
-        <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:100%; max-width:1200px; padding:15px 20px; box-sizing:border-box; z-index:5002; display:flex; justify-content:flex-end; pointer-events:none;">
-            <button class="btn-back dark" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')" style="pointer-events:auto;"><span>↩</span> 返回</button>
-        </div>
-    `;
-    layer.innerHTML = headerHtml;
 
-    // 创建消息容器 (存放所有对话) 
-    const listContainer = document.createElement('div'); 
-    listContainer.id = 'chat-history-container'; 
-    layer.appendChild(listContainer); 
-
-    // 插入提示语 
-    const hint = document.createElement('div'); 
-    hint.innerText = "(点击屏幕继续)"; 
-    hint.style.cssText = "position:absolute; bottom:20px; width:100%; text-align:center; color:rgba(255,255,255,0.5); font-size:12px; pointer-events:none; animation:fadeIn 1s infinite alternate;"; 
-    layer.appendChild(hint); 
-    document.getElementById('prep-modal').appendChild(layer); 
-
-    // 播放第一句 
+    // 启动显示
     appendNextChatMessage(); 
 }
 
@@ -4690,14 +4808,21 @@ function appendNextChatMessage() {
     if (!container || gossip.currentLineIndex >= gossip.lines.length) return; 
     
     const line = gossip.lines[gossip.currentLineIndex]; 
-    const isLeft = (gossip.currentLineIndex % 2 === 0); // 偶数行在左(A)，奇数行在右(B) 
+    let isLeft = (gossip.currentLineIndex % 2 === 0); 
     const speakerName = gossip.speakers[gossip.currentLineIndex % gossip.speakers.length]; 
     
-    // [核心修改] 强制映射测试图片 
-    // 左边(A) -> 王屠户，右边(B) -> 退休教师 
-    const testImageSrc = isLeft ? "assets/characters/A角-王屠户.png" : "assets/characters/B角-退休教师.png"; 
+    // [核心新增] 智能朝向修正 
+    if (speakerName === '我') isLeft = true; 
+    if (['道明叔', '左伊姐', '老张头', '林大婶', '刘大爷'].includes(speakerName)) isLeft = false; 
     
-    // 颜色生成逻辑 (保留作为回退方案) 
+    // [核心修复] 左边是流动NPC(B角)，右边是固定摊主(A角) 
+    const rolePrefix = isLeft ? "B角-" : "A角-"; 
+    
+    // 优先尝试的文件名 和 备用文件名 
+    const primaryImageSrc = `assets/characters/${rolePrefix}${speakerName}.png`; 
+    const fallbackImageSrc = `assets/characters/${speakerName}.png`; 
+    
+    // 颜色生成逻辑 (最终兜底方案) 
     const charCode = speakerName.charCodeAt(0); 
     const colorList = ['#e67e22', '#3498db', '#e74c3c', '#9b59b6', '#1abc9c', '#f1c40f']; 
     const avatarColor = colorList[charCode % colorList.length]; 
@@ -4706,9 +4831,13 @@ function appendNextChatMessage() {
     const row = document.createElement('div'); 
     row.className = `chat-row ${isLeft ? 'left' : 'right'}`; 
     
+    // [增强] 双重 onerror 机制 
+    // 第一次错误：尝试去掉前缀加载 (data-fallback 用作标记防止死循环) 
+    // 第二次错误：隐藏 img，显示 placeholder 
     const portraitHtml = `
     <div class="chat-portrait-box">
-        <img class="chat-portrait-img" src="${testImageSrc}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <img class="chat-portrait-img" src="${primaryImageSrc}" 
+             onerror="if(!this.dataset.triedFallback){ this.dataset.triedFallback='true'; this.src='${fallbackImageSrc}'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }">
         <div class="chat-portrait-placeholder" style="background:${avatarColor}; display:none;"> 
             ${avatarChar} 
         </div> 
@@ -4731,8 +4860,8 @@ function appendNextChatMessage() {
             </div> 
         `; 
     } 
-    row.innerHTML = isLeft ? `${portraitHtml}<div class="chat-bubble">${bubbleContent}</div>` : `${portraitHtml}<div class="chat-bubble">${bubbleContent}</div>`; // 注意：右侧Flex会自动反转顺序，这里HTML结构保持一致即可 
-
+    row.innerHTML = isLeft ? `${portraitHtml}<div class="chat-bubble">${bubbleContent}</div>` : `${portraitHtml}<div class="chat-bubble">${bubbleContent}</div>`; 
+    
     container.appendChild(row); 
     playChatBubbleSound(); // [修改] 使用 IM 气泡音效
 } 
@@ -4841,8 +4970,10 @@ function renderShop() {
                 // 简单的模糊匹配防止改名失效
                 if (targetPots.some(t => itemName.includes(t)) || true) {
                     const fallbackId = `fallback-pot-${levelIdx}-${key}`;
+                    // [修复] Omni 系列文件名无空格 (Omni1.0.png)，但名称有空格 (Omni 1.0)
+                    const fileName = itemName.replace(/\s+/g, '');
                     iconHtml = `
-                        <img src="assets/equipment/${itemName}.png" 
+                        <img src="assets/equipment/${fileName}.png" 
                              alt="${itemName}" 
                              style="width: 100%; height: 100%; object-fit: contain;" 
                              onerror="this.style.display='none'; document.getElementById('${fallbackId}').style.display='flex';">
@@ -5049,6 +5180,7 @@ const GameStateManager = {
     resetAllData: function(keepLegacy = false) {
         const keysToRemove = [
             'gameState',          // 核心存档
+            'restaurant_game_save', // 兼容可能的旧存档名
             'yesterdayRate',      // 昨日评分
             'ng_params',          // 新征程参数
             'dailyLegacyIncome'
@@ -5059,6 +5191,12 @@ const GameStateManager = {
             keysToRemove.push('legacy_shops_list');
             // 兼容清理旧版单店数据
             keysToRemove.push('legacy_shop_data');
+            // [核心新增] 清除高叔新手剧情的播放记录！
+            keysToRemove.push('hasPlayedIntro');
+            // [核心新增] 清除集市初见剧情
+            keysToRemove.push('hasPlayedMarketIntro');
+            // [核心新增] 清除开业贺礼领取记录
+            keysToRemove.push('hasSeenPrepGift');
         }
         
         keysToRemove.forEach(key => localStorage.removeItem(key));
@@ -5852,31 +5990,73 @@ function renderStation(sid, updateMode = 'full') {
         cookMachine.className = 'cook-machine';
         if (s.isBroken || (s.maintenance && s.maintenance >= 10)) cookMachine.classList.add('maintenance');
         
-        // --- [核心修改] 灶台底图生成逻辑 --- 
-        let stoveHtml = ''; 
+        // --- [修改] 设备渲染逻辑 (安全分支模式) --- 
+    let stoveHtml = ''; 
+    
+    // 1. 判断是否为 Omni 设备 (不区分大小写) 
+    const isOmni = potName && potName.toLowerCase().includes('omni');
+    if (isOmni) { 
+        // === Omni 专用分支 === 
         
-        // 只有非 Omni 系列的设备才显示传统灶台 
-        // (Omni 系列自带底座，不需要灶台图) 
-        if (!potName.includes('Omni')) { 
+        // 1. 文件名清洗："Omni 1.0" -> "Omni1.0" 
+        const fileName = potName.replace(/\s+/g, ''); 
+        
+        // 2. 动态判定当前工位状态，分发后缀 
+        let stateSuffix = '空闲'; // 默认状态 
+        
+        if (s.stage === 'COOKING') { 
+            stateSuffix = '烹饪中'; 
+        } else if (s.stage === 'FINISHED') { 
+            // 状态是空闲，但上面有菜，说明是做好了等玩家收 
+            stateSuffix = '出餐中'; 
+        } 
+        
+        // 3. 渲染图片，带有双重回退机制 
+        // 优先找: Omni1.0空闲.png / Omni1.0烹饪中.png / Omni1.0出餐中.png 
+        // 找不到则回退找: Omni1.0.png (原版/商店图) 
+        stoveHtml = ` 
+            <img src="assets/equipment/${fileName}${stateSuffix}.png" 
+                 class="omni-popout-bg" 
+                 alt="${potName} ${stateSuffix}" 
+                 onerror=" 
+                    if (!this.getAttribute('data-fallback')) { 
+                        this.setAttribute('data-fallback', 'true'); 
+                        this.src='assets/equipment/${fileName}.png'; 
+                    } else { 
+                        this.src='assets/equipment/${potName}.png'; 
+                        this.onerror=null; 
+                    } 
+                 "> 
+        `; 
+    } else { 
+            // === 普通灶台逻辑 (完全保持原样，防止位移) === 
             const expansionLevel = game.inventory.expansion || 0; 
             const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}'); 
             const region = (ngParams.location || 'cn:main').split(':')[0]; 
-            // 计算位置后缀 
             let suffix = '01'; 
             if (sid === 's2') suffix = '02'; 
             if (sid === 's3') suffix = '03'; 
-            
-            // 修正后缀逻辑 
             if (expansionLevel === 0) suffix = '01'; 
             if (expansionLevel === 1 && suffix === '03') suffix = '01'; 
             const stoveImageName = `stove_${region}_lv${expansionLevel}_${suffix}.png`; 
+            
+            // 注意：这里继续使用旧的 .stove-bg 类 
             stoveHtml = `<img src="assets/equipment/${stoveImageName}" class="stove-bg" alt="灶台">`; 
         }
 
         // 2. 根据状态组合 HTML
         if (s.stage === 'COOKING') {
             cookMachine.classList.add('active');
-            cookMachine.innerHTML = `${stoveHtml}<img src="assets/equipment/${potName}.png" alt="Cooking" class="pot-main" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            
+            // Omni 特殊处理：使用破框大图
+            if (isOmni) {
+                // Omni: stoveHtml 已包含大图，追加烹饪中的视觉（如有）
+                cookMachine.innerHTML = `${stoveHtml}`;
+            } else {
+                // 普通: 正常显示
+                cookMachine.innerHTML = `${stoveHtml}<img src="assets/equipment/${potName}.png" alt="Cooking" class="pot-main" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            }
+            
             status.innerText = '烹饪中...';
             status.style.color = '#e67e22';
             barContainer.style.display = 'block';
@@ -5891,15 +6071,86 @@ function renderStation(sid, updateMode = 'full') {
                 badgeHtml = `<div style="position:absolute; top:25px; right:25px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;">x${s.servingsLeft}</div>`;
             }
 
-            cookMachine.innerHTML = `${stoveHtml}<div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;"><img src="assets/dishes/${dishName}.png" alt="${dishName}" style="width:64px; height:64px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span style="display:none; font-size:42px;">${dishIcon}</span>${badgeHtml}</div>`;
+            // [核心修复] 生成菜品图标 (dishHtml) - Omni 出餐口特效优化
+            const dishImg = (s.recipe && s.recipe.image) ? s.recipe.image : `assets/dishes/${dishName}.png`;
+            
+            // 基础样式：居中, 64px (覆盖 class 中的 45px)
+            let dishStyle = 'width:64px; height:64px; object-fit:contain; pointer-events:auto; transition: all 0.2s ease-out;';
+            
+            // 如果是 Omni 设备，并且处于出餐阶段 (FINISHED = Idle with dish)
+            if (isOmni && s.stage === 'FINISHED') {
+                // 视觉模拟：调整为 98px
+                // 位置下移：保持在出餐口托盘位置 (top: 80% + 38px)
+                dishStyle += `
+                    width: 98px !important;
+                    height: 98px !important;
+                    top: calc(80% + 38px) !important;
+                    filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5));
+                `;
+            }
+
+            const dishHtml = `
+                <div style="position:absolute; width:100%; height:100%; top:0; left:0; z-index:100; pointer-events:none;">
+                    <img src="${dishImg}" 
+                         alt="${dishName}" 
+                         class="station-dish-icon" 
+                         style="${dishStyle}" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <span style="display:none; font-size:42px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">${dishIcon}</span>
+                    ${badgeHtml}
+                </div>
+            `;
+            
+            // 组装：背景(stoveHtml) + 菜品层(dishHtml)
+            // 注意：stoveHtml 里的 .omni-popout-bg 已经是 z-index:0，dishHtml 是 z-index:100
+            cookMachine.innerHTML = `${stoveHtml}${dishHtml}`;
+            
             status.innerText = '点击取餐!';
             status.style.color = '#2ecc71';
             barContainer.style.display = 'none';
         } else {
-            cookMachine.innerHTML = `${stoveHtml}<img src="assets/equipment/${potName}.png" alt="Idle" class="pot-main" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            // IDLE
+            if (isOmni) {
+                cookMachine.innerHTML = `${stoveHtml}`;
+            } else {
+                // [微调] 特殊锅具在空闲时下移+左移
+                const shiftPots = ['基础铁锅', '专业不粘锅', '多段控温精钢锅'];
+                const extraStyle = shiftPots.includes(potName) ? 'transform: translate(-6px, 16px);' : '';
+                cookMachine.innerHTML = `${stoveHtml}<img src="assets/equipment/${potName}.png" alt="Idle" class="pot-main" style="${extraStyle}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeT0iNDAiIGZvbnQtc2l6ZT0iNDAiPvCfpZg8L3RleHQ+PC9zdmc+'">`;
+            }
             status.innerText = '空闲';
             status.style.color = '#ccc';
             barContainer.style.display = 'none';
+        }
+        
+        // --- [新增] Omni 样式动态修正 ---
+        const cookCard = el.querySelector('.station-card.cook-card');
+        const cookZone = el.querySelector('.station-cook-zone');
+        
+        if (cookCard && cookZone) {
+            if (isOmni) {
+                // Omni 专用：背景全透明，移除边框和阴影
+                cookCard.style.background = 'none';
+                cookCard.style.boxShadow = 'none';
+                cookCard.style.border = 'none';
+                cookZone.style.background = 'none';
+                cookZone.style.boxShadow = 'none';
+                cookZone.style.border = 'none';
+                
+                // 移除“+”号提示 (用户要求不显示)
+                const plus = cookZone.querySelector('.omni-plus-sign');
+                if (plus) plus.remove();
+            } else {
+                // 普通灶台：恢复原有的卡片质感
+                cookCard.style.background = '';
+                cookCard.style.boxShadow = '';
+                cookCard.style.border = '';
+                cookZone.style.background = '';
+                cookZone.style.boxShadow = '';
+                cookZone.style.border = '';
+                const plus = cookZone.querySelector('.omni-plus-sign');
+                if (plus) plus.remove();
+            }
         }
     } 
     
@@ -6781,8 +7032,23 @@ window.onload = () => {
             const cover = document.getElementById('cover') || document.getElementById('start-screen');
             if (cover) cover.style.display = 'none'; // 隐藏封面
             
-            // [新增] 插入街坊情报环节
-            showPrepModal();
+            // [新增] 检查是否是第一次游玩 
+            const hasPlayed = localStorage.getItem('hasPlayedIntro'); 
+            
+            if (!hasPlayed) { 
+                // 第一次：播放序章 
+                setTimeout(() => { 
+                    renderStoryModal(INTRO_STORY, () => { 
+                        localStorage.setItem('hasPlayedIntro', 'true'); 
+                        saveGameState(); 
+                        // 剧情结束后，进入集市备菜
+                        showPrepModal();
+                    }); 
+                }, 500); // 稍微延时等待转场 
+            } else {
+                // [新增] 插入街坊情报环节
+                showPrepModal();
+            }
         };
     }
 
@@ -7538,6 +7804,170 @@ function renderLocationStep1() {
     mapScreen.appendChild(bottomBar); 
 }
 
+// ================= 剧情系统 ================= 
+const INTRO_STORY = [ 
+    { 
+        speaker: "高叔", 
+        text: "孩子……你终于回来了。", 
+        image: "assets/characters/高叔.png",
+        bgImage: "assets/bg/门店后厨.jpg"
+    }, 
+    { 
+        speaker: "高叔", 
+        text: "这间店你爷爷守了一辈子，现在……你就是这家店的主厨了。", 
+        image: "assets/characters/高叔.png" 
+    }, 
+    { 
+        speaker: "高叔", 
+        text: "高叔相信你一定能让这个老招牌重新在这条街亮起来。", 
+        image: "assets/characters/高叔.png" 
+    }, 
+    { 
+        speaker: "高叔", 
+        text: "我帮你张罗了一批新鲜食材已经入库了，先练练手，把咱那灶台热起来再说！", 
+        image: "assets/characters/高叔.png", 
+        reward: { coins: 500, items: { 'tomato': 5, 'egg': 5, 'rice': 5, 'onion': 5 } } 
+    } 
+]; 
+
+function renderStoryModal(storyData, onComplete) { 
+    let currentIndex = 0; 
+    const container = document.getElementById('game-container') || document.body; 
+    
+    // 移除旧的（如果存在） 
+    const oldOverlay = document.getElementById('story-overlay'); 
+    if (oldOverlay) oldOverlay.remove(); 
+    
+    const overlay = document.createElement('div'); 
+    overlay.id = 'story-overlay'; 
+    // 加入 transition 实现背景平滑渐变过渡 
+    overlay.style.cssText = ` 
+        position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; 
+        background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('assets/bg/门店后厨.jpg') center/cover no-repeat; 
+        display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:15%; 
+        transition: background 0.5s ease; 
+    `; 
+    
+    const renderFrame = () => { 
+        if (currentIndex >= storyData.length) { 
+            overlay.remove(); 
+            if (onComplete) onComplete(); 
+            return; 
+        } 
+        
+        const frame = storyData[currentIndex]; 
+        
+        // [核心修改 1] 动态切换背景：如果有馈赠，则切换到家庭厨房+深色蒙层 
+        if (frame.reward) { 
+            overlay.style.background = "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url('assets/bg/家庭厨房.jpeg') center/cover no-repeat"; 
+        } else { 
+            overlay.style.background = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('assets/bg/门店后厨.jpg') center/cover no-repeat"; 
+        } 
+    // [核心修改 2] 自定义奖励弹窗 HTML (UI 升级版) 
+    let rewardModalHtml = ''; 
+    if (frame.reward && !frame.rewarded) { 
+        rewardModalHtml = ` 
+            <div id="intro-reward-modal" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:10000; display:flex; align-items:center; justify-content:center;" onclick="event.stopPropagation()"> 
+                <style>
+                    @keyframes popIn {
+                        0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+                        100% { transform: scale(1) translateY(0); opacity: 1; }
+                    }
+                    .reward-btn:active { transform: scale(0.96); }
+                </style>
+                <div style="background:linear-gradient(145deg, #ffffff, #fffaf5); width:90%; max-width:360px; border-radius:24px; padding:32px 24px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border: 4px solid rgba(255,255,255,0.8); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-bottom: 20vh;"> 
+                    <div style="width:80px; height:80px; margin:0 auto 20px; background:linear-gradient(135deg, #fceabb, #f8b500); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px rgba(243,156,18,0.3);">
+                        <div style="font-size:42px;">🎁</div> 
+                    </div>
+                    <h3 style="margin:0 0 24px 0; color:#d35400; font-size:24px; font-weight:800; text-shadow:0 1px 2px rgba(211,84,0,0.1);">高叔的馈赠</h3> 
+                    <div style="background:rgba(255,248,225,0.8); border-radius:16px; padding:20px; margin-bottom:28px; border:1px solid rgba(243,156,18,0.2);"> 
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:12px;">
+                            <span style="color:#7f8c8d; font-weight:600;">启动资金</span>
+                            <span style="color:#e74c3c; font-size:20px; font-weight:800; font-family:monospace;">¥${frame.reward.coins}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#7f8c8d; font-weight:600;">基础食材包</span>
+                            <span style="color:#2ecc71; font-size:18px; font-weight:800;">x1</span>
+                        </div>
+                    </div> 
+                    <button class="reward-btn" onclick="acceptIntroReward(event)" style="background:linear-gradient(135deg, #e67e22, #d35400); color:#fff; border:none; padding:16px 0; border-radius:30px; font-size:18px; font-weight:bold; cursor:pointer; box-shadow:0 8px 20px rgba(230,126,34,0.4); width:100%; transition:transform 0.1s;">收下这份心意</button> 
+                </div> 
+            </div> 
+        `; 
+        
+        // 绑定“收下”按钮的全局事件 
+        window.acceptIntroReward = (e) => { 
+            e.stopPropagation(); // 防止穿透点击 
+            
+            // 实际发放奖励 
+            if (frame.reward.coins) { 
+                game.coins = (game.coins || 0) + frame.reward.coins; 
+                if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay(); 
+            } 
+            if (frame.reward.items) { 
+                for (let key in frame.reward.items) { 
+                    game.inventory[key] = (game.inventory[key] || 0) + frame.reward.items[key]; 
+                } 
+            } 
+            frame.rewarded = true; 
+            
+            if (typeof playSfx === 'function') playSfx(600, 'sine', 0.3); 
+            
+            // 移除弹窗，允许玩家继续点击屏幕结束对话 
+            const modal = document.getElementById('intro-reward-modal'); 
+            if (modal) modal.remove(); 
+        }; 
+    } 
+    
+    // [核心修改] 放大整体布局、立绘及气泡，将点击提示放入气泡内部 
+    overlay.innerHTML = ` 
+        <div style="width:95%; max-width:800px; margin:0 auto; padding:20px; position:relative; cursor:pointer; height:100%; display:flex; flex-direction:column; justify-content:flex-end;" onclick="advanceStory(event)"> 
+            <div class="chat-row left" style="display:flex; margin-bottom: 0; align-items: flex-end;"> 
+                
+                <div class="chat-portrait-box" style="width: 160px; height: 220px; flex-shrink: 0; position: relative; z-index: 10;"> 
+                    <img src="${frame.image}" 
+                         class="chat-portrait-img" 
+                         style="display:block; width: 320px; height: 380px; max-width:none; position:absolute; bottom:0; left:50%; transform:translateX(-50%); object-fit:contain; object-position:bottom center;" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"> 
+                    <div class="chat-portrait-placeholder" style="background:#e67e22; display:none; width:80px; height:80px; font-size:40px; line-height:80px; border-radius:10px;">高</div> 
+                </div> 
+                
+                <div class="chat-bubble" style="position:relative; flex-grow: 1; padding: 30px 40px 50px 120px !important; margin-left: -70px; z-index: 5; font-size: 18px; line-height: 1.6; min-height: 120px;"> 
+                    <span style="font-weight:bold; color:#d35400; display:block; margin-bottom:12px; font-size:22px;">${frame.speaker}</span> 
+                    ${frame.text} 
+                    
+                    <div style="position:absolute; right:25px; bottom:15px; font-size:14px; color:#e67e22; font-weight:bold; animation:blink 1.2s infinite;"> 
+                        (点击屏幕继续) ▶ 
+                    </div> 
+                </div> 
+            </div> 
+        </div> 
+        ${rewardModalHtml} 
+    `; 
+    }; 
+    window.advanceStory = (e) => { 
+        if (e) e.stopPropagation(); 
+        
+        const frame = storyData[currentIndex]; 
+        // [核心修改 3] 拦截逻辑：如果当前帧有奖励且未领取，禁止进入下一句 
+        if (frame.reward && !frame.rewarded) { 
+            return; 
+        } 
+        
+        currentIndex++; 
+        renderFrame(); 
+        if (typeof playSfx === 'function') playSfx(400, 'triangle', 0.05); 
+    }; 
+    renderFrame(); 
+    container.appendChild(overlay); 
+}
+
+// [加一点文字闪烁动画提升提示效果] 
+const style = document.createElement('style'); 
+style.innerHTML = "@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }"; 
+document.head.appendChild(style); 
+// ================= 剧情系统结束 =================
+
 function renderLocationStep2(regionId) {
     const list = document.getElementById('district-list-container');
     const sidePanel = document.getElementById('district-panel');
@@ -8212,6 +8642,33 @@ window.confirmPrep = async function() {
  showToast(`DAY ${game.level} 开始营业啦`, 2000); 
  };
 
+function loadBackgroundImageWithRetry(element, url, version, retries = 3) {
+    const img = new Image();
+    // 添加时间戳防止缓存
+    const uniqueUrl = `${url}?v=${version}&t=${Date.now()}`;
+    
+    img.onload = function() {
+        element.style.background = `url('${uniqueUrl}') no-repeat center center / cover`;
+        console.log("Market image loaded successfully:", uniqueUrl);
+    };
+    
+    img.onerror = function() {
+        console.error("Failed to load market image:", uniqueUrl);
+        if (retries > 0) {
+            console.log(`Retrying... (${retries} attempts left)`);
+            setTimeout(() => {
+                loadBackgroundImageWithRetry(element, url, version, retries - 1);
+            }, 500);
+        } else {
+             // 最终失败兜底
+             element.style.background = '#2c3e50'; 
+             showToast("背景加载异常，已启用备用背景");
+        }
+    };
+    
+    img.src = uniqueUrl;
+}
+
 function showPrepModal() {
     // 1. 基础清理
     document.querySelectorAll('#cover, #start-screen, .loading-screen').forEach(el => el.style.display = 'none');
@@ -8247,13 +8704,24 @@ function showPrepModal() {
         if (isNewBranch) {
             introText = `🚀 <b>${ngParams.branchName || '新分店'}</b> 盛大开业！<br><span style='font-size:0.6em; opacity:0.9'>利用启动资金，快速在新城市站稳脚跟吧。</span>`;
         } else {
-            introText = "🎉 新店开业大吉！<br><span style='font-size:0.6em; opacity:0.9; font-weight:400'>隔壁市场老板送来贺礼，今日食材<b>全场免费</b>！</span>";
-        }
-        // Day 1 自动给一点初始库存
-        if (Object.keys(window.tempInventory).length === 0) {
-            window.tempInventory['tomato'] = 5;
-            window.tempInventory['egg'] = 5;
-            window.tempInventory['onion'] = 5;
+            // [修复] 仅在首次进入时显示开业贺礼，并领取物资
+            const hasSeenPrepGift = localStorage.getItem('hasSeenPrepGift');
+            
+            if (!hasSeenPrepGift) {
+                introText = "新店开业大吉！<br><span style='font-size:0.6em; opacity:0.8; font-weight:400'>街坊邻居们听说你回来重开老店，特意凑了些新鲜食材送来当贺礼！</span>";
+                
+                // 仅在首次领取时发放物资
+                if (Object.keys(window.tempInventory).length === 0) {
+                    window.tempInventory['tomato'] = 5;
+                    window.tempInventory['egg'] = 5;
+                    window.tempInventory['onion'] = 5;
+                }
+                
+                localStorage.setItem('hasSeenPrepGift', 'true');
+            } else {
+                // 如果已领取过，显示默认文案
+                introText = "晨光熹微，市集喧嚣...<br><span style='font-size:0.6em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span>";
+            }
         }
     } else {
         introText = "晨光熹微，市集喧嚣...<br><span style='font-size:0.6em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span>";
@@ -8291,6 +8759,13 @@ function showPrepModal() {
             </div>
         </div>
     `;
+    
+    // [修复] 动态加载背景图片，强制刷新缓存并监控状态
+    const bgEl = modal.querySelector('.prep-bg');
+    if (bgEl) {
+        // 使用版本号 v1.0 (如果更新了图片文件，请修改此处)
+        loadBackgroundImageWithRetry(bgEl, 'assets/bg/白天菜市场.png', '1.0');
+    }
 
     // 6. 渲染商品内容 (此时虽然不可见但已存在 DOM 中)
     renderPrepUI();
@@ -8603,18 +9078,44 @@ function showLegacyManageModal(shopData) {
 
 
 <script>
-// 3. 强制重置开始按钮（放在代码最末尾）：
+// ================= 游戏启动逻辑 =================
+function initGame() {
+    showPrepModal();
+}
+
+function startGame() {
+    if (typeof playBgm === 'function') {
+        playBgm();
+    }
+    
+    const startScreen = document.getElementById('start-screen');
+    const gameUI = document.getElementById('game-ui');
+    
+    if (startScreen) startScreen.style.display = 'none';
+    if (gameUI) gameUI.style.display = 'block';
+    
+    const hasPlayed = localStorage.getItem('hasPlayedIntro');
+    
+    if (!hasPlayed) {
+        setTimeout(() => {
+            renderStoryModal(INTRO_STORY, () => {
+                localStorage.setItem('hasPlayedIntro', 'true');
+                saveGameState();
+                initGame();
+            });
+        }, 500);
+    } else {
+        initGame();
+    }
+}
+
+// 绑定开始按钮
 (function() {
     const realBtn = document.getElementById('btn-start') || document.getElementById('start-btn');
     if (realBtn) {
         realBtn.onclick = function(e) {
             e.preventDefault();
-            // 隐藏所有可能遮挡的层
-            ['cover', 'start-screen'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.style.display = 'none';
-            });
-            showPrepModal();
+            startGame();
         };
     }
 })();
