@@ -444,189 +444,7 @@
             box-sizing: border-box;
         }
         
-        /* Ingredient Shelf (Pantry Design) */
-        #ingredient-shelf {
-            width: 100%; height: 100%; /* Fill Grid Row 3 */
-            /* Simulated Wood Cabinet Background */
-            background-color: #5d4037;
-            background-image: 
-                /* Inner Shadow */
-                linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 20%),
-                /* Vertical Cabinet Door Separators */
-                repeating-linear-gradient(90deg, 
-                    transparent 0, transparent 249px, 
-                    rgba(0,0,0,0.3) 250px, rgba(255,255,255,0.05) 251px, transparent 252px),
-                /* Wood Grain Pattern */
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 2px, transparent 4px),
-                /* Base Wood Gradient */
-                linear-gradient(180deg, #4e342e 0%, #3e2723 100%);
-            
-            border-top: 6px solid #3e2723; /* Cabinet top trim */
-            border-bottom: 6px solid #281a17; /* Cabinet bottom trim */
-            display: flex;
-            align-items: center; /* [优化] 保持居中对齐 */
-            justify-content: center;
-            gap: 20px; /* Increased gap for better spacing */
-            padding: 30px 30px 0 30px; /* [优化] 增加顶部 padding (30px) 将内容下移 */
-            box-sizing: border-box;
-            box-shadow: 
-                inset 0 10px 30px rgba(0,0,0,0.6), /* Deep internal shadow */
-                0 -2px 5px rgba(0,0,0,0.2); /* Outer shadow */
-            z-index: 20;
-            position: relative;
-            overflow: hidden; /* Ensure handles don't overflow */
-        }
 
-        /* Cabinet Handles Simulation (Removed) */
-        /* #ingredient-shelf::before {
-            content: '';
-            position: absolute;
-            top: 50%; left: 0; right: 0;
-            height: 10px;
-            transform: translateY(-50%);
-            background-image: 
-                radial-gradient(circle at 125px 50%, rgba(255,215,0,0.6) 2px, transparent 4px),
-                radial-gradient(circle at 375px 50%, rgba(255,215,0,0.6) 2px, transparent 4px),
-                radial-gradient(circle at 625px 50%, rgba(255,215,0,0.6) 2px, transparent 4px),
-                radial-gradient(circle at 875px 50%, rgba(255,215,0,0.6) 2px, transparent 4px);
-            background-repeat: repeat-x;
-            background-size: 1000px 10px;
-            pointer-events: none;
-            opacity: 0.8;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
-            z-index: 1;
-        } */
-
-        /* Shelf Depth / Texture Overlay */
-        #ingredient-shelf::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.2) 100%);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .ing-btn {
-            width: 80px; height: 90px;
-            /* Crate/Box style removed for transparent ingredients */
-            border: none;
-            background: transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-            user-select: none;
-            position: relative;
-            z-index: 2; /* Above background pattern */
-        }
-        
-        /* Crate texture removed for transparent style */
-
-        /* Pantry Door Animation */
-        #pantry-door {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #5d4037;
-            background-image: 
-                linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 20%),
-                repeating-linear-gradient(90deg, transparent 0, transparent 249px, rgba(0,0,0,0.3) 250px, rgba(255,255,255,0.05) 251px, transparent 252px),
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 2px, transparent 4px),
-                linear-gradient(180deg, #6d4c41 0%, #4e342e 100%);
-            border-bottom: 8px solid #3e2723;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            z-index: 100;
-            transform: translateY(0);
-            /* Optimized Animation: Faster response (0.2s delay removed), smooth ease-out curve */
-            /* Cubic-bezier(0.2, 0.8, 0.2, 1) provides a quick start and natural deceleration */
-            transition: transform 1.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            pointer-events: all;
-        }
-        
-        #pantry-door.door-open {
-            transform: translateY(-100%);
-            pointer-events: none;
-        }
-        
-        /* Optimized Manual Handle Style */
-        #pantry-handle-btn {
-            width: 140px; height: 28px;
-            background-color: #dcdcdc;
-            /* Brushed metal texture simulation */
-            background-image: 
-                linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 45%, rgba(0,0,0,0.1) 55%, rgba(0,0,0,0.3) 100%),
-                repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(0,0,0,0.05) 3px, transparent 4px);
-            
-            border: 1px solid #888;
-            border-top-color: #aaa;
-            border-bottom-color: #666;
-            border-radius: 6px;
-            margin-bottom: 40px;
-            cursor: pointer;
-            
-            /* Realistic 3D shadows and highlights */
-            box-shadow: 
-                0 4px 8px rgba(0,0,0,0.4), 
-                inset 0 1px 0 rgba(255,255,255,0.9), 
-                inset 0 -1px 0 rgba(0,0,0,0.2);
-                
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            position: relative;
-            z-index: 101;
-        }
-        
-        #pantry-handle-btn::after {
-            /* Metallic sheen/highlight */
-            content: '';
-            position: absolute;
-            top: 4px; left: 8px; right: 8px; bottom: 4px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
-            border-radius: 3px;
-            pointer-events: none;
-        }
-        
-        #pantry-handle-btn:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.05);
-            box-shadow: 
-                0 6px 12px rgba(0,0,0,0.5), 
-                inset 0 1px 0 rgba(255,255,255,0.9), 
-                inset 0 -1px 0 rgba(0,0,0,0.2);
-        }
-        
-        #pantry-handle-btn:active {
-            transform: translateY(2px);
-            filter: brightness(0.95);
-            box-shadow: 
-                0 1px 2px rgba(0,0,0,0.3), 
-                inset 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .ing-btn:hover { 
-            transform: translateY(-5px) scale(1.05); 
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
-        }
-        
-        .ing-btn:active { 
-            transform: translateY(0) scale(0.98); 
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-        }
-        
-        .ing-btn.disabled { 
-            opacity: 0.6; 
-            pointer-events: none; 
-            filter: grayscale(0.8); 
-            background: #ccc;
-            box-shadow: none;
-        }
         
         .ing-icon { 
             font-size: 48px; /* [优化] 放大备菜区图标 (36px -> 48px) */
@@ -1153,6 +971,55 @@
         #loading-bar-container { width: 300px; height: 12px; background: #eee; border: 2px solid #2c3e50; border-radius: 6px; overflow: hidden; margin: 20px 0; position: relative; }
         #loading-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
         #loading-text { font-size: 14px; font-weight: bold; color: #666; margin-bottom: 10px; }
+
+        /* [新增] Loading 界面样式优化 */
+        .loading-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 25px;
+            
+            /* 纯净图片展示 */
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-color: transparent; /* 确保无背景色 */
+            border: none !important;       /* 强制去描边 */
+            box-shadow: none !important;   /* 强制去阴影 */
+            
+            /* 浮动动画 */
+            animation: floating 2s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* [优化] 小贴士文字：更宽、更大、更清晰 */
+        .loading-tips-text {
+            margin-top: 20px;
+            font-size: 16px;  /* [修改] 字号再加大 */
+            color: rgba(255, 255, 255, 0.75); /* [修改] 稍微提亮颜色，但不纯白 */
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5); /* 增加一点文字阴影增加可读性 */
+            
+            /* 强制单行逻辑 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            
+            /* [修改] 使用视口宽度，突破父容器限制 */
+            width: 90vw;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            
+            line-height: 1.5;
+            font-weight: 500;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
         
         /* SVG Chart */
         .chart-container { width: 100%; height: clamp(140px, 22vh, 210px); position: relative; margin-top: 12px; margin-bottom: 6px; border-bottom: 2px solid #ddd; border-left: 2px solid #ddd; box-sizing: border-box; }
@@ -1239,6 +1106,7 @@
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            z-index: 100; /* [Fix] Ensure buttons are clickable */
         }
         .home-balance {
             min-width: 140px;
@@ -3433,9 +3301,257 @@
     width: 80%;
     z-index: 100 !important;
 }
+/* [新增] Omni 出餐图标悬浮动效 */
+    @keyframes omni-dish-bounce {
+        0%, 100% { transform: translate(-50%, -50%); }
+        50% { transform: translate(-50%, calc(-50% - 10px)); }
+    }
+    
+    /* [新增] 全局垃圾桶卡片：位于右侧垂直居中 */
+/* [UI 优化] 全局垃圾桶：风格对齐 station-card (毛玻璃/透明卡片) */
+    .global-trash-card {
+        position: absolute;
+        right: 45px; /* [调整] 向左平移 10px (35px -> 45px) */
+        top: 55%;
+        transform: translateY(-50%);
+        margin-top: 18px; /* [调整] 向下平移 18px */
+        
+        width: 130px; /* [调整] 等比放大 (70px -> 130px) */
+        height: 160px; /* [调整] 高度设为备菜卡片的一半 (85px -> 160px) */
+        
+        /* 风格：透明背景，与 Omni station 保持一致 */
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        
+        border-radius: 16px; /* 对齐 station-card */
+        border: none; /* [修改] 去除描边，对齐 Omni 风格 */
+        box-shadow: none; /* 对齐 station-card */
+        
+        /* 初始状态：必须隐藏！ */
+        display: none;
+        
+        /* 布局与交互 */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        
+        /* 层级控制：低于暂停遮罩 (3100)，但在 HUD (20) 之上 */
+        z-index: 50;
+        
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    /* 悬停效果：对齐 station-card:hover */
+    .global-trash-card:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* 激活状态：清洁模式 */
+    .global-trash-card.active {
+        background: rgba(231, 76, 60, 0.15) !important; /* 红调透明 */
+        border-color: #e74c3c;
+        transform: translateY(-50%) scale(1.05);
+        box-shadow: 0 0 15px rgba(231, 76, 60, 0.3) !important;
+        z-index: 100; /* 激活时适当提升层级 */
+    }
+    
+    .global-trash-icon {
+        font-size: 58px; /* [调整] 等比放大 (32px -> 58px) */
+        margin-bottom: 10px; /* [调整] 等比放大 (5px -> 10px) */
+        filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3)); /* 增强投影 */
+    }
+    
+    .global-trash-label {
+        font-size: 18px; /* [调整] 等比放大 (11px -> 18px) */
+        color: rgba(255, 255, 255, 0.9); /* 白色文字 */
+        font-weight: 800; /* 加粗 */
+        letter-spacing: 1px;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* 强阴影保证可读性 */
+    }
+    
+    .global-trash-card.active .global-trash-label {
+        color: #e74c3c;
+        text-shadow: none;
+    }
+        /* [核心] 抽屉容器 */ 
+    /* [UI调整] 食材柜：恢复 4x4 版本的宽度，但保持 3x4 布局 */ 
+#pantry-drawer { 
+    position: absolute; 
+    top: 22%; 
+    bottom: 18%; 
+    left: 0; 
+    
+    /* [核心修改] 宽度改回 70%，最大 400px (之前是 300px) */ 
+    width: 70%; 
+    max-width: 400px; 
+    
+    /* 材质保持深色木纹不变 */ 
+    background-color: #5d4037; 
+    background-image: 
+        linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 10%), 
+        repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(0,0,0,0.03) 3px, rgba(255,255,255,0.01) 4px, transparent 6px), 
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"); 
+    
+    border: 4px solid #3e2723; 
+    border-left: none; 
+    border-radius: 0 16px 16px 0; 
+    z-index: 3000; 
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.4); 
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+} 
+#pantry-drawer.closed { transform: translateX(-100%); } 
+#pantry-drawer.open { transform: translateX(0); } 
+
+/* 把手：保持金属质感，位置微调 */ 
+#pantry-handle { 
+    position: absolute; 
+    top: 50%; 
+    right: -36px; /* 挂在外面 */ 
+    transform: translateY(-50%); 
+    width: 36px; 
+    height: 90px; 
+    cursor: pointer; 
+    z-index: 3001; /* 比柜体高一点 */ 
+
+    background: linear-gradient(to right, #7f8c8d, #ecf0f1, #95a5a6); 
+    border: 2px solid #555; 
+    border-left: none; 
+    border-radius: 0 10px 10px 0; 
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.3); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+} 
+.handle-grip { 
+    width: 6px; 
+    height: 50%; 
+    background: #bdc3c7; 
+    border-radius: 3px; 
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2); 
+} 
+
+/* 内部容器 */ 
+.drawer-content { 
+    height: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 15px; 
+    box-sizing: border-box; 
+} 
+
+/* 标题栏：文字颜色改为浅色，以适应深色背景 */ 
+.drawer-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 12px; 
+    padding-bottom: 8px; 
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15); /* 浅色分割线 */ 
+} 
+.drawer-title { 
+    color: #ecf0f1 !important; /* [修改] 浅灰白文字 */ 
+    font-size: 16px; 
+    font-weight: 800; 
+    text-shadow: none !important; /* [核心修改] 去除投影 */ 
+    letter-spacing: 1px; 
+} 
+
+/* 翻页按钮：深色背景上的亮色按钮 */ 
+.drawer-nav button { 
+    background: rgba(0, 0, 0, 0.3); 
+    color: #fff; 
+    border: 1px solid rgba(255,255,255,0.2); 
+    border-radius: 6px; 
+    padding: 4px 10px; 
+    cursor: pointer; 
+    transition: background 0.2s; 
+} 
+.drawer-nav button:hover { background: rgba(0, 0, 0, 0.5); } 
+#pantry-layer-indicator { 
+    color: rgba(255, 255, 255, 0.7) !important; 
+    font-size: 12px; 
+    margin: 0 5px; 
+    text-shadow: none !important; 
+} 
+
+/* [布局修改] 3列 x 4行 = 12格 */ 
+#ingredient-grid { 
+    flex: 1; 
+    display: grid; 
+    /* [核心修改] 改为3列 */ 
+    grid-template-columns: repeat(3, 1fr); 
+    grid-template-rows: repeat(4, 1fr); 
+    gap: 10px; 
+    overflow: hidden; 
+} 
+
+/* 格子样式：深色凹槽感 */ 
+.ingredient-item { 
+    width: 100%; 
+    height: 100%; 
+    /* 深色凹槽背景 */ 
+    background: rgba(0, 0, 0, 0.25); 
+    border-radius: 10px; 
+    border: 1px solid rgba(255, 255, 255, 0.05); /* 微弱高光边框 */ 
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3); /* 内阴影制造凹陷感 */ 
+
+    display: flex; 
+    flex-direction: column; /* 垂直排列 */ 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+    cursor: pointer; 
+    transition: transform 0.1s; 
+} 
+.ingredient-item:active { transform: scale(0.95); background: rgba(0,0,0,0.35); } 
+
+.ingredient-item img { 
+    width: 75%; /* 图片稍小一点，留出呼吸感 */ 
+    height: 75%; 
+    object-fit: contain; 
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); 
+} 
+
+/* 兼容 Emoji 图标的样式 */
+.ingredient-item .ing-icon {
+    font-size: 40px;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+    line-height: 1;
+}
+
+/* [核心修改] 数量标签：高对比，无投影 */ 
+.ingredient-count { 
+    position: absolute; 
+    bottom: 4px; 
+    right: 4px; 
+    background: #e74c3c; /* 鲜艳红底 */ 
+    color: #fff; 
+    font-size: 11px; 
+    font-weight: 700; 
+    padding: 1px 5px; 
+    border-radius: 4px; 
+    text-shadow: none !important; /* [强制] 去除文字阴影 */ 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* 标签本身的盒子阴影保留一点点 */ 
+}
+        
     </style>
 </head>
 <body>
+<!-- [Audio System] Preloaded Audio Elements -->
+<div id="audio-pool" style="display: none;">
+    <audio id="bgm-theme" loop>
+        <source src="audio/theme_bgm.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgm-shop" loop>
+        <source src="audio/shop_bgm.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgm-game" loop>
+        <source src="audio/game_bgm.mp3" type="audio/mpeg">
+    </audio>
+</div>
 <div id="orientation-lock">
     <div style="font-size: 60px; margin-bottom: 20px;">📱🔄</div>
     <div style="font-size: 24px; font-weight: bold;">请旋转手机</div>
@@ -3444,6 +3560,24 @@
 
 
 <div id="game-container">
+    <div id="game-ui" style="display:none;"> 
+        <div id="pantry-drawer" class="closed"> 
+            <div class="drawer-content"> 
+                <div class="drawer-header"> 
+                    <span class="drawer-title" style="color:#8B4513; font-weight:bold;">📦 食材储物柜</span> 
+                    <div class="drawer-nav"> 
+                        <button onclick="changePantryLayer(-1)">◀</button> 
+                        <span id="pantry-layer-indicator" style="color:#5D4037;">1/2</span> 
+                        <button onclick="changePantryLayer(1)">▶</button> 
+                    </div> 
+                </div> 
+                <div id="ingredient-grid"></div> 
+            </div> 
+            <div id="pantry-handle" onclick="togglePantry()"> 
+                <div class="handle-grip"></div> 
+            </div> 
+        </div> 
+    </div>
     <div id="game-bg" aria-hidden="true">
         <div class="bg-layer bg-a"></div>
         <div class="bg-layer bg-b"></div>
@@ -3499,6 +3633,9 @@
         <!-- Progress bar removed -->
     </div>
 
+    <!-- [新增] 全局垃圾桶卡片 (插入在 HUD 之后，Play Area 之前) -->
+
+
     <div id="play-area">
         <div id="belt-container"></div>
 
@@ -3506,10 +3643,9 @@
             <!-- Stations injected by JS -->
         </div>
 
-        <div id="ingredient-shelf">
-            <!-- Ingredients injected by JS -->
-        </div>
     </div>
+
+
 
     <div id="start-screen">
         <div class="home-top-right">
@@ -3517,7 +3653,7 @@
                 <span>钱包</span>
                 <span id="home-balance">¥0</span>
             </div>
-            <button id="btn-world-map" class="home-btn-secondary">🗺 商业版图</button>
+            <button id="btn-world-map" class="home-btn-secondary" onclick="playCoin(); showLocationSelection()">🗺 商业版图</button>
             <button id="btn-shop" class="home-btn-secondary" onclick="showShop()">🛒 商店</button>
         </div>
         <div class="home-title">
@@ -3635,17 +3771,28 @@
             </div>
         </div>
     </div>
+
+    <!-- [新增] 全局垃圾桶卡片 (Moved inside game-container) -->
+    <div id="global-trash-card" class="global-trash-card" onclick="toggleTrashMode()">
+        <div class="global-trash-icon">🗑️</div>
+        <div class="global-trash-label">丢弃</div>
+    </div>
     </div>
 </div>
+
+
 
 <div id="drag-cursor"></div>
 
 <div id="loading" style="position:fixed; inset:0; background:#000 url('assets/bg/门店后厨.jpg') no-repeat center center / cover; z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s ease;">
     <div id="loading-content" style="position:relative; z-index:2; font-size:24px; font-weight:bold; color:#FFFFFF; display:flex; flex-direction:column; align-items:center; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
-        <div style="font-size:60px; margin-bottom:20px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">🧑‍🍳</div>
+        <!-- [修改] 移除Emoji，使用动态素材轮播 -->
+        <div id="loading-icon" class="loading-icon"></div>
         <div style="margin-bottom:10px; letter-spacing: 2px;">准备好成为餐饮大亨了吗？</div>
         <div id="loading-text" style="color:#FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.9);">资源加载中 0%</div>
         <div id="loading-bar-container" style="background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 6px rgba(0,0,0,0.4);"><div id="loading-bar"></div></div>
+        <!-- [新增] 随机小贴士容器 -->
+        <div id="loading-tips" class="loading-tips-text">正在准备厨房...</div>
     </div>
 </div>
 <div id="transition-overlay" style="position:fixed; inset:0; background:black; z-index:10000; opacity:0; pointer-events:none; transition:opacity 0.45s ease;"></div>
@@ -3670,7 +3817,7 @@
         <button class="close-btn" onclick="hideSettingsModal()">保存并返回</button>
     </div>
 </div>
-<audio id="bgm" src="audio/theme_bgm.mp4" loop style="display:none"></audio>
+<audio id="bgm" src="audio/theme_bgm.mp3" loop style="display:none"></audio>
 <audio id="game-bgm" src="audio/game_bgm.mp3" loop style="display:none"></audio>
 
 <div id="overlay">
@@ -3749,6 +3896,90 @@
 
 <script src="tests.js"></script>
 <script>
+// [Audio System] Global Audio Controller
+const AudioController = {
+    currentBgm: null,
+    isUnlocked: false, // User interaction flag
+
+    // Initialize: Unlock audio context on first interaction
+    init() {
+        if (this.isUnlocked) return;
+        const unlock = () => {
+            this.isUnlocked = true;
+            
+            // Resume Web Audio Context if suspended
+            if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Unlock Audio Elements
+            const theme = document.getElementById('bgm-theme');
+            if (theme) {
+                // [Fix] Only perform play-pause unlock if NOT already playing/active
+                // This prevents interrupting the theme song if it's already playing
+                if (this.currentBgm === 'bgm-theme' || !theme.paused) {
+                    // Already active, no need to interrupt
+                } else {
+                    theme.play().then(() => {
+                         // Double check before pausing
+                         if (this.currentBgm !== 'bgm-theme') {
+                             theme.pause();
+                         }
+                    }).catch(() => {});
+                }
+            }
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('touchstart', unlock);
+        };
+        document.addEventListener('click', unlock);
+        document.addEventListener('touchstart', unlock);
+    },
+
+    // Stop current BGM
+    stopCurrent() {
+        if (this.currentBgm) {
+            const audio = document.getElementById(this.currentBgm);
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            this.currentBgm = null;
+        }
+    },
+
+    // Play specific BGM (Mutex)
+    play(id) {
+        if (this.currentBgm === id) {
+            // Ensure it's playing
+            const audio = document.getElementById(id);
+            if (audio && audio.paused) audio.play().catch(() => {});
+            return;
+        }
+
+        this.stopCurrent(); // Stop previous
+
+        const audio = document.getElementById(id);
+        if (audio) {
+            audio.volume = 0.5; // Default volume
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn(`Audio playback failed for ${id}:`, error);
+                });
+            }
+            this.currentBgm = id;
+        }
+    },
+
+    // Scene shortcuts
+    playTheme() { this.play('bgm-theme'); },
+    playShop() { this.play('bgm-shop'); },
+    playGame() { this.play('bgm-game'); }
+};
+
+// Auto-init on load
+window.addEventListener('DOMContentLoaded', () => AudioController.init());
+
 // [新增] 移动端视窗适配系统
 function resizeGameWindow() {
     const container = document.getElementById('game-container');
@@ -3849,9 +4080,12 @@ let coinBuffer = null;
 let revenueBuffer = null;
 let angryBuffers = []; // [新增] 存储生气音效 Buffer
 let resultSfxBuffer = null; // [新增] 成绩单音效 Buffer
+/* [Deprecated] Legacy Audio Objects
 let shopMusic = new Audio('audio/shop_bgm.mp3'); // [新增] 商店/集市音乐
 shopMusic.loop = true;
+shopMusic.volume = 1.0; // [核心修改] 提高 BGM 音量至 1.0 (Max)
 let shopMusicSource = null;
+*/
 
 let angryAudioElements = []; // [新增] 存储生气音效 Audio 元素 (Fallback)
 const ANGRY_SOUNDS = ['audio/angry_man.mp3', 'audio/angry_woman.mp3', 'audio/angry_child.mp3']; // [新增] 音效文件列表 (英文文件名避免编码问题)
@@ -3861,7 +4095,7 @@ let gameBgmSource = null; // Track Game BGM MediaElementSource
 const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.9; masterGain.connect(audioCtx.destination);
 const sfxGain = audioCtx.createGain(); sfxGain.gain.value = 0.8; sfxGain.connect(masterGain);
 const musicGain = audioCtx.createGain(); musicGain.gain.value = 0.3; musicGain.connect(masterGain);
-const themeGain = audioCtx.createGain(); themeGain.gain.value = 0.15; themeGain.connect(musicGain); // Theme song specific gain for normalization
+const themeGain = audioCtx.createGain(); themeGain.gain.value = 1.0; themeGain.connect(musicGain); // Theme song specific gain for normalization
 const gameFileGain = audioCtx.createGain(); gameFileGain.gain.value = 0.3; gameFileGain.connect(musicGain); // Game BGM specific gain
 
 let uiState = 'LOADING';
@@ -4019,12 +4253,12 @@ function updateGameBackground(stateStage = null) {
     setGameBgImage(targetBg, defaultBg);
 }
 
-function playSfx(f, t='sine', d=0.1) {
+function playSfx(f, t='sine', d=0.1, v=0.1) {
     if (!sfxEnabled) return;
     const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
     o.type = t; o.connect(g); g.connect(sfxGain);
     o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
     o.start(); o.stop(audioCtx.currentTime + d);
 }
@@ -4136,46 +4370,16 @@ function playResultSfx() {
     }
 }
 
-// [新增] 播放商店/集市音乐 (作为 BGM)
+/* [Deprecated] Legacy Audio Functions
 function playShopMusic() {
-    // [修改] 商店音乐属于 BGM，受 themeMusicEnabled 控制
-    if (!themeMusicEnabled) return;
-    
-    // [修复] 播放商店音乐时，暂停主背景音乐
-    const bgm = document.getElementById('bgm');
-    const gameBgm = document.getElementById('game-bgm');
-    if (bgm && !bgm.paused) bgm.pause();
-    if (gameBgm && !gameBgm.paused) gameBgm.pause();
-
-    try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        
-        // [调整] 降低音量以匹配主题曲 (主题曲 themeGain=0.15)
-        shopMusic.volume = 0.15;
-
-        // 尝试连接到 musicGain (替代 sfxGain)
-        if (!shopMusicSource) {
-             try {
-                 shopMusicSource = audioCtx.createMediaElementSource(shopMusic);
-                 shopMusicSource.connect(musicGain);
-             } catch(e) {
-                 console.warn('MediaElementSource creation failed (maybe already connected):', e);
-             }
-        }
-        
-        // 防止重复播放导致重置
-        if (!shopMusic.paused && shopMusic.currentTime > 0) return;
-
-        shopMusic.currentTime = 0;
-        shopMusic.play().catch(e => console.error("Shop music play failed:", e));
-    } catch(e) { console.error(e); }
+   console.warn("playShopMusic is deprecated. Use AudioController.playShop() instead.");
 }
+*/
 
 // [新增] 停止商店/集市音乐
 function stopShopMusic() {
-    if (shopMusic) {
-        shopMusic.pause();
-        shopMusic.currentTime = 0;
+    if (AudioController.currentBgm === 'bgm-shop') {
+        AudioController.stopCurrent();
     }
 }
 
@@ -4242,91 +4446,30 @@ function preloadAudio() {
 
 let nintendoBGMInterval = null;
 
-function startNintendoBGM() { 
-    if (!gameMusicEnabled) return; 
-    
-    // 清理旧的循环 (如果存在)
-    if (nintendoBGMInterval) {
-        clearInterval(nintendoBGMInterval);
-        nintendoBGMInterval = null;
-    }
-
-    const gameBgm = document.getElementById('game-bgm');
-    if (gameBgm) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        
-        if (!gameBgmSource) {
-            try {
-                gameBgmSource = audioCtx.createMediaElementSource(gameBgm);
-                gameBgmSource.connect(gameFileGain);
-            } catch (e) { console.log("Game BGM Source connect error:", e); }
-        }
-        
-        // 确保主音乐音量正常
-        musicGain.gain.cancelScheduledValues(audioCtx.currentTime); 
-        musicGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-
-        if (gameBgm.paused) {
-            gameBgm.play().catch(e => console.log("Game BGM Play Error:", e));
-        }
-    }
-    console.log("🎵 游戏 BGM (MP3) 已启动"); 
+function startNintendoBGM() {
+    AudioController.playGame();
 }
 
 function startMusic() {
     // 检查当前是否处于“非游戏状态”（即 Loading 或 Start 界面）
     const loadingEl = document.getElementById('loading');
     const startScreen = document.getElementById('start-screen');
+    const mapScreen = document.getElementById('map-screen');
     
     const isLoading = loadingEl && loadingEl.style.display !== 'none';
     const isStart = startScreen && startScreen.style.display !== 'none';
-    const isMenuState = isLoading || isStart;
+    const isMap = mapScreen && mapScreen.style.display !== 'none';
+    const isMenuState = isLoading || isStart || isMap;
     
-    // A. 菜单状态：播放主题曲
     if (isMenuState) {
-        // 确保游戏音乐停止
-        const gameBgm = document.getElementById('game-bgm');
-        if (gameBgm) gameBgm.pause();
-        if (nintendoBGMInterval) {
-            clearInterval(nintendoBGMInterval);
-            nintendoBGMInterval = null;
-        }
-
-        const bgm = document.getElementById('bgm');
-        if (themeMusicEnabled && bgm && bgm.paused) {
-            // 确保音频上下文已激活
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            if (!bgmSource) {
-                try {
-                    bgmSource = audioCtx.createMediaElementSource(bgm);
-                    bgmSource.connect(themeGain);
-                } catch (e) { console.log("Audio Source connect error:", e); }
-            }
-            bgm.play().catch(e => console.log("BGM Play Error:", e));
-        }
-    }
-    // B. 游戏状态：播放 游戏BGM
-    else {
-        // 确保主题曲停止
-        const bgm = document.getElementById('bgm');
-        if (bgm) bgm.pause();
-
-        if (gameMusicEnabled) startNintendoBGM();
+        AudioController.playTheme();
+    } else {
+        AudioController.playGame();
     }
 }
 
 function stopMusic() {
-    const bgm = document.getElementById('bgm');
-    if (bgm) bgm.pause();
-    
-    const gameBgm = document.getElementById('game-bgm');
-    if (gameBgm) gameBgm.pause();
-
-    if (nintendoBGMInterval) {
-        clearInterval(nintendoBGMInterval);
-        nintendoBGMInterval = null;
-    }
+    AudioController.stopCurrent();
 }
 
 /* Removed old createCoinBuffer definition */
@@ -4821,6 +4964,7 @@ function appendNextChatMessage() {
     // 优先尝试的文件名 和 备用文件名 
     const primaryImageSrc = `assets/characters/${rolePrefix}${speakerName}.png`; 
     const fallbackImageSrc = `assets/characters/${speakerName}.png`; 
+    const placeholderImageSrc = `assets/characters/${rolePrefix}占位符.png`;
     
     // 颜色生成逻辑 (最终兜底方案) 
     const charCode = speakerName.charCodeAt(0); 
@@ -4831,13 +4975,26 @@ function appendNextChatMessage() {
     const row = document.createElement('div'); 
     row.className = `chat-row ${isLeft ? 'left' : 'right'}`; 
     
-    // [增强] 双重 onerror 机制 
-    // 第一次错误：尝试去掉前缀加载 (data-fallback 用作标记防止死循环) 
-    // 第二次错误：隐藏 img，显示 placeholder 
+    // [增强] 三重 onerror 机制 (Primary -> Fallback -> Placeholder -> CSS Box)
+    // 注意：data 属性必须使用驼峰式访问，或者在 HTML 中避免连字符。
+    // 这里我们将 HTML 属性改为 data-fallback1 以匹配 dataset.fallback1
     const portraitHtml = `
     <div class="chat-portrait-box">
         <img class="chat-portrait-img" src="${primaryImageSrc}" 
-             onerror="if(!this.dataset.triedFallback){ this.dataset.triedFallback='true'; this.src='${fallbackImageSrc}'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }">
+             data-fallback1="${fallbackImageSrc}"
+             data-fallback2="${placeholderImageSrc}"
+             onerror="
+                if (!this.dataset.retry) {
+                    this.dataset.retry = '1';
+                    this.src = this.dataset.fallback1;
+                } else if (this.dataset.retry === '1') {
+                    this.dataset.retry = '2';
+                    this.src = this.dataset.fallback2;
+                } else {
+                    this.style.display='none';
+                    this.nextElementSibling.style.display='flex';
+                }
+             ">
         <div class="chat-portrait-placeholder" style="background:${avatarColor}; display:none;"> 
             ${avatarChar} 
         </div> 
@@ -4854,7 +5011,7 @@ function appendNextChatMessage() {
 
         bubbleContent += ` 
             <div class="chat-action-area"> 
-                <button class="btn-start-shopping" onclick="event.stopPropagation(); playSfx(400, 'triangle', 0.1); finishChatterAndShop()"> 
+                <button class="btn-start-shopping" onclick="event.stopPropagation(); playSfx(400, 'triangle', 0.3); finishChatterAndShop()"> 
                     开始买菜 
                 </button> 
             </div> 
@@ -4938,7 +5095,7 @@ function openShopUI() {
 }
 
 function renderShop() {
-    playShopMusic(); // [新增] 播放商店音乐
+    // playShopMusic(); // [Fixed] Removed duplicate music call. AudioController handles this in showShop().
     const overlay = document.getElementById('shop-overlay');
     if (!overlay) return;
 
@@ -5087,6 +5244,7 @@ function renderShop() {
 }
 
 function showShop() {
+    AudioController.playShop();
     const startScreen = document.getElementById('start-screen');
     if (startScreen) {
         startScreen.style.display = 'none';
@@ -5103,7 +5261,7 @@ function showShop() {
 }
 
 function closeShop() {
-    stopShopMusic(); // [新增] 停止商店音乐
+    AudioController.playTheme();
     const shopOverlay = document.getElementById('shop-overlay');
     if (shopOverlay) {
         shopOverlay.style.display = 'none';
@@ -5116,10 +5274,12 @@ function closeShop() {
             startScreen.style.display = 'flex';
             updateBalanceDisplay();
             // [修复] 返回首页时恢复背景音乐
+            /* 
             if (themeMusicEnabled) {
                 const bgm = document.getElementById('bgm');
                 if (bgm && bgm.paused) bgm.play().catch(e => console.log(e));
             }
+            */
         }
     } else {
         // Return to game/settlement view
@@ -5902,14 +6062,17 @@ function renderStation(sid, updateMode = 'full') {
 
     // [核心修改] 移除 prepStyle 中的 opacity 设置
     const prepStyle = '';
+    
+    // [新增] 提前计算 Omni 状态，用于控制标题显示
+    const isOmni = potName && potName.toLowerCase().includes('omni');
 
     el.innerHTML = `
         <div class="station-card cook-card ${cookStatus}">
             <div class="card-header">
-                <span class="card-title">OUTPUT / 烹饪</span>
-                <div style="display:flex; gap:5px;">
+                ${isOmni ? '' : '<span class="card-title">OUTPUT / 烹饪</span>'}
+                <div style="display:flex; gap:5px; margin-left: auto;">
                     <button class="btn-trash-mini" style="background:rgba(52, 152, 219, 0.3);" title="切换设备: ${potName}" onclick="event.stopPropagation(); cycleStationEquipment('${sid}')">🔄</button>
-                    <button class="btn-trash-mini" title="丢弃" onclick="event.stopPropagation(); trashStation('${sid}', 'cook')">🗑️</button>
+                    <!-- [已移除] 垃圾桶按钮 -->
                 </div>
             </div>
             <div class="station-cook-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'cook')">
@@ -5923,7 +6086,7 @@ function renderStation(sid, updateMode = 'full') {
         <div class="station-card prep-card ${prepStatus}" style="${prepStyle}">
             <div class="card-header">
                 <span class="card-title">INPUT / 备菜</span>
-                <button class="btn-trash-mini" title="清空" onclick="event.stopPropagation(); trashStation('${sid}', 'prep')">🗑️</button>
+                <!-- [已移除] 备菜区清空按钮 -->
             </div>
             <div class="station-prep-zone" onclick="event.stopPropagation(); handleStationClick('${sid}', event, 'prep')">
                 <div class="prep-status-text"></div>
@@ -5993,8 +6156,7 @@ function renderStation(sid, updateMode = 'full') {
         // --- [修改] 设备渲染逻辑 (安全分支模式) --- 
     let stoveHtml = ''; 
     
-    // 1. 判断是否为 Omni 设备 (不区分大小写) 
-    const isOmni = potName && potName.toLowerCase().includes('omni');
+    // 1. 判断是否为 Omni 设备 (已在上文定义) 
     if (isOmni) { 
         // === Omni 专用分支 === 
         
@@ -6080,12 +6242,14 @@ function renderStation(sid, updateMode = 'full') {
             // 如果是 Omni 设备，并且处于出餐阶段 (FINISHED = Idle with dish)
             if (isOmni && s.stage === 'FINISHED') {
                 // 视觉模拟：调整为 98px
-                // 位置下移：保持在出餐口托盘位置 (top: 80% + 38px)
+                // 位置下移：保持在出餐口托盘位置 (top: 80% + 78px)
+                // 动效：上下浮动引导取餐
                 dishStyle += `
                     width: 98px !important;
                     height: 98px !important;
-                    top: calc(80% + 38px) !important;
+                    top: calc(80% + 78px) !important;
                     filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5));
+                    animation: omni-dish-bounce 1.5s infinite ease-in-out;
                 `;
             }
 
@@ -6105,7 +6269,12 @@ function renderStation(sid, updateMode = 'full') {
             // 注意：stoveHtml 里的 .omni-popout-bg 已经是 z-index:0，dishHtml 是 z-index:100
             cookMachine.innerHTML = `${stoveHtml}${dishHtml}`;
             
-            status.innerText = '点击取餐!';
+            // [UI微调] Omni 设备出餐阶段不显示文字
+            if (isOmni) {
+                status.innerText = '';
+            } else {
+                status.innerText = '点击取餐!';
+            }
             status.style.color = '#2ecc71';
             barContainer.style.display = 'none';
         } else {
@@ -6230,6 +6399,27 @@ function updateBalanceDisplay() {
 
 function switchScreen(screenId) {
     console.log(`[UI] Switching to: ${screenId}`);
+
+    // [新增] 统一管理 Game UI 容器显示状态
+    const gameUI = document.getElementById('game-ui');
+    if (gameUI) {
+        // 只有在进入正式游戏容器时才显示 game-ui
+        if (screenId === 'game-container') {
+            gameUI.style.display = 'block';
+        } else {
+            gameUI.style.display = 'none';
+        }
+    }
+
+    // [修复] 切换屏幕时隐藏全局垃圾桶
+    const trashCard = document.getElementById('global-trash-card');
+    if (trashCard) {
+        if (screenId === 'game-container') {
+            trashCard.style.display = 'flex';
+        } else {
+            trashCard.style.display = 'none';
+        }
+    }
     
     stopShopMusic(); // [新增] 切屏时停止商店音乐
     
@@ -6264,7 +6454,7 @@ function switchScreen(screenId) {
         if (belt) belt.style.display = 'none';
         
         uiState = 'HOME';
-        stopMusic();
+        // stopMusic(); // [Fixed] Removed to allow seamless transition (AudioController handles mutex)
         startMusic();
     } else if (screenId === 'game-container') {
         // --- 游戏模式 ---
@@ -6286,6 +6476,8 @@ function switchScreen(screenId) {
                 if (startScreen) startScreen.style.display = 'none';
                 if (playArea) playArea.style.display = 'none';
                 if (hud) hud.style.display = 'none';
+                // [Fix] Ensure theme music continues playing
+                AudioController.playTheme();
             }
         }
     }
@@ -6407,75 +6599,141 @@ function analyzeDish(ingredients) {
     }
 }
 
-function initIngredients() { 
-     const shelf = document.getElementById('ingredient-shelf'); 
-     if (!shelf) return; 
-     shelf.innerHTML = ''; 
-     
-     // 1. [双重保险] 计算当前关卡允许显示的食材 
-     // 只有当前关卡能用到的食材，才会出现在架子上 
-     const currentLevel = game.level; 
-     const allowedIngIds = new Set(); 
-     
-     // 反推已解锁菜谱 (逻辑必须与 spawnOrder 完全一致) 
-     let unlockedRecipes = []; 
-     if (currentLevel >= 1) unlockedRecipes.push(...RECIPES.slice(0, 2)); 
-     if (currentLevel >= 3) unlockedRecipes.push(...RECIPES.slice(2, 6)); 
-     if (currentLevel >= 6) unlockedRecipes.push(...RECIPES.slice(6, 9)); 
-     if (currentLevel >= 9) unlockedRecipes.push(...RECIPES.slice(9, 12)); 
-     
-     // 提取食材 ID 
-     unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngIds.add(i))); 
-     
-     // Day 1 修正：确保番茄、鸡蛋、洋葱一定在 
-     if (currentLevel === 1) { 
-         ['tomato', 'egg', 'onion'].forEach(id => allowedIngIds.add(id)); 
-     } 
- // 2. 渲染食材按钮 
- Object.values(INGREDIENTS).forEach(ing => { 
-     // [核心过滤] 如果食材未解锁，直接跳过，不渲染 DOM 
-     if (!allowedIngIds.has(ing.id)) return; 
-     const btn = document.createElement('button'); 
-     btn.className = 'ingredient-btn'; 
-     
-     const isDayOne = currentLevel === 1; 
-     const stock = (game.dailyInventory && game.dailyInventory[ing.id] !== undefined) ? game.dailyInventory[ing.id] : 0; 
-     
-     let stockDisplay = stock; 
-     let stockColor = stock > 0 ? '#999' : '#e74c3c'; 
-     
-     if (isDayOne) { 
-         stockDisplay = '∞'; 
-         stockColor = '#2ecc71'; 
-     } 
-     btn.innerHTML = `<span class="ing-icon">${ing.icon}</span><span class="ing-name">${ing.name}</span><span class="ing-stock" style="color:${stockColor}">${stockDisplay}</span>`; 
-     
-     btn.onclick = (e) => handleIngredientClick(e, ing); 
-     
-     if (!isDayOne && stock <= 0) { 
-         btn.style.opacity = '0.7'; 
-     } 
-     
-     shelf.appendChild(btn); 
- }); 
- // 3. 添加倒掉按钮 
- const trashBtn = document.createElement('button'); 
- trashBtn.className = 'ingredient-btn'; 
- trashBtn.style.borderColor = '#e74c3c'; 
- trashBtn.innerHTML = `<span class="ing-icon">🗑️</span><span class="ing-name" style="color:#e74c3c; font-weight:900">倒掉</span>`; 
- trashBtn.onclick = (e) => { 
-     if (holdingThing) { 
-         holdingThing = null; 
-         updateCursor(); 
-         if(typeof playSfx === 'function') playSfx(100, 'sawtooth', 0.2); 
-         const rect = trashBtn.getBoundingClientRect(); 
-         triggerFeedback(rect.left + rect.width/2, rect.top, "已丢弃", "#999"); 
-     } 
- }; 
- shelf.appendChild(trashBtn); 
- }
+// [新增] 全局状态 
+let pantryLayer = 1; 
+// [修改] 改为 12 (3列 x 4行) 
+const ITEMS_PER_LAYER = 12;
+
+// 切换抽屉开关 
+// [交互] 切换抽屉状态 (带音效) 
+window.togglePantry = function() { 
+    const drawer = document.getElementById('pantry-drawer'); 
+    if (!drawer) return; 
+    
+    if (drawer.classList.contains('closed')) { 
+        // 打开 
+        drawer.classList.remove('closed'); 
+        drawer.classList.add('open'); 
+        // [新增] 恢复旧版食材柜音效 (220-150Hz 下降音) -> 改为清脆声 (600Hz Triangle, Vol 0.3)
+        playSfx(600, 'triangle', 0.2, 0.3); // slide open sound approximation 
+    } else { 
+        // 关闭 
+        drawer.classList.remove('open'); 
+        drawer.classList.add('closed'); 
+        // [新增] 恢复旧版关闭音效 (150Hz 短促) -> 改为清脆声 (500Hz Square, Vol 0.2)
+        playSfx(500, 'square', 0.1, 0.2); // click close sound approximation 
+    } 
+};
+
+// 翻页逻辑 
+window.changePantryLayer = function(delta) { 
+    const currentLevel = game.level;
+    const allowedIngIds = new Set();
+    let unlockedRecipes = [];
+    if (currentLevel >= 1) unlockedRecipes.push(...RECIPES.slice(0, 2));
+    if (currentLevel >= 3) unlockedRecipes.push(...RECIPES.slice(2, 6));
+    if (currentLevel >= 6) unlockedRecipes.push(...RECIPES.slice(6, 9));
+    if (currentLevel >= 9) unlockedRecipes.push(...RECIPES.slice(9, 12));
+    unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngIds.add(i)));
+    if (currentLevel === 1) ['tomato', 'egg', 'onion'].forEach(id => allowedIngIds.add(id));
+    
+    const allItems = Object.values(INGREDIENTS).filter(ing => allowedIngIds.has(ing.id));
+    const maxLayers = Math.ceil(allItems.length / ITEMS_PER_LAYER) || 1; 
+    
+    let newLayer = pantryLayer + delta; 
+    if (newLayer < 1) newLayer = 1; 
+    if (newLayer > maxLayers) newLayer = maxLayers; 
+    
+    if (newLayer !== pantryLayer) { 
+        pantryLayer = newLayer; 
+        updateInventoryDisplay(); 
+        playSfx(400, 'triangle', 0.1, 0.2); // Page flip sound
+    } 
+};
+
+function updateInventoryDisplay() { 
+    const grid = document.getElementById('ingredient-grid'); 
+    if (!grid) return; 
+    grid.innerHTML = ''; 
+    
+    const currentLevel = game.level; 
+    const allowedIngIds = new Set(); 
+    let unlockedRecipes = []; 
+    if (currentLevel >= 1) unlockedRecipes.push(...RECIPES.slice(0, 2)); 
+    if (currentLevel >= 3) unlockedRecipes.push(...RECIPES.slice(2, 6)); 
+    if (currentLevel >= 6) unlockedRecipes.push(...RECIPES.slice(6, 9)); 
+    if (currentLevel >= 9) unlockedRecipes.push(...RECIPES.slice(9, 12)); 
+    unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngIds.add(i))); 
+    if (currentLevel === 1) ['tomato', 'egg', 'onion'].forEach(id => allowedIngIds.add(id)); 
+    
+    const allItems = Object.values(INGREDIENTS).filter(ing => allowedIngIds.has(ing.id));
+    
+    // 分页计算
+    const totalLayers = Math.ceil(allItems.length / ITEMS_PER_LAYER) || 1;
+    if (pantryLayer > totalLayers) pantryLayer = totalLayers;
+    
+    const start = (pantryLayer - 1) * ITEMS_PER_LAYER; 
+    const end = start + ITEMS_PER_LAYER; 
+    const currentItems = allItems.slice(start, end); 
+    
+    // 更新页码显示
+    const layerIndicator = document.getElementById('pantry-layer-indicator'); 
+    if(layerIndicator) layerIndicator.innerText = `${pantryLayer}/${totalLayers}`; 
+    
+    // 渲染固定 16 个格子
+    for (let i = 0; i < ITEMS_PER_LAYER; i++) {
+        const div = document.createElement('div');
+        div.className = 'ingredient-item';
+        
+        if (i < currentItems.length) {
+            const ing = currentItems[i];
+            const isDayOne = currentLevel === 1;
+            const stock = (game.dailyInventory && game.dailyInventory[ing.id] !== undefined) ? game.dailyInventory[ing.id] : 0;
+            let stockDisplay = stock;
+            let stockColor = stock > 0 ? '#fff' : '#e74c3c'; // 白色文字在深色标签上
+            if (isDayOne) {
+                stockDisplay = '∞';
+                stockColor = '#2ecc71';
+            }
+            
+            div.innerHTML = `
+                <span class="ing-icon">${ing.icon}</span>
+                <span class="ing-name" style="font-size:12px; margin-top:4px; color:#ecf0f1; font-weight:bold; text-shadow:none;">${ing.name}</span>
+                <span class="ingredient-count" style="${isDayOne ? 'background:#2ecc71;' : ''}">${stockDisplay}</span>
+            `;
+            
+            div.onclick = (e) => {
+                e.stopPropagation();
+                handleIngredientClick(e, ing);
+                // [注意] 这里移除了 togglePantry()，保持抽屉打开
+            };
+            
+            if (!isDayOne && stock <= 0) {
+                div.style.opacity = '0.6';
+            }
+        } else {
+            // 空格子占位
+            div.style.opacity = '0.3';
+            div.style.cursor = 'default';
+        }
+        grid.appendChild(div);
+    }
+}
+ 
+const initIngredients = updateInventoryDisplay;
 
 function handleIngredientClick(e, ing) {
+    if (game.isTrashMode) {
+        if(typeof showToast === 'function') showToast("丢弃模式下无法拿取食材");
+        return;
+    }
+    
+    // [修改] 移除了自动收起抽屉的逻辑
+    // const drawer = document.getElementById('pantry-drawer');
+    // if (drawer && drawer.classList.contains('open')) {
+    //    togglePantry();
+    // }
+
     // Allow picking up even if stock is 0
     // if (ing.stock <= 0) return;
     
@@ -6498,6 +6756,7 @@ function updateCursor() {
     tickets.forEach(t => t.classList.remove('match-highlight'));
 
     if (holdingThing) {
+        document.body.style.cursor = 'default'; // [新增] 恢复默认光标
         if (cursor.style.display !== 'block') cursor.style.display = 'block';
 
         let newHTML = '';
@@ -6528,8 +6787,19 @@ function updateCursor() {
                 }
             });
         }
+    } else if (game.isTrashMode) {
+        // [新增] 清洁模式显示扫把
+        document.body.style.cursor = 'none'; // [新增] 隐藏系统光标
+        if (cursor.style.display !== 'block') cursor.style.display = 'block';
+        const currentId = cursor.getAttribute('data-holding-id');
+        if (currentId !== 'trash-broom') {
+            cursor.innerHTML = '<span style="font-size:80px;">🧹</span>';
+            cursor.setAttribute('data-holding-id', 'trash-broom');
+        }
     } else {
+        document.body.style.cursor = 'default'; // [新增] 恢复默认光标
         if (cursor.style.display !== 'none') cursor.style.display = 'none';
+        cursor.removeAttribute('data-holding-id');
     }
 }
 
@@ -6668,7 +6938,60 @@ function initStations() {
     });
 }
 
+// === 新增：清洁模式控制 ===
+game.isTrashMode = false;
+function toggleTrashMode() {
+    // [新增] 优先处理手持物品丢弃
+    if (holdingThing) {
+        holdingThing = null;
+        updateCursor();
+        if(typeof playSfx === 'function') playSfx(100, 'sawtooth', 0.2);
+        
+        const btn = document.getElementById('global-trash-card');
+        if (btn) {
+            const rect = btn.getBoundingClientRect();
+            triggerFeedback(rect.left + rect.width/2, rect.top, "已丢弃", "#999");
+        }
+        return;
+    }
+
+    game.isTrashMode = !game.isTrashMode;
+    const btn = document.getElementById('global-trash-card');
+    const label = btn ? btn.querySelector('.global-trash-label') : null;
+    
+    if (btn) {
+        if (game.isTrashMode) {
+            btn.classList.add('active');
+            if (label) label.innerText = "请选目标";
+            if (typeof playSfx === 'function') playSfx(400, 'triangle', 0.1);
+            
+            // [修改] 仅在第一次使用时显示提示
+            const hasSeenTip = localStorage.getItem('hasSeenTrashTip');
+            if (!hasSeenTip) {
+                if (typeof showToast === 'function') showToast("请点击 备菜区 或 烹饪区 进行丢弃");
+                localStorage.setItem('hasSeenTrashTip', 'true');
+            }
+        } else {
+            btn.classList.remove('active');
+            if (label) label.innerText = "丢弃";
+        }
+    }
+    updateCursor(); // [新增] 更新光标状态(显示/隐藏扫把)
+}
+
 function handleStationClick(sid, event, zone) {
+    // === 新增：清洁模式拦截 ===
+    if (game.isTrashMode) {
+        if (zone === 'prep') {
+            trashStation(sid, 'prep');
+        } else {
+            // 点击烹饪区或整体 -> 倒掉菜品
+            trashStation(sid, 'cook');
+        }
+        toggleTrashMode(); // 操作完自动退出模式
+        return;
+    }
+
     if (game.isPaused) return;
     const s = stations[sid];
 
@@ -6939,7 +7262,89 @@ function startPreOpening() {
     showPrepModal();
 }
 
+/* [新增] Loading 界面逻辑 */
+const LOADING_CAROUSEL_IMAGES = [
+    'assets/equipment/kitchen_cn_lv0.png',
+    'assets/equipment/kitchen_cn_lv1.png',
+    'assets/equipment/kitchen_cn_lv2.png',
+    'assets/equipment/多段控温精钢锅.png',
+    'assets/equipment/Omni1.0.png',
+    'assets/equipment/Omni2.0.png',
+    'assets/equipment/Omni3.0.png'
+];
+const LOADING_TIPS_TEXTS = [ 
+    "🔥 Omni 智能设备可以自动识别食材并选择最佳烹饪方式！", 
+    "🗑️ 垃圾桶不仅能清理变质菜品，还能丢弃手持的错误食材。", 
+    "💰 每天的“热门菜品”会根据市场趋势变化，记得查看今日情报！", 
+    "⏲️ 升级“极速处理”科技可以大幅减少备菜时间。", 
+    "🧹 保持厨房整洁，尽量不要造成食材浪费。", 
+    "📈 连续完成订单可以触发“火热时刻”，获得双倍收益！", 
+    "🍳 完美的烹饪时机是获得五星好评的关键。", 
+    "🛒 每天清晨集市会有新鲜食材，记得早起抢购！", 
+    "🏪 扩展分店可以解锁更多菜谱。", 
+    "🥘 某些特殊菜品需要特定的厨具才能制作，请留意设备要求。", 
+    "🎵 可以在设置中调整音效和背景音乐。", 
+    "📅 记得每天结算后查看经营报表，优化你的经营策略。", 
+    "🐟 海鲜类食材保鲜期较短，建议优先使用。", 
+    "🌶️ 辣味菜品在冬季更受欢迎，夏季则推荐清爽凉菜。", 
+    "🧂 适量添加调味料可以提升菜品品质，但不要过量哦！", 
+    "🤝 雇佣帮手可以自动完成部分简单的工作。", 
+    "📦 食材库空间有限，合理规划库存至关重要。", 
+    "✨ 传说中的“神级厨具”隐藏在某个神秘的地方...", 
+    "Omni 1.0 出餐居然这么快，不愧是爷爷当年的得力帮手！", 
+    "Omni 2.0 炒出来的菜好像更香，听说核心温控技术升级了。", 
+    "什么时候让食客能体验到 Omni 3.0 的神奇风味呢？努力赚钱吧！", 
+    "自从扩容后厨后，感觉装修风格也变得更气派了。", 
+    "备菜区的食材一定要保持新鲜，这是我们店的老规矩。", 
+    "不知道集市上的道明叔今天又进了什么好肉。", 
+    "左伊姐的杂货铺总能发现一些提味的小惊喜。", 
+    "听说 Omni 系列研发的初衷，就是为了完美还原大厨的“锅气”。", 
+    "忙不过来的时候，记得看看有没有闲置的 Omni 设备能帮忙。", 
+    "每一道新菜品解锁成功，离重振老店招牌就更近了一步。", 
+    "即使是最基础的番茄炒蛋，用不同的设备做出来口感也会有微妙不同。", 
+    "看着后厨从空荡荡变得满满当当，真有成就感啊。", 
+    "有时候在集市多和街坊邻居聊聊，说不定会有意外收获。", 
+    "今天争取多卖几单，早点攒够钱把那个心仪已久的大家伙买回来！", 
+    "我们家独家的特制酱料配方，就藏在这一道道看似普通的家常菜里。", 
+    "无论科技怎么进步，用心为食客做菜的那份心意永远不会变。", 
+    "合理安排备菜区的空间，是成为高效主厨的第一步。" 
+];
+
+function initLoadingScreen() {
+    const iconEl = document.getElementById('loading-icon');
+    const tipsEl = document.getElementById('loading-tips');
+    
+    // 1. 图片轮播 (每 2 秒切换)
+    if (iconEl && LOADING_CAROUSEL_IMAGES.length > 0) {
+        let currentIdx = 0;
+        const updateIcon = () => {
+            iconEl.style.backgroundImage = `url('${LOADING_CAROUSEL_IMAGES[currentIdx]}')`;
+            currentIdx = (currentIdx + 1) % LOADING_CAROUSEL_IMAGES.length;
+        };
+        updateIcon(); // 立即显示第一张
+        setInterval(updateIcon, 2000); // 每2秒切换
+    }
+
+    // 2. 文案轮播 (每 2.5 秒切换)
+    if (tipsEl && LOADING_TIPS_TEXTS.length > 0) {
+        let textIndex = Math.floor(Math.random() * LOADING_TIPS_TEXTS.length);
+        tipsEl.innerText = LOADING_TIPS_TEXTS[textIndex]; // 初始随机一条
+        
+        setInterval(() => {
+            // 简单的淡入淡出效果
+            tipsEl.style.opacity = '0';
+            setTimeout(() => {
+                textIndex = (textIndex + 1) % LOADING_TIPS_TEXTS.length; // 顺序轮播
+                tipsEl.innerText = LOADING_TIPS_TEXTS[textIndex];
+                tipsEl.style.opacity = '0.9';
+            }, 300); // 300ms 后切换文字并显示
+        }, 2500);
+    }
+}
+
 window.onload = () => {
+    initLoadingScreen(); // [新增] 启动 Loading 界面动态效果
+
     const bar = document.getElementById('loading-bar');
     const txt = document.getElementById('loading-text');
     const btn = document.getElementById('btn-start');
@@ -7016,11 +7421,16 @@ window.onload = () => {
 
     if (btn) {
         btn.onclick = function() {
-            // [新增] 用户点击开始时，再次确保 AudioContext 激活
+            // [新增] 音效与 AudioContext 激活
+            const playStartSound = () => { if(typeof playSfx === 'function') playSfx(400, 'triangle', 0.3); };
+
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume().then(() => {
                     console.log("AudioContext resumed by Start Button");
+                    playStartSound();
                 }).catch(e => console.error("Audio resume failed:", e));
+            } else {
+                playStartSound();
             }
             
             // [新增] 检查并补充预加载（以防onload时网络卡顿未完成）
@@ -7029,34 +7439,8 @@ window.onload = () => {
                  preloadAudio(); 
             }
 
-            const cover = document.getElementById('cover') || document.getElementById('start-screen');
-            if (cover) cover.style.display = 'none'; // 隐藏封面
-            
-            // [新增] 检查是否是第一次游玩 
-            const hasPlayed = localStorage.getItem('hasPlayedIntro'); 
-            
-            if (!hasPlayed) { 
-                // 第一次：播放序章 
-                setTimeout(() => { 
-                    renderStoryModal(INTRO_STORY, () => { 
-                        localStorage.setItem('hasPlayedIntro', 'true'); 
-                        saveGameState(); 
-                        // 剧情结束后，进入集市备菜
-                        showPrepModal();
-                    }); 
-                }, 500); // 稍微延时等待转场 
-            } else {
-                // [新增] 插入街坊情报环节
-                showPrepModal();
-            }
-        };
-    }
-
-    const worldBtn = document.getElementById('btn-world-map');
-    if (worldBtn) {
-        worldBtn.onclick = () => {
-            playCoin();
-            showLocationSelection();
+            // 统一使用 startGame() 进入游戏，确保 BGM 连续性与逻辑一致
+            startGame();
         };
     }
 
@@ -7097,6 +7481,10 @@ window.hideEndGameModal = function() {
 
 window.endGame = function() {
     console.log("Starting endGame sequence...");
+
+    // [修复] 强制隐藏全局垃圾桶
+    const trashCard = document.getElementById('global-trash-card');
+    if (trashCard) trashCard.style.display = 'none';
     
     // 隐藏自定义模态框
     const modal = document.getElementById('end-game-modal');
@@ -7203,6 +7591,10 @@ if (btnEndGame) {
 }
 
 function showResult(msg) {
+    // [新增] 结算时隐藏全局垃圾桶
+    const trashCard = document.getElementById('global-trash-card'); 
+    if (trashCard) trashCard.style.display = 'none';
+
     playResultSfx(); // [新增] 播放成绩单音效
     
     // [修复] 结算时停止所有工位的音效 (如炒菜声)
@@ -7809,47 +8201,106 @@ const INTRO_STORY = [
     { 
         speaker: "高叔", 
         text: "孩子……你终于回来了。", 
-        image: "assets/characters/高叔.png",
-        bgImage: "assets/bg/门店后厨.jpg"
+        image: "assets/characters/高叔.png", 
+        audio: "assets/voice/intro_gao_0.mp3", // [新增] 配音路径 
+        volume: 0.5 // [调整] 第一句音量调低
     }, 
     { 
         speaker: "高叔", 
         text: "这间店你爷爷守了一辈子，现在……你就是这家店的主厨了。", 
-        image: "assets/characters/高叔.png" 
+        image: "assets/characters/高叔.png", 
+        audio: "assets/voice/intro_gao_1.mp3",
+        volume: 0.5 // [调整] 第二句音量调低
     }, 
     { 
         speaker: "高叔", 
         text: "高叔相信你一定能让这个老招牌重新在这条街亮起来。", 
-        image: "assets/characters/高叔.png" 
+        image: "assets/characters/高叔.png", 
+        audio: "assets/voice/intro_gao_2.mp3" 
     }, 
     { 
         speaker: "高叔", 
         text: "我帮你张罗了一批新鲜食材已经入库了，先练练手，把咱那灶台热起来再说！", 
         image: "assets/characters/高叔.png", 
-        reward: { coins: 500, items: { 'tomato': 5, 'egg': 5, 'rice': 5, 'onion': 5 } } 
+        reward: { coins: 500, items: { 'tomato': 5, 'egg': 5, 'rice': 5, 'onion': 5 } }, 
+        audio: "assets/voice/intro_gao_3.mp3" 
     } 
 ]; 
 
+// [全局音频对象] 确保跨函数/跨调用时也能控制音频停止
+let currentVoiceAudio = null;
+let currentDialogueBgm = null; // [新增] 全局剧情 BGM 对象
+
 function renderStoryModal(storyData, onComplete) { 
     let currentIndex = 0; 
+    // let currentVoiceAudio = null; // [修改] 移除局部变量，使用全局变量
     const container = document.getElementById('game-container') || document.body; 
     
-    // 移除旧的（如果存在） 
+    // 移除旧层 
     const oldOverlay = document.getElementById('story-overlay'); 
     if (oldOverlay) oldOverlay.remove(); 
     
+    // [新增] 安全停止之前的音频（如果存在）
+    if (currentVoiceAudio) {
+        currentVoiceAudio.pause();
+        currentVoiceAudio = null;
+    }
+
+    // 1. [优化] 极速淡出原 BGM (50ms 一次，迅速降噪) 
+    const fadeOutBgm = () => { 
+        const audios = document.querySelectorAll('audio'); 
+        audios.forEach(audio => { 
+            // 排除语音和剧情BGM 
+            if (!audio.paused && !audio.src.includes('对话框bgm.mp3')) { 
+                let vol = audio.volume; 
+                const fadeInterval = setInterval(() => { 
+                    if (vol > 0.05) { 
+                        vol -= 0.1; // [修改] 每次减 0.1，更快 
+                        if(vol < 0) vol = 0; 
+                        audio.volume = vol; 
+                    } else { 
+                        audio.pause(); 
+                        clearInterval(fadeInterval); 
+                    } 
+                }, 50); // [修改] 50ms 极速响应 
+            } 
+        }); 
+    }; 
+    // 立即执行淡出 
+    fadeOutBgm(); 
+
+    // 2. [优化] 降低剧情背景音，不抢人声 
+    currentDialogueBgm = new Audio('audio/对话框bgm.mp3'); 
+    currentDialogueBgm.loop = true; 
+    currentDialogueBgm.volume = 0.3; // [修改] 降至 0.3 
+    currentDialogueBgm.play().catch(e => console.log("剧情BGM自动播放受阻:", e));
+
     const overlay = document.createElement('div'); 
     overlay.id = 'story-overlay'; 
-    // 加入 transition 实现背景平滑渐变过渡 
     overlay.style.cssText = ` 
         position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; 
         background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('assets/bg/门店后厨.jpg') center/cover no-repeat; 
         display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:15%; 
         transition: background 0.5s ease; 
     `; 
-    
+
+    const stopCurrentVoice = () => { 
+        if (currentVoiceAudio) { 
+            currentVoiceAudio.pause(); 
+            currentVoiceAudio.currentTime = 0; 
+            currentVoiceAudio = null; 
+        } 
+    }; 
+
     const renderFrame = () => { 
+        stopCurrentVoice(); 
         if (currentIndex >= storyData.length) { 
+            // [新增] 剧情结束，停止专属 BGM
+            if (currentDialogueBgm) {
+                currentDialogueBgm.pause();
+                currentDialogueBgm.currentTime = 0;
+                currentDialogueBgm = null;
+            }
             overlay.remove(); 
             if (onComplete) onComplete(); 
             return; 
@@ -7857,67 +8308,87 @@ function renderStoryModal(storyData, onComplete) {
         
         const frame = storyData[currentIndex]; 
         
-        // [核心修改 1] 动态切换背景：如果有馈赠，则切换到家庭厨房+深色蒙层 
+        // [核心逻辑修改] 音频播放控制 
+        const playFrameAudio = () => { 
+            if (frame.audio) { 
+                stopCurrentVoice(); // 再次确保安全 
+                currentVoiceAudio = new Audio(frame.audio); 
+                // 3. [优化] 优先使用配置音量，默认统一为 0.8 
+                currentVoiceAudio.volume = (frame.volume !== undefined) ? frame.volume : 0.8;
+                currentVoiceAudio.play().catch(e => console.log("Audio play blocked:", e)); 
+            } 
+        }; 
+        // 如果有奖励且未领取 -> 暂停播放，等待领奖 
+        // 如果没有奖励 -> 立即播放 
+        if (!frame.reward || frame.rewarded) { 
+            playFrameAudio(); 
+        } 
+
+        // 背景切换 
         if (frame.reward) { 
             overlay.style.background = "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url('assets/bg/家庭厨房.jpeg') center/cover no-repeat"; 
         } else { 
             overlay.style.background = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('assets/bg/门店后厨.jpg') center/cover no-repeat"; 
         } 
-    // [核心修改 2] 自定义奖励弹窗 HTML (UI 升级版) 
-    let rewardModalHtml = ''; 
-    if (frame.reward && !frame.rewarded) { 
-        rewardModalHtml = ` 
-            <div id="intro-reward-modal" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:10000; display:flex; align-items:center; justify-content:center;" onclick="event.stopPropagation()"> 
-                <style>
-                    @keyframes popIn {
-                        0% { transform: scale(0.8) translateY(20px); opacity: 0; }
-                        100% { transform: scale(1) translateY(0); opacity: 1; }
-                    }
-                    .reward-btn:active { transform: scale(0.96); }
-                </style>
-                <div style="background:linear-gradient(145deg, #ffffff, #fffaf5); width:90%; max-width:360px; border-radius:24px; padding:32px 24px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border: 4px solid rgba(255,255,255,0.8); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-bottom: 20vh;"> 
-                    <div style="width:80px; height:80px; margin:0 auto 20px; background:linear-gradient(135deg, #fceabb, #f8b500); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px rgba(243,156,18,0.3);">
-                        <div style="font-size:42px;">🎁</div> 
-                    </div>
-                    <h3 style="margin:0 0 24px 0; color:#d35400; font-size:24px; font-weight:800; text-shadow:0 1px 2px rgba(211,84,0,0.1);">高叔的馈赠</h3> 
-                    <div style="background:rgba(255,248,225,0.8); border-radius:16px; padding:20px; margin-bottom:28px; border:1px solid rgba(243,156,18,0.2);"> 
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:12px;">
-                            <span style="color:#7f8c8d; font-weight:600;">启动资金</span>
-                            <span style="color:#e74c3c; font-size:20px; font-weight:800; font-family:monospace;">¥${frame.reward.coins}</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="color:#7f8c8d; font-weight:600;">基础食材包</span>
-                            <span style="color:#2ecc71; font-size:18px; font-weight:800;">x1</span>
-                        </div>
-                    </div> 
-                    <button class="reward-btn" onclick="acceptIntroReward(event)" style="background:linear-gradient(135deg, #e67e22, #d35400); color:#fff; border:none; padding:16px 0; border-radius:30px; font-size:18px; font-weight:bold; cursor:pointer; box-shadow:0 8px 20px rgba(230,126,34,0.4); width:100%; transition:transform 0.1s;">收下这份心意</button> 
-                </div> 
-            </div> 
-        `; 
         
-        // 绑定“收下”按钮的全局事件 
-        window.acceptIntroReward = (e) => { 
-            e.stopPropagation(); // 防止穿透点击 
+        // 奖励弹窗 
+        let rewardModalHtml = ''; 
+        if (frame.reward && !frame.rewarded) { 
+            if(typeof playSfx === 'function') playSfx(500, 'sine', 0.4); 
+            rewardModalHtml = ` 
+                <div id="intro-reward-modal" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:10000; display:flex; align-items:center; justify-content:center;" onclick="event.stopPropagation()"> 
+                    <style>
+                        @keyframes popIn {
+                            0% { transform: scale(0.2) translateY(40px); opacity: 0; }
+                            60% { transform: scale(1.1) translateY(-10px); opacity: 1; }
+                            80% { transform: scale(0.95) translateY(5px); }
+                            100% { transform: scale(1) translateY(0); opacity: 1; }
+                        }
+                        .reward-btn:active { transform: scale(0.96); }
+                    </style>
+                    <div style="background:linear-gradient(145deg, #ffffff, #fffaf5); width:90%; max-width:360px; border-radius:24px; padding:32px 24px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border: 4px solid rgba(255,255,255,0.8); animation: popIn 0.6s cubic-bezier(0.25, 1, 0.5, 1); margin-bottom: calc(20vh + 18px);"> 
+                        <div style="width:80px; height:80px; margin:0 auto 20px; background:linear-gradient(135deg, #fceabb, #f8b500); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px rgba(243,156,18,0.3);">
+                            <div style="font-size:42px;">🎁</div> 
+                        </div>
+                        <h3 style="margin:0 0 24px 0; color:#d35400; font-size:24px; font-weight:800; text-shadow:0 1px 2px rgba(211,84,0,0.1);">高叔的馈赠</h3> 
+                        <div style="background:rgba(255,248,225,0.8); border-radius:16px; padding:20px; margin-bottom:28px; border:1px solid rgba(243,156,18,0.2);"> 
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed rgba(0,0,0,0.1); padding-bottom:12px;">
+                                <span style="color:#7f8c8d; font-weight:600;">启动资金</span>
+                                <span style="color:#e74c3c; font-size:20px; font-weight:800; font-family:monospace;">¥${frame.reward.coins}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="color:#7f8c8d; font-weight:600;">基础食材包</span>
+                                <span style="color:#2ecc71; font-size:18px; font-weight:800;">x1</span>
+                            </div>
+                        </div> 
+                        <button class="reward-btn" onclick="acceptIntroReward(event)" style="background:linear-gradient(135deg, #e67e22, #d35400); color:#fff; border:none; padding:16px 0; border-radius:30px; font-size:18px; font-weight:bold; cursor:pointer; box-shadow:0 8px 20px rgba(230,126,34,0.4); width:100%; transition:transform 0.1s;">收下这份心意</button> 
+                    </div> 
+                </div> 
+            `; 
             
-            // 实际发放奖励 
-            if (frame.reward.coins) { 
-                game.coins = (game.coins || 0) + frame.reward.coins; 
-                if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay(); 
-            } 
-            if (frame.reward.items) { 
-                for (let key in frame.reward.items) { 
-                    game.inventory[key] = (game.inventory[key] || 0) + frame.reward.items[key]; 
+            window.acceptIntroReward = (e) => { 
+                e.stopPropagation(); 
+                // 发放奖励逻辑... 
+                if (frame.reward.coins) { 
+                    game.coins = (game.coins || 0) + frame.reward.coins; 
+                    if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay(); 
                 } 
-            } 
-            frame.rewarded = true; 
-            
-            if (typeof playSfx === 'function') playSfx(600, 'sine', 0.3); 
-            
-            // 移除弹窗，允许玩家继续点击屏幕结束对话 
-            const modal = document.getElementById('intro-reward-modal'); 
-            if (modal) modal.remove(); 
-        }; 
-    } 
+                if (frame.reward.items) { 
+                    for (let key in frame.reward.items) { 
+                        game.inventory[key] = (game.inventory[key] || 0) + frame.reward.items[key]; 
+                    } 
+                } 
+                frame.rewarded = true; 
+                if (typeof playSfx === 'function') playSfx(880, 'square', 0.2); 
+                
+                // [核心修改] 领奖后才播放该段语音
+                playFrameAudio();
+
+                // 移除弹窗 
+                const modal = document.getElementById('intro-reward-modal'); 
+                if (modal) modal.remove(); 
+            }; 
+        } 
     
     // [核心修改] 放大整体布局、立绘及气泡，将点击提示放入气泡内部 
     overlay.innerHTML = ` 
@@ -8586,6 +9057,16 @@ window.confirmPrep = async function() {
     // 2. 同步数据 
     game.dailyInventory = { ...window.tempInventory }; 
     game.coins = window.tempCoins; 
+    
+    // [新增] 重置食材柜层数
+    if (typeof pantryLayer !== 'undefined') pantryLayer = 1;
+
+    // [修复] 每天开始营业时，强制重置食材柜为关闭状态
+    const drawer = document.getElementById('pantry-drawer');
+    if (drawer) {
+        drawer.classList.remove('open');
+        drawer.classList.add('closed');
+    }
 
     // [核心修改] 触发旧店后台结算 (不再直接发钱)
     processLegacyShopDailyTick();
@@ -8596,6 +9077,14 @@ window.confirmPrep = async function() {
     if(prepModal) prepModal.style.display = 'none';
     const cover = document.getElementById('cover');
     if(cover) cover.style.display = 'none';
+
+    // [新增] 只有在这里才显示垃圾桶！ 
+    const trashCard = document.getElementById('global-trash-card'); 
+    if (trashCard) trashCard.style.display = 'flex'; 
+
+    // [优化] game-ui 显示逻辑已移至 switchScreen 中统一管理
+    // const gameUI = document.getElementById('game-ui');
+    // if (gameUI) gameUI.style.display = 'block';
 
     // 使用 switchScreen 统一管理：它会自动显示 play-area/hud/belt，并隐藏 start-screen
     switchScreen('game-container');
@@ -8612,20 +9101,8 @@ window.confirmPrep = async function() {
  } 
  
  // [关键修复] 音频切换逻辑 
- // A. 停止主题曲 
- const themeBgm = document.getElementById('bgm'); 
- if (themeBgm) { 
-     themeBgm.pause(); 
-     themeBgm.currentTime = 0; 
- } 
- 
- // B. 启动游戏音乐 (去掉 window. 前缀，直接使用全局变量) 
- // 注意：这里改成了 gameMusicEnabled 而不是 window.gameMusicEnabled 
- if (gameMusicEnabled && typeof startNintendoBGM === 'function') { 
-     startNintendoBGM(); 
- } else { 
-     console.log("BGM 未启动: 开关状态=" + gameMusicEnabled); 
- } 
+ // 切换到游戏音乐
+ AudioController.playGame(); 
  
  // 7. 初始化游戏逻辑 
     if(typeof initStations === 'function') initStations(); 
@@ -8635,7 +9112,7 @@ window.confirmPrep = async function() {
     updateBalanceDisplay(); 
     
     // Check and play pantry animation
-    if(typeof checkAndPlayPantryAnimation === 'function') checkAndPlayPantryAnimation();
+    // if(typeof checkAndPlayPantryAnimation === 'function') checkAndPlayPantryAnimation();
 
     // 8. 开启游戏循环 
  requestAnimationFrame(update); 
@@ -8771,7 +9248,7 @@ function showPrepModal() {
     renderPrepUI();
     
     // 7. 播放音乐 (与集市共享)
-    playShopMusic();
+    AudioController.playShop();
 
     // 8. [关键] 启动对话流程
     // 延时从 500ms 改为 2200ms，等待 Intro Text (2.5s) 播放大半后再出现
@@ -8860,100 +9337,7 @@ function renderPrepUI() {
     if (typeof updatePrepFooter === 'function') updatePrepFooter();
 }
 
-function playCabinetOpenSound() {
-    // 1. 尝试播放真实音效文件 (如果存在)
-    const audio = new Audio('audio/cabinet_open.mp3');
-    audio.volume = 0.6;
-    
-    // 尝试播放，如果失败(文件不存在)则使用合成音效
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            // console.log("Audio file not found, using synthesized sound fallback.");
-            // 2. Fallback: 使用 Web Audio API 合成真实物理音效
-            if (typeof audioCtx === 'undefined') return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            const t = audioCtx.currentTime;
-            
-            // A. "咔哒" 机械解锁声 (高频短促)
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(masterGain);
-            
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(800, t);
-            osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
-            
-            gain.gain.setValueAtTime(0.4, t);
-            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
-            
-            osc.start(t);
-            osc.stop(t + 0.1);
-            
-            // B. "呼" 门体滑动的风声/摩擦声 (低通滤波噪音)
-            const bufferSize = audioCtx.sampleRate * 0.8; // 0.8秒
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.5; // 白噪音
-            }
-            
-            const noise = audioCtx.createBufferSource();
-            noise.buffer = buffer;
-            
-            const noiseFilter = audioCtx.createBiquadFilter();
-            noiseFilter.type = 'lowpass';
-            noiseFilter.frequency.setValueAtTime(400, t);
-            noiseFilter.frequency.linearRampToValueAtTime(100, t + 0.5); // 频率随门开降低
-            
-            const noiseGain = audioCtx.createGain();
-            noiseGain.gain.setValueAtTime(0.3, t); // 初始音量
-            noiseGain.gain.linearRampToValueAtTime(0.1, t + 0.2); // 中间平稳
-            noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.8); // 尾音衰减
-            
-            noise.connect(noiseFilter);
-            noiseFilter.connect(noiseGain);
-            noiseGain.connect(masterGain);
-            
-            noise.start(t);
-        });
-    }
-}
 
-function checkAndPlayPantryAnimation() {
-    const shelf = document.getElementById('ingredient-shelf');
-    if (!shelf) return;
-
-    const existing = document.getElementById('pantry-door');
-    if (existing && existing.parentNode) {
-        existing.parentNode.removeChild(existing);
-    }
-
-    const door = document.createElement('div');
-    door.id = 'pantry-door';
-    shelf.appendChild(door);
-    
-    // Manual trigger handle
-    const handle = document.createElement('div');
-    handle.id = 'pantry-handle-btn';
-    // handle.innerText = 'OPEN PANTRY';
-    handle.onclick = (e) => {
-        e.stopPropagation();
-        // Play realistic cabinet sound
-        playCabinetOpenSound();
-        
-        // Animate door
-        door.classList.add('door-open');
-        
-        // Remove door after animation (Synced with 1.8s CSS transition)
-        setTimeout(() => {
-            if(door.parentNode) door.parentNode.removeChild(door);
-        }, 1800);
-    };
-    door.appendChild(handle);
-}
 
 // --- 分店托管系统核心逻辑 ---
 // 计算旧店评分 (每日基础产出)
@@ -9084,15 +9468,14 @@ function initGame() {
 }
 
 function startGame() {
-    if (typeof playBgm === 'function') {
-        playBgm();
-    }
+    AudioController.playTheme();
     
     const startScreen = document.getElementById('start-screen');
     const gameUI = document.getElementById('game-ui');
     
     if (startScreen) startScreen.style.display = 'none';
-    if (gameUI) gameUI.style.display = 'block';
+    // [修正] 移除此处直接显示 gameUI，改为在 switchScreen('game-container') 中统一处理
+    // if (gameUI) gameUI.style.display = 'block';
     
     const hasPlayed = localStorage.getItem('hasPlayedIntro');
     
