@@ -3377,165 +3377,193 @@
         text-shadow: none;
     }
         /* [核心] 抽屉容器 */ 
-    /* [UI调整] 食材柜：恢复 4x4 版本的宽度，但保持 3x4 布局 */ 
-#pantry-drawer { 
-    position: absolute; 
-    top: 22%; 
-    bottom: 18%; 
-    left: 0; 
-    
-    /* [核心修改] 宽度改回 70%，最大 400px (之前是 300px) */ 
-    width: 70%; 
-    max-width: 400px; 
-    
-    /* 材质保持深色木纹不变 */ 
-    background-color: #5d4037; 
-    background-image: 
-        linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 10%), 
-        repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(0,0,0,0.03) 3px, rgba(255,255,255,0.01) 4px, transparent 6px), 
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"); 
-    
-    border: 4px solid #3e2723; 
-    border-left: none; 
-    border-radius: 0 16px 16px 0; 
-    z-index: 3000; 
-    box-shadow: 5px 5px 20px rgba(0,0,0,0.4); 
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
-} 
-#pantry-drawer.closed { transform: translateX(-100%); } 
-#pantry-drawer.open { transform: translateX(0); } 
+    /* [视觉升级] 4A级 高保真木质食材柜 */ 
+    #pantry-drawer { 
+        position: absolute; 
+        top: 22%; 
+        bottom: 18%; 
+        left: 0; 
+        width: 70%; 
+        max-width: 400px; 
+        
+        /* [材质核心] 逼真胡桃木纹理 stack */ 
+        background-color: #3E2723; /* 深褐色底色 */ 
+        background-image: 
+            /* 1. 顶部高光 (模拟清漆反光) */ 
+            linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 20%), 
+            /* 2. 木纹线条 (深浅交替) */ 
+            repeating-linear-gradient(105deg, transparent 0px, transparent 2px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.05) 6px), 
+            /* 3. 噪点质感 (增加真实度) */ 
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E"); 
+        
+        /* [立体感] 厚重的木框边框 */ 
+        border: 4px solid #281813; /* 极深色边框 */ 
+        border-left: none; 
+        border-radius: 0 12px 12px 0; 
+        
+        /* [立体感] 内发光+外投影 */ 
+        box-shadow: 
+            inset 0 0 20px rgba(0,0,0,0.8), /* 内部深邃感 */ 
+            inset 2px 2px 5px rgba(255,255,255,0.1), /* 边缘高光 */ 
+            10px 10px 30px rgba(0,0,0,0.5); /* 外部真实投影 */ 
+            
+        z-index: 3000; 
+        transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1); /* 带有轻微回弹的物理动效 */ 
+    } 
+    #pantry-drawer.closed { transform: translateX(-100%); } 
+    #pantry-drawer.open { transform: translateX(0); } 
 
-/* 把手：保持金属质感，位置微调 */ 
-#pantry-handle { 
-    position: absolute; 
-    top: 50%; 
-    right: -36px; /* 挂在外面 */ 
-    transform: translateY(-50%); 
-    width: 36px; 
-    height: 90px; 
-    cursor: pointer; 
-    z-index: 3001; /* 比柜体高一点 */ 
+    /* [视觉升级] 拉丝金属镂空把手 (C型结构) */ 
+    #pantry-handle { 
+        position: absolute; 
+        top: 50%; 
+        right: -34px; /* 挂在柜体外侧 */ 
+        transform: translateY(-50%); 
+        width: 34px; 
+        height: 100px; 
+        cursor: pointer; 
+        z-index: 3001; 
+        
+        /* 镂空结构的实现：利用 border 和 背景镂空 */ 
+        box-sizing: border-box; 
+        border-radius: 0 16px 16px 0; /* 外圆角 */ 
+        /* [材质核心] 拉丝金属渐变 */ 
+        background: repeating-linear-gradient( 
+            90deg, 
+            #bdc3c7 0%, 
+            #95a5a6 10%, 
+            #ecf0f1 20%, 
+            #7f8c8d 30%, 
+            #bdc3c7 40% 
+        ); 
+        
+        /* 金属光泽投影 */ 
+        box-shadow: 
+            2px 2px 5px rgba(0,0,0,0.4), /* 外部投影 */ 
+            inset 1px 1px 2px rgba(255,255,255,0.8), /* 顶部高光倒角 */ 
+            inset -1px -1px 2px rgba(0,0,0,0.3); /* 底部阴影倒角 */ 
+            
+        /* 弹性布局用于居中镂空部分 */ 
+        display: flex; 
+        align-items: center; 
+        justify-content: flex-start; /* 靠左对齐，因为要连着柜子 */ 
+    } 
 
-    background: linear-gradient(to right, #7f8c8d, #ecf0f1, #95a5a6); 
-    border: 2px solid #555; 
-    border-left: none; 
-    border-radius: 0 10px 10px 0; 
-    box-shadow: 4px 4px 10px rgba(0,0,0,0.3); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-} 
-.handle-grip { 
-    width: 6px; 
-    height: 50%; 
-    background: #bdc3c7; 
-    border-radius: 3px; 
-    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2); 
-} 
+    /* [把手细节] 中间镂空的“扣手位” */ 
+    #pantry-handle::after { 
+        content: ''; 
+        display: block; 
+        width: 24px; /* 镂空宽度 */ 
+        height: 76%; /* 镂空高度，上下留出金属实体 */ 
+        
+        /* 镂空部分的颜色：设为透明或深色阴影，模拟“透过去”或“凹槽” */ 
+        background: rgba(0,0,0,0.3); 
+        /* 如果想做真镂空（透出后面背景），可以用 clip-path，但这里模拟凹槽手感更好 */ 
+        border-radius: 0 10px 10px 0; /* 内圆角 */ 
+        box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6); /* 内部凹陷阴影 */ 
+        border-left: 1px solid rgba(0,0,0,0.2); 
+    } 
 
-/* 内部容器 */ 
-.drawer-content { 
-    height: 100%; 
-    display: flex; 
-    flex-direction: column; 
-    padding: 15px; 
-    box-sizing: border-box; 
-} 
+    /* 内部容器微调 */ 
+    .drawer-content { 
+        height: 100%; 
+        display: flex; 
+        flex-direction: column; 
+        padding: 16px; 
+        box-sizing: border-box; 
+    } 
 
-/* 标题栏：文字颜色改为浅色，以适应深色背景 */ 
-.drawer-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 12px; 
-    padding-bottom: 8px; 
-    border-bottom: 2px solid rgba(255, 255, 255, 0.15); /* 浅色分割线 */ 
-} 
-.drawer-title { 
-    color: #ecf0f1 !important; /* [修改] 浅灰白文字 */ 
-    font-size: 16px; 
-    font-weight: 800; 
-    text-shadow: none !important; /* [核心修改] 去除投影 */ 
-    letter-spacing: 1px; 
-} 
+    /* 标题栏 - 嵌入式烫金文字感 */ 
+    .drawer-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 12px; 
+        padding-bottom: 10px; 
+        border-bottom: 2px solid rgba(0,0,0,0.3); 
+        box-shadow: 0 1px 0 rgba(255,255,255,0.05); /* 雕刻线效果 */ 
+    } 
 
-/* 翻页按钮：深色背景上的亮色按钮 */ 
-.drawer-nav button { 
-    background: rgba(0, 0, 0, 0.3); 
-    color: #fff; 
-    border: 1px solid rgba(255,255,255,0.2); 
-    border-radius: 6px; 
-    padding: 4px 10px; 
-    cursor: pointer; 
-    transition: background 0.2s; 
-} 
-.drawer-nav button:hover { background: rgba(0, 0, 0, 0.5); } 
-#pantry-layer-indicator { 
-    color: rgba(255, 255, 255, 0.7) !important; 
-    font-size: 12px; 
-    margin: 0 5px; 
-    text-shadow: none !important; 
-} 
+    .drawer-title { 
+        color: #E0E0E0 !important; 
+        font-size: 16px; 
+        font-weight: 700; 
+        letter-spacing: 1.5px; 
+        text-shadow: 0 2px 0 rgba(0,0,0,0.5); /* 凹陷文字效果 */ 
+    } 
 
-/* [布局修改] 3列 x 4行 = 12格 */ 
-#ingredient-grid { 
-    flex: 1; 
-    display: grid; 
-    /* [核心修改] 改为3列 */ 
-    grid-template-columns: repeat(3, 1fr); 
-    grid-template-rows: repeat(4, 1fr); 
-    gap: 10px; 
-    overflow: hidden; 
-} 
+    /* 翻页按钮 - 金属微动开关风格 */ 
+    .drawer-nav button { 
+        background: linear-gradient(to bottom, #555, #333); 
+        color: #ddd; 
+        border: 1px solid #222; 
+        border-top: 1px solid #666; 
+        border-radius: 4px; 
+        padding: 4px 12px; 
+        cursor: pointer; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.4); 
+    } 
+    .drawer-nav button:active { 
+        background: #222; 
+        transform: translateY(1px); 
+    } 
 
-/* 格子样式：深色凹槽感 */ 
-.ingredient-item { 
-    width: 100%; 
-    height: 100%; 
-    /* 深色凹槽背景 */ 
-    background: rgba(0, 0, 0, 0.25); 
-    border-radius: 10px; 
-    border: 1px solid rgba(255, 255, 255, 0.05); /* 微弱高光边框 */ 
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3); /* 内阴影制造凹陷感 */ 
+    #pantry-layer-indicator { 
+        color: #aaa !important; 
+        font-family: monospace; 
+        font-size: 14px; 
+        text-shadow: 0 1px 0 rgba(0,0,0,0.8); 
+    } 
 
-    display: flex; 
-    flex-direction: column; /* 垂直排列 */ 
-    align-items: center; 
-    justify-content: center; 
-    position: relative; 
-    cursor: pointer; 
-    transition: transform 0.1s; 
-} 
-.ingredient-item:active { transform: scale(0.95); background: rgba(0,0,0,0.35); } 
+    /* 网格保持不变 */ 
+    #ingredient-grid { 
+        flex: 1; 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        grid-template-rows: repeat(4, 1fr); 
+        gap: 12px; 
+        overflow: hidden; 
+    } 
 
-.ingredient-item img { 
-    width: 75%; /* 图片稍小一点，留出呼吸感 */ 
-    height: 75%; 
-    object-fit: contain; 
-    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); 
-} 
+    /* 格子升级 - 嵌入式木盒 */ 
+    .ingredient-item { 
+        width: 100%; 
+        height: 100%; 
+        /* 深色凹槽 */ 
+        background: rgba(0, 0, 0, 0.2); 
+        border-radius: 8px; 
+        /* 内部阴影，制造深度 */ 
+        box-shadow: inset 3px 3px 8px rgba(0,0,0,0.4), inset -1px -1px 2px rgba(255,255,255,0.05); 
+        border: 1px solid rgba(255,255,255,0.03); 
+        
+        display: flex; 
+        flex-direction: column;
+        align-items: center; 
+        justify-content: center; 
+        position: relative; 
+        cursor: pointer; 
+    } 
 
-/* 兼容 Emoji 图标的样式 */
-.ingredient-item .ing-icon {
-    font-size: 40px;
-    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
-    line-height: 1;
-}
+    .ingredient-item img { 
+        width: 80%; 
+        height: 80%; 
+        object-fit: contain; 
+        filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); /* 食材悬浮感 */ 
+    } 
 
-/* [核心修改] 数量标签：高对比，无投影 */ 
-.ingredient-count { 
-    position: absolute; 
-    bottom: 4px; 
-    right: 4px; 
-    background: #e74c3c; /* 鲜艳红底 */ 
-    color: #fff; 
-    font-size: 11px; 
-    font-weight: 700; 
-    padding: 1px 5px; 
-    border-radius: 4px; 
-    text-shadow: none !important; /* [强制] 去除文字阴影 */ 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* 标签本身的盒子阴影保留一点点 */ 
-}
+    .ingredient-count { 
+        position: absolute; 
+        bottom: 5px; 
+        right: 5px; 
+        background: #C0392B; /* 更深沉的红 */ 
+        color: #fff; 
+        font-size: 11px; 
+        font-weight: 700; 
+        padding: 2px 6px; 
+        border-radius: 4px; 
+        box-shadow: 0 2px 3px rgba(0,0,0,0.3); 
+        text-shadow: none !important; 
+    }
         
     </style>
 </head>
@@ -3971,10 +3999,9 @@ const AudioController = {
         }
     },
 
-    // Scene shortcuts
-    playTheme() { this.play('bgm-theme'); },
-    playShop() { this.play('bgm-shop'); },
-    playGame() { this.play('bgm-game'); }
+    playTheme() { if (typeof themeMusicEnabled === 'undefined' || themeMusicEnabled) this.play('bgm-theme'); },
+    playShop() { if (typeof themeMusicEnabled === 'undefined' || themeMusicEnabled) this.play('bgm-shop'); },
+    playGame() { if (typeof gameMusicEnabled === 'undefined' || gameMusicEnabled) this.play('bgm-game'); }
 };
 
 // Auto-init on load
@@ -4462,14 +4489,26 @@ function startMusic() {
     const isMenuState = isLoading || isStart || isMap;
     
     if (isMenuState) {
-        AudioController.playTheme();
+        if (themeMusicEnabled) {
+            AudioController.playTheme();
+        } else {
+            AudioController.stopCurrent();
+        }
     } else {
-        AudioController.playGame();
+        if (gameMusicEnabled) {
+            AudioController.playGame();
+        } else {
+            AudioController.stopCurrent();
+        }
     }
 }
 
 function stopMusic() {
     AudioController.stopCurrent();
+    if (typeof nintendoBGMInterval !== 'undefined' && nintendoBGMInterval) {
+        clearInterval(nintendoBGMInterval);
+        nintendoBGMInterval = null;
+    }
 }
 
 /* Removed old createCoinBuffer definition */
@@ -4957,6 +4996,8 @@ function appendNextChatMessage() {
     // [核心新增] 智能朝向修正 
     if (speakerName === '我') isLeft = true; 
     if (['道明叔', '左伊姐', '老张头', '林大婶', '刘大爷'].includes(speakerName)) isLeft = false; 
+    if (speakerName === '滑板少年') isLeft = true;
+    if (speakerName === '集市管理员') isLeft = false;
     
     // [核心修复] 左边是流动NPC(B角)，右边是固定摊主(A角) 
     const rolePrefix = isLeft ? "B角-" : "A角-"; 
@@ -5043,9 +5084,17 @@ window.finishChatterAndShop = function() {
         layer.style.opacity = '0'; 
         setTimeout(() => { 
             layer.remove(); 
+            if (!localStorage.getItem('hasPlayedIntro')) { 
+                showUncleGaoInterlude(); 
+                return; 
+            } 
             revealPrepUI(); 
         }, 300); 
     } else { 
+        if (!localStorage.getItem('hasPlayedIntro')) { 
+            showUncleGaoInterlude(); 
+            return; 
+        } 
         revealPrepUI(); 
     } 
 };
@@ -5261,7 +5310,7 @@ function showShop() {
 }
 
 function closeShop() {
-    AudioController.playTheme();
+    startMusic();
     const shopOverlay = document.getElementById('shop-overlay');
     if (shopOverlay) {
         shopOverlay.style.display = 'none';
@@ -7554,15 +7603,13 @@ window.endGame = function() {
         
         // 7. 播放主题曲
         try {
-            const themeBgm = document.getElementById('bgm');
-            if (themeBgm && themeMusicEnabled) {
-                themeBgm.currentTime = 0;
+            if (themeMusicEnabled) {
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume().then(() => {
-                         themeBgm.play().catch(e => console.log("Theme play error (after resume):", e));
+                        AudioController.playTheme();
                     });
                 } else {
-                     themeBgm.play().catch(e => console.log("Theme play error:", e));
+                    AudioController.playTheme();
                 }
             }
         } catch(e) {
@@ -8278,7 +8325,7 @@ function renderStoryModal(storyData, onComplete) {
     const overlay = document.createElement('div'); 
     overlay.id = 'story-overlay'; 
     overlay.style.cssText = ` 
-        position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; 
+        position:fixed; top:0; left:0; width:100%; height:100%; z-index:20001; 
         background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('assets/bg/门店后厨.jpg') center/cover no-repeat; 
         display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:15%; 
         transition: background 0.5s ease; 
@@ -8867,13 +8914,11 @@ if (themeToggle) {
     themeToggle.checked = themeMusicEnabled;
     themeToggle.addEventListener('change', e => {
         themeMusicEnabled = e.target.checked;
-        const bgm = document.getElementById('bgm');
         
         if (!themeMusicEnabled) {
-            // 关闭：立即停止
-            if (bgm) {
-                bgm.pause();
-                bgm.currentTime = 0;
+            // 关闭：如果当前正在播放主题曲，则停止
+            if (AudioController.currentBgm === 'bgm-theme') {
+                AudioController.stopCurrent();
             }
         } else {
             // 开启：检查是否在菜单界面，是则播放
@@ -8892,23 +8937,24 @@ if (themeToggle) {
 if (musicToggle) {
     musicToggle.checked = gameMusicEnabled;
     musicToggle.addEventListener('change', e => {
-        gameMusicEnabled = e.target.checked;
-        if (gameMusicEnabled) {
-            const loadingEl = document.getElementById('loading');
-            if (loadingEl && loadingEl.style.display === 'none' && game.isLive) {
-                startNintendoBGM();
+            gameMusicEnabled = e.target.checked;
+            if (gameMusicEnabled) {
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl && loadingEl.style.display === 'none' && game.isLive) {
+                    AudioController.playGame();
+                }
+            } else {
+                // 停止游戏音乐
+                if (AudioController.currentBgm === 'bgm-game') {
+                    AudioController.stopCurrent();
+                }
+                
+                if (nintendoBGMInterval) {
+                    clearInterval(nintendoBGMInterval);
+                    nintendoBGMInterval = null;
+                }
             }
-        } else {
-            // 停止 MP3 播放
-            const gameBgm = document.getElementById('game-bgm');
-            if (gameBgm) gameBgm.pause();
-            
-            if (nintendoBGMInterval) {
-                clearInterval(nintendoBGMInterval);
-                nintendoBGMInterval = null;
-            }
-        }
-    });
+        });
 }
 document.getElementById('toggle-sfx').addEventListener('change', e => { sfxEnabled = e.target.checked; });
 document.querySelectorAll('.action-btn').forEach(b => b.addEventListener('pointerdown', () => playCoin()));
@@ -9463,6 +9509,167 @@ function showLegacyManageModal(shopData) {
 
 <script>
 // ================= 游戏启动逻辑 =================
+function showIntroGiftModal() {
+    const overlay = document.createElement('div');
+    overlay.id = 'intro-gift-modal';
+    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;z-index:20000;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:fadeIn 0.5s;";
+    const bg = document.createElement('div');
+    bg.style.cssText = "position:absolute;inset:0;background:url('assets/bg/门店后厨.jpg') center/cover no-repeat;filter:blur(4px) brightness(0.5);";
+    overlay.appendChild(bg);
+    const gifts = [
+        { id: 'egg', count: 5 },
+        { id: 'tomato', count: 5 },
+        { id: 'onion', count: 5 }
+    ];
+    let itemsHtml = '';
+    gifts.forEach(item => {
+        const ing = (typeof INGREDIENTS !== 'undefined' ? INGREDIENTS[item.id] : null);
+        const icon = ing && ing.icon ? ing.icon : '🥦';
+        const name = ing && ing.name ? ing.name : item.id;
+        itemsHtml += `
+            <div style="display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,0.35);border-radius:12px;padding:15px;width:90px;border:1px solid rgba(255,255,255,0.2)">
+                <div style="font-size:44px;margin-bottom:8px">${icon}</div>
+                <span style="color:#fff;font-size:14px">${name}</span>
+                <span style="color:#f1c40f;font-weight:bold;font-size:16px">x${item.count}</span>
+            </div>
+        `;
+    });
+    overlay.innerHTML += `
+        <div style="position:relative;width:90%;max-width:680px;background:#fff;border-radius:16px;padding:20px;display:flex;margin-bottom:30px;box-shadow:0 10px 30px rgba(0,0,0,0.5)">
+            <div style="width:80px;height:80px;margin-right:15px;flex-shrink:0">
+                <img src="assets/npc/高叔_normal.png" style="width:100%;height:100%;object-fit:cover;border-radius:8px">
+            </div>
+            <div>
+                <div style="color:#d35400;font-weight:bold;margin-bottom:5px">高叔</div>
+                <div style="color:#2c3e50;line-height:1.6">虽然现在只能炒些家常小菜，但这是咱们起步的根基。收下这些，开始你的第一天营业吧！</div>
+            </div>
+        </div>
+        <h3 style="position:relative;color:#fff;margin-bottom:20px;font-weight:normal;letter-spacing:2px">— 初始物资 —</h3>
+        <div style="position:relative;display:flex;gap:15px;flex-wrap:wrap;justify-content:center;margin-bottom:40px;">
+            ${itemsHtml}
+        </div>
+        <button id="btn-intro-start" style="position:relative;background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;border:none;padding:15px 60px;font-size:20px;border-radius:30px;font-weight:bold;cursor:pointer;box-shadow:0 4px 15px rgba(230,126,34,0.4);animation:pulse 2s infinite">开始营业</button>
+    `;
+    document.body.appendChild(overlay);
+    const btn = overlay.querySelector('#btn-intro-start');
+    btn.onclick = async () => {
+        playSfx(400, 'sine', 0.1);
+        try {
+            if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') await audioCtx.resume();
+        } catch {}
+        overlay.remove();
+        localStorage.setItem('hasPlayedIntro', 'true');
+        if (typeof saveGameState === 'function') saveGameState();
+        initGameAfterIntro(gifts);
+    };
+}
+
+function initGameAfterIntro(gifts) {
+    if (typeof initDailyInventory === 'function') initDailyInventory();
+    if (!game.dailyInventory) game.dailyInventory = {};
+    gifts.forEach(g => {
+        const realId = (g.id === 'vegetable' && INGREDIENTS && INGREDIENTS['pepper']) ? 'pepper' : g.id;
+        game.dailyInventory[realId] = (game.dailyInventory[realId] || 0) + g.count;
+    });
+    window.tempInventory = { ...game.dailyInventory };
+    window.tempCoins = (game.coins !== undefined) ? game.coins : 500;
+    window.startCoins = window.tempCoins;
+    if (typeof window.confirmPrep === 'function') {
+        window.confirmPrep();
+    }
+}
+
+// [新增] 新手集市插曲：高叔叮嘱 -> 赠送物资
+function showUncleGaoInterlude() {
+    const prepModal = document.getElementById('prep-modal');
+    if (!prepModal) return;
+    const layer = document.createElement('div');
+    layer.id = 'intro-interlude-layer';
+    layer.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;z-index:10002;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:15%;background:transparent;animation:fadeIn 0.3s;";
+    const gifts = [
+        { id: 'egg', name: '鸡蛋', count: 5 },
+        { id: 'tomato', name: '番茄', count: 5 },
+        { id: 'onion', name: '洋葱', count: 5 }
+    ];
+    const dialogueHtml = `
+        <div id="gao-dialogue-box" style="width:95%; max-width:800px; margin:0 auto; padding:20px; position:relative; cursor:pointer; height:100%; display:flex; flex-direction:column; justify-content:flex-end;" onclick="switchToIntroShelf()">
+            <div class="chat-row left" style="display:flex; margin-bottom: 0; align-items: flex-end;">
+                <div class="chat-portrait-box" style="width: 160px; height: 220px; flex-shrink: 0; position: relative; z-index: 10;">
+                    <img src="assets/characters/高叔.png" 
+                         class="chat-portrait-img" 
+                         style="display:block; width: 320px; height: 380px; max-width:none; position:absolute; bottom:0; left:50%; transform:translateX(-50%); object-fit:contain; object-position:bottom center;" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="chat-portrait-placeholder" style="background:#e67e22; display:none; width:80px; height:80px; font-size:40px; line-height:80px; border-radius:10px;">高</div>
+                </div>
+                <div class="chat-bubble" style="position:relative; flex-grow: 1; padding: 30px 40px 50px 120px !important; margin-left: -70px; z-index: 5; font-size: 18px; line-height: 1.6; min-height: 120px;">
+                    <span style="font-weight:bold; color:#d35400; display:block; margin-bottom:12px; font-size:22px;">高叔</span>
+                    虽然现在只能炒些家常小菜，但这是咱们起步的根基。
+                    <div style="position:absolute; right:25px; bottom:15px; font-size:14px; color:#e67e22; font-weight:bold; animation:blink 1.2s infinite;">
+                        (点击屏幕继续) ▶
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    let gridHtml = '';
+    gifts.forEach(item => {
+        const ing = (typeof INGREDIENTS !== 'undefined' ? INGREDIENTS[(item.id === 'vegetable') ? 'pepper' : item.id] : null);
+        const icon = ing && ing.icon ? ing.icon : '🥦';
+        const name = item.name || (ing && ing.name ? ing.name : item.id);
+        gridHtml += `
+            <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(5px);width:100%;max-width:260px;box-sizing:border-box;overflow:hidden;">
+                <div style="font-size:48px;margin-bottom:10px;">${icon}</div>
+                <div style="color:#fff;font-weight:bold;margin-bottom:5px;">${name}</div>
+                <div style="color:#f1c40f;font-weight:900;font-size:18px;">x${item.count}</div>
+                <div style="font-size:12px;color:#2ecc71;margin-top:5px;">赠送</div>
+            </div>
+        `;
+    });
+    const shelfHtml = `
+        <div id="intro-shelf-box" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:2;">
+            <h2 style="color:#fff;font-size:28px;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,0.5);">📦 初始物资</h2>
+            <p style="color:rgba(255,255,255,0.8);margin-bottom:30px;">高叔为你准备的启动食材</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:24px;width:85%;max-width:900px;margin:0 auto 40px;justify-items:center;align-items:stretch;">
+                ${gridHtml}
+            </div>
+            <button onclick="finishIntroInterlude()" style="background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;border:none;padding:15px 60px;font-size:20px;border-radius:50px;font-weight:bold;cursor:pointer;box-shadow:0 4px 15px rgba(230,126,34,0.4);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">开始营业</button>
+        </div>
+    `;
+    layer.innerHTML = dialogueHtml + shelfHtml;
+    prepModal.appendChild(layer);
+    const curtainEl = document.createElement('div');
+    curtainEl.className = 'prep-curtain';
+    layer.appendChild(curtainEl);
+    window.switchToIntroShelf = () => {
+        playSfx(400, 'sine', 0.1);
+        const d = document.getElementById('gao-dialogue-box');
+        if (d) d.style.display = 'none';
+        const shelf = document.getElementById('intro-shelf-box');
+        const curtain = layer.querySelector('.prep-curtain');
+        if (curtain) {
+            curtain.classList.add('active');
+            setTimeout(() => {
+                if (shelf) {
+                    shelf.style.display = 'flex';
+                    shelf.style.animation = 'fadeIn 0.5s';
+                }
+            }, 800);
+        } else {
+            if (shelf) {
+                shelf.style.display = 'flex';
+                shelf.style.animation = 'fadeIn 0.5s';
+            }
+        }
+    };
+    window.finishIntroInterlude = () => {
+        playSfx(400, 'triangle', 0.1);
+        localStorage.setItem('hasPlayedIntro', 'true');
+        if (typeof saveGameState === 'function') saveGameState();
+        layer.remove();
+        initGameAfterIntro(gifts);
+    };
+}
+
 function initGame() {
     showPrepModal();
 }
@@ -9482,8 +9689,6 @@ function startGame() {
     if (!hasPlayed) {
         setTimeout(() => {
             renderStoryModal(INTRO_STORY, () => {
-                localStorage.setItem('hasPlayedIntro', 'true');
-                saveGameState();
                 initGame();
             });
         }, 500);
