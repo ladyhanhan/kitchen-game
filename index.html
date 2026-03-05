@@ -529,8 +529,8 @@
  
  /* 3. 鼠标拖拽时的图片 */ 
  #drag-cursor img { 
-     width: 60px; 
-     height: 60px; 
+     width: 80px; 
+     height: 80px; 
      object-fit: contain; 
      filter: drop-shadow(0 8px 15px rgba(0,0,0,0.3)); 
  }
@@ -818,20 +818,25 @@
 .cook-machine.active { 
     animation: machineWork 0.5s infinite; 
 } 
-.cook-machine.finished { 
+/* .cook-machine.finished { 
     transform: scale(1.1); 
     filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.9)); 
+} */
+.cook-machine.finished {
+    transform: scale(1.1);
 } 
 
-.progress-bar-container { width: 80%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); } .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e67e22); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 10px rgba(230, 126, 34, 0.5); } 
+.progress-bar-container { width: 80%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); } .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e67e22); width: 0%; transition: width 0.1s linear; /* box-shadow: 0 0 10px rgba(230, 126, 34, 0.5); */ } 
 
 /* 状态样式 - 使用边框色区分 */ 
 .prep-card.status-active { border-color: #3498db; box-shadow: 0 0 15px rgba(52, 152, 219, 0.3) !important; } 
-.cook-card.status-cooking { border-color: #e67e22; box-shadow: 0 0 15px rgba(230, 126, 34, 0.3) !important; } 
+/* .cook-card.status-cooking { border-color: #e67e22; box-shadow: 0 0 15px rgba(230, 126, 34, 0.3) !important; } */
+.cook-card.status-cooking {}
+
 .cook-card.status-finished { 
-    border-color: #f1c40f; 
+    /* border-color: #f1c40f; */
     background: transparent !important; /* 移除背景色 */
-    box-shadow: 0 0 20px rgba(241, 196, 15, 0.5) !important; /* 增强发光效果替代背景 */
+    /* box-shadow: 0 0 20px rgba(241, 196, 15, 0.5) !important; */
 } 
 
 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } } @keyframes machineWork { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } } 
@@ -963,7 +968,9 @@
 
         /* 反馈 */
         .float-text { position: fixed; font-weight: bold; font-size: 24px; pointer-events: none; animation: floatUp 1.2s forwards; z-index: 2000; text-shadow: 0 2px 0 #fff; }
+        .float-text-earnings { position: fixed; font-weight: bold; font-size: 24px; pointer-events: none; animation: floatUpEarnings 3.5s forwards; z-index: 15; text-shadow: 0 2px 0 #fff; text-align: center; color: #f1c40f; }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-80px); opacity: 0; } }
+        @keyframes floatUpEarnings { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
 
         /* 弹窗 */
         #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 3000; padding: 18px; box-sizing: border-box; }
@@ -2323,6 +2330,174 @@
 
  
     /* --- 清晨集市 (Prep Market) 极致优化版样式 --- */
+    /* 集市食材卡片适配独立按钮 */
+    .market-grid .ingredient-card, .prep-grid .ingredient-card { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        padding: 15px; 
+        gap: 8px; 
+        cursor: default; 
+        background: rgba(30, 30, 30, 0.7); /* 深色毛玻璃 */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        width: 100%; /* 由 Grid 控制宽度 */
+        box-sizing: border-box;
+    } 
+    /* 激活态/已购买态样式 */
+    .market-grid .ingredient-card.active-card, .prep-grid .ingredient-card.active-card {
+        background: rgba(30, 30, 30, 0.7); /* 移除特殊背景色，保持与默认一致 */
+        border-color: #4CAF50; /* 绿色边框 */
+        box-shadow: 0 0 15px rgba(76, 175, 80, 0.3); /* 柔和绿色光晕 */
+    }
+    .market-grid .ingredient-card:hover, .prep-grid .ingredient-card:hover {
+        transform: translateY(-5px);
+        background: rgba(40, 40, 40, 0.8);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    .market-grid .ingredient-card.active-card:hover, .prep-grid .ingredient-card.active-card:hover {
+        background: rgba(40, 40, 40, 0.8);
+        border-color: #4CAF50;
+        box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+    }
+
+    /* 食材名称白色 */
+    .ingredient-card .ing-name {
+        color: #fff;
+        font-weight: bold;
+        font-size: 15px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    /* 食材图标悬浮效果 */
+    .ingredient-card .ing-icon {
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+    .ingredient-card:hover .ing-icon {
+        transform: scale(1.2) rotate(10deg) translateY(-5px);
+    }
+
+    /* 价格和库存行容器 */
+    .ing-info-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        margin-bottom: 4px;
+    }
+    .ing-price {
+        color: #f1c40f; 
+        font-weight: 900; 
+        font-size: 14px;
+    }
+
+    .buy-btn-group { 
+        display: flex; 
+        width: 100%; 
+        gap: 6px; 
+        justify-content: center; 
+        margin-top: auto; /* 底部对齐 */
+    } 
+    .buy-btn-group button { 
+        flex: 1; 
+        padding: 8px 0; 
+        font-size: 13px; 
+        font-weight: bold; 
+        color: #fff; 
+        background: rgba(255, 255, 255, 0.15); 
+        border: 1px solid rgba(255,255,255,0.1); 
+        border-radius: 8px; 
+        cursor: pointer; 
+        transition: all 0.2s; 
+    } 
+    .buy-btn-group button.btn-minus {
+        background: rgba(255, 255, 255, 0.1); /* 去掉红色，改为更淡的背景 */
+        flex: 0.6;
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #ccc;
+    }
+    .buy-btn-group button:hover { 
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    } 
+    .buy-btn-group button.btn-minus:hover {
+        background: rgba(255, 255, 255, 0.2); /* hover也去掉红色 */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        color: #fff;
+    }
+    .buy-btn-group button:active { transform: scale(0.95); } 
+    
+    /* [新增] 暂停界面按钮动效 */
+    #btn-resume:hover, #btn-end-game:hover {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+    }
+    #btn-resume:active, #btn-end-game:active {
+        transform: scale(0.95);
+        filter: brightness(0.9);
+    }
+
+    .market-stock-badge { 
+        font-size: 11px; 
+        color: #bdc3c7; 
+        background: rgba(0, 0, 0, 0.3); 
+        padding: 2px 6px; 
+        border-radius: 4px; 
+        font-weight: normal;
+        white-space: nowrap;
+        border: 1px solid transparent; /* 预留边框位置，防止跳动 */
+    } 
+    
+    /* [新增] 当库存大于0时（active-card），库存文字变绿 */
+    .ingredient-card.active-card .market-stock-badge {
+        color: #4CAF50; /* 与边框颜色一致 */
+        font-weight: bold;
+        background: rgba(76, 175, 80, 0.15); /* 淡淡的绿色背景增强识别度 */
+        border-color: rgba(76, 175, 80, 0.3);
+    }
+    
+    /* 容器布局修正 - 使用 Grid 确保每行6个 */
+    .category-items {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px; /* 间距 */
+        justify-content: start;
+        padding: 10px;
+        width: 100%;
+        max-width: 1500px; /* [优化] 限制最大宽度，防止大屏卡片过宽 */
+        margin: 0 auto; /* [优化] 居中显示 */
+        box-sizing: border-box;
+    }
+    
+    /* 响应式适配：屏幕较窄时自动调整，但保持均匀分布 */
+    @media (max-width: 1200px) {
+        .category-items {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+    @media (max-width: 992px) {
+        .category-items {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+    @media (max-width: 768px) {
+        .category-items {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    @media (max-width: 576px) {
+        .category-items {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
     .prep-overlay { 
         position: fixed; inset: 0; z-index: 10000; 
         display: flex; flex-direction: column; 
@@ -2607,12 +2782,8 @@
     .market-category { display: flex; flex-direction: column; gap: 10px; animation: slideInUp 0.4s ease forwards; } 
     .category-title { font-size: 18px; font-weight: 800; color: #f1c40f; display: flex; align-items: center; gap: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); } 
     
-    .category-items { 
-        display: grid; 
-        /* [优化] 增加卡片宽度：110px -> 130px (约+18%)，保持信息不拥挤 */
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-        gap: 12px; /* [优化] 增加间距 */
-    } 
+    
+    /* [Deleted conflicting .category-items rule] */
 
     /* 精致卡片样式 */ 
     .market-item-card { 
@@ -2673,9 +2844,9 @@
 
     /* [优化] 响应式设计：适配移动端 */
     @media (max-width: 768px) {
-        .prep-container { padding: 10px 10px 0 10px; width: 100%; max-width: 100%; }
-        .category-items { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; } /* 移动端保持较小 */
-        .pc-icon { font-size: 30px; }
+        /* [Deleted conflicting media query for .category-items] */
+    .prep-container { padding: 10px 10px 0 10px; width: 100%; max-width: 100%; }
+    .pc-icon { font-size: 30px; }
         .prep-footer { padding: 15px 20px; flex-direction: column; gap: 15px; align-items: stretch; border-radius: 0; }
         .pf-info { flex-direction: row; justify-content: space-between; align-items: center; }
         .btn-start-day { width: 100%; justify-content: center; }
@@ -3698,6 +3869,211 @@
         text-shadow: 0 1px 0 rgba(0,0,0,0.8); 
     } 
 
+    /* ❄️ Fridge Upgrade Style for Pantry Drawer (保鲜冷库视觉升级) */
+    #pantry-drawer.fridge-style {
+        background-color: #cfd8dc; /* Metallic silver/ice base */
+        background-image:
+            /* 1. Realistic metallic sheen (Broad reflection band) */
+            linear-gradient(115deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 60%),
+            /* 2. Frosty noise texture (Fine grain) */
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='frost'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23frost)' opacity='0.2'/%3E%3C/svg%3E"),
+            /* 3. Subtle brushed metal grain (Horizontal, fine & irregular) */
+            repeating-linear-gradient(180deg, transparent, transparent 2px, rgba(0,0,0,0.02) 3px, transparent 6px),
+            /* 4. Deep Cold Gradient */
+            radial-gradient(circle at 0% 0%, #eceff1 0%, #b0bec5 100%);
+            
+        border: 4px solid #78909c; /* Darker metal border */
+        border-left: none;
+        box-shadow:
+            inset 0 0 40px rgba(128, 222, 234, 0.3), /* Stronger icy blue glow */
+            inset 2px 2px 5px rgba(255,255,255,0.9),
+            12px 12px 35px rgba(0,0,0,0.3);
+        /* Ensure smooth transition */
+        transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1.05), background 0.8s, border 0.8s, box-shadow 0.8s;
+    }
+
+    /* Temperature Display - Moved to right of title */
+    #pantry-drawer.fridge-style .drawer-title::after {
+        content: '-4°C';
+        display: inline-block;
+        margin-left: 12px;
+        vertical-align: middle;
+        background: #263238;
+        color: #00e676;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid #37474f;
+        box-shadow: 0 0 5px rgba(0, 230, 118, 0.4);
+        /* Fade in */
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    /* Frost/Condensation Overlay */
+    #pantry-drawer.fridge-style::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(to top, rgba(255,255,255,0.3), transparent);
+        border-bottom-right-radius: 12px;
+        pointer-events: none;
+        opacity: 0.6;
+        /* Fade in */
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    /* --- Cold Mist Particle Animation --- */
+    /* 1. Open Burst Particles */
+    .mist-particle {
+        position: absolute;
+        background: radial-gradient(circle, rgba(200,230,255,0.8) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 3002; /* Above handle */
+        will-change: transform, opacity;
+        filter: blur(2px);
+    }
+
+    /* 2. Cold Distortion Wave (Temperature Change) */
+    .cold-distortion-wave {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 10px; /* Starts thin */
+        background: rgba(255,255,255,0.1);
+        /* Simulate distortion with blur + scale */
+        backdrop-filter: blur(4px); 
+        border-left: 2px solid rgba(255,255,255,0.3);
+        z-index: 3001;
+        pointer-events: none;
+        opacity: 0;
+        transform-origin: right center;
+    }
+
+    @keyframes distortionWaveOpen {
+        0% {
+            opacity: 0;
+            width: 10px;
+            transform: scaleX(1);
+        }
+        20% {
+            opacity: 1;
+            width: 80px;
+            transform: scaleX(1.5);
+        }
+        100% {
+            opacity: 0;
+            width: 150px;
+            transform: scaleX(2.5);
+        }
+    }
+
+    @keyframes mistFloatOut {
+        0% {
+            opacity: 0;
+            transform: translate(0, 0) scale(0.5);
+        }
+        15% {
+            opacity: var(--opacity-peak, 0.6);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(var(--tx), var(--ty)) scale(var(--scale-end, 2.0));
+        }
+    }
+
+    /* 3. Closing Sucked In Particles */
+    .mist-particle-close {
+        position: absolute;
+        background: radial-gradient(circle, rgba(200,230,255,0.6) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 3002;
+        will-change: transform, opacity;
+        filter: blur(1px);
+    }
+
+    @keyframes mistSuckedIn {
+        0% {
+            opacity: 0;
+            transform: translate(var(--start-x), var(--start-y)) scale(1.5);
+        }
+        20% {
+            opacity: 0.8;
+        }
+        100% {
+            opacity: 0;
+            /* Suck towards the drawer gap (right edge) */
+            transform: translate(10px, 0) scale(0.2);
+        }
+    }
+
+    /* Since retrieving current matrix in CSS keyframes isn't standard, we'll use a simpler 'dissipate' animation for closing */
+    @keyframes mistDissipate {
+        0% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0.2); }
+    }
+
+    /* Adjust text colors for fridge style */
+    #pantry-drawer.fridge-style .drawer-title {
+        color: #263238 !important; /* Darker for readability */
+        text-shadow: 0 1px 0 rgba(255,255,255,0.4) !important;
+        display: flex;
+        align-items: center;
+    }
+    
+    #pantry-drawer.fridge-style #pantry-layer-indicator {
+        color: #37474f !important; /* Darker */
+        font-weight: bold;
+        text-shadow: none !important;
+    }
+
+    /* Adjust grid item background for fridge style */
+    #pantry-drawer.fridge-style .ingredient-item {
+        background: rgba(245, 245, 245, 0.4); /* Slightly lighter background */
+        border: 1px solid rgba(255,255,255,0.6);
+        box-shadow: inset 1px 1px 3px rgba(255,255,255,0.8), inset -1px -1px 2px rgba(0,0,0,0.1);
+    }
+    
+    #pantry-drawer.fridge-style .ing-name {
+        color: #000 !important; /* Force black */
+        font-weight: 900;
+        text-shadow: 0 0 1px rgba(255,255,255,0.8); /* White halo for contrast */
+        z-index: 10;
+        position: relative;
+    }
+    
+    #pantry-drawer.fridge-style .ing-stock {
+        color: #000;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid #b0bec5;
+        font-weight: bold;
+    }
+
+    /* Hover effect for fridge style ingredients */
+    #pantry-drawer.fridge-style .ingredient-item:hover {
+        /* Deep recess effect (simulate groove) without moving the grid */
+        background: rgba(176, 190, 197, 0.4); /* Darker cool grey */
+        box-shadow: inset 4px 4px 12px rgba(0,0,0,0.3), inset -2px -2px 6px rgba(255,255,255,0.4);
+        border-color: rgba(120, 144, 156, 0.6);
+        transform: none;
+        transition: all 0.2s ease;
+    }
+    
+    #pantry-drawer.fridge-style .ingredient-item:hover .ing-icon {
+        /* Icon pops out slightly */
+        filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
+        transform: scale(1.15) translateY(-5px);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+        display: inline-block; /* Ensure transform works on span */
+    }
+
     /* 网格保持不变 */ 
     #ingredient-grid { 
         flex: 1; 
@@ -3939,7 +4315,7 @@
         <div id="pantry-drawer" class="closed"> 
             <div class="drawer-content"> 
                 <div class="drawer-header"> 
-                    <span class="drawer-title" style="color:#8B4513; font-weight:bold;">📦 食材储物柜</span> 
+                    <span class="drawer-title" style="color:#8B4513; font-weight:bold;">食材储物柜</span> 
                     <div class="drawer-nav"> 
                         <button onclick="changePantryLayer(-1)">◀</button> 
                         <span id="pantry-layer-indicator" style="color:#5D4037;">1/2</span> 
@@ -4198,11 +4574,12 @@
     </div>
 
     <div id="pause-overlay">
-        <div class="modal">
-            <h2>⏸ 已暂停</h2>
-            <p>按空格 / P 键，或点击“继续”恢复游戏。</p>
-            <button type="button" id="btn-resume">继续</button>
-            <button type="button" id="btn-end-game" style="margin-top: 10px; background: #e74c3c; border-bottom: 4px solid #c0392b;" onclick="window.confirmEndGame()">店铺打烊</button>
+        <div class="modal" style="background: transparent; box-shadow: none; padding: 0; border: none; transform: scale(1.02); position: relative; width: 600px; height: 500px; display: flex; justify-content: center; align-items: center;">
+            <img src="assets/ui/餐厅服务暂停中.png" alt="餐厅服务暂停中" style="width: 100%; height: auto; display: block; position: absolute; top: 0; left: 0; z-index: 1;">
+            <div style="position: absolute; z-index: 2; top: 50%; left: 50%; transform: translate(-50%, 0); display: flex; flex-direction: column; align-items: center; margin-top: -62px;">
+                <img src="assets/ui/弹窗_继续.png" id="btn-resume" alt="继续" style="cursor: pointer; width: 234px; height: auto; display: block; margin-bottom: 4px; transition: transform 0.1s;">
+                <img src="assets/ui/弹窗_店铺打烊.png" id="btn-end-game" alt="店铺打烊" onclick="window.confirmEndGame()" style="cursor: pointer; width: 234px; height: auto; display: block; transition: transform 0.1s;">
+            </div>
         </div>
     </div>
 
@@ -4325,8 +4702,8 @@
     <div class="modal">
         <h2>⏸ 已暂停</h2>
         <p>按空格 / P 键，或点击“继续”恢复游戏。</p>
-        <button type="button" id="btn-resume">继续</button>
-        <button type="button" id="btn-end-game" style="margin-top: 10px; background: #e74c3c; border-bottom: 4px solid #c0392b;" onclick="window.confirmEndGame()">店铺打烊</button>
+        <img src="assets/ui/弹窗_继续.png" id="btn-resume" alt="继续" style="cursor: pointer; width: 180px; height: auto; display: block; margin: 15px auto; transition: transform 0.1s;">
+        <img src="assets/ui/弹窗_店铺打烊.png" id="btn-end-game" alt="店铺打烊" onclick="window.confirmEndGame()" style="cursor: pointer; width: 180px; height: auto; display: block; margin: 15px auto; transition: transform 0.1s;">
     </div>
 </div>
 
@@ -5671,6 +6048,7 @@ function revealPrepUI() {
     // 2. [核心修改] 延迟 800ms，等待黑幕完全盖住屏幕后，再显示 UI
     setTimeout(() => {
         const header = document.querySelector('.prep-header');
+        const topControls = document.getElementById('prep-top-controls'); // [新增]
         const grid = document.getElementById('prep-grid');
         const footer = document.getElementById('prep-footer');
 
@@ -5682,6 +6060,7 @@ function revealPrepUI() {
         };
 
         reveal(header);
+        reveal(topControls); // [新增]
         reveal(grid);
         reveal(footer);
 
@@ -6059,6 +6438,11 @@ function buyUpgrade(type, btnEl) {
         // [新增] 刷新头衔显示
         if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
         
+        // [UI] 即时更新储物柜样式
+        if (type === 'fridge') {
+             if (typeof updatePantryStyle === 'function') updatePantryStyle();
+        }
+        
         triggerFeedback(window.innerWidth / 2, window.innerHeight / 2, `升级成功！-¥${price}`, '#2ecc71');
     } else {
         showInsufficientBalanceFeedback();
@@ -6133,6 +6517,7 @@ window.executeReset = function() {
 };
 
 let game = {
+    buyMultiplier: 1, // [新增] 购买倍率
     level: 1, revenue: 0, served: 0, total: 0, spawned: 0, isLive: true, isPaused: false, dayEnded: false,
     dailyRevenue: 0, totalRevenue: 0, targetRevenue: 1000,
     dailyDishCount: 0, dailyQualitySum: 0,
@@ -6259,9 +6644,10 @@ function generateDailyOrders(level) {
         // [类别B] 趋势主打菜：根据集市暗示筛选 
         const trendDishes = availableRecipes.filter(r => { 
             const ings = r.ingredients; 
-            if (todayTrend === 'meat') return ings.includes('pork') || ings.includes('beef') || ings.includes('chicken') || ings.includes('pork_ribs'); 
-            if (todayTrend === 'vege') return ings.includes('tomato') || ings.includes('potato') || ings.includes('pepper') || ings.includes('eggplant'); 
-            if (todayTrend === 'seafood') return ings.includes('shrimp') || ings.includes('fish') || ings.includes('abalone') || ings.includes('sea_cucumber'); 
+            // [Fix] Expanded trend filters to cover high-level ingredients and missing types
+            if (todayTrend === 'meat') return ings.includes('pork') || ings.includes('beef') || ings.includes('chicken') || ings.includes('pork_ribs') || ings.includes('chicken_wing') || ings.includes('wagyu'); 
+            if (todayTrend === 'vege') return ings.includes('tomato') || ings.includes('potato') || ings.includes('pepper') || ings.includes('eggplant') || ings.includes('tofu') || ings.includes('onion') || ings.includes('asparagus') || ings.includes('pumpkin_mash'); 
+            if (todayTrend === 'seafood') return ings.includes('shrimp') || ings.includes('fish') || ings.includes('abalone') || ings.includes('sea_cucumber') || ings.includes('fish_maw'); 
             if (todayTrend === 'spicy') return ings.includes('chili') || ings.includes('pepper') || ings.includes('tofu'); 
             return false; 
         }); 
@@ -6296,6 +6682,8 @@ function generateDailyOrders(level) {
                 finalWeightedPool.push(recipe); 
             } 
         }); 
+        // [史诗级修复] 将今日的专属菜单池存入全局变量，供无限生成使用 
+        game.dailyActivePool = finalWeightedPool; 
         // 5. 根据最终池子生成订单队列 
         for (let i = 0; i < goal; i++) { 
             const count = Math.ceil(Math.random() * game.getDishesPerOrder(level)); 
@@ -6404,21 +6792,24 @@ function spawnOrder(slotIdx, requeuedOrder = null) {
              order = game.orderQueue.shift(); 
              saveGameState(); 
         } else { 
-            // [核心修复] 队列耗尽后的兜底逻辑：必须严格遵循关卡解锁规则！ 
-             const level = game.level; 
-             // [Refactor] 动态解锁逻辑
-             let availableRecipes = RECIPES.filter(r => (r.reqLevel || 1) <= level);
-             
-             // 兜底防止空数组 
-             if (availableRecipes.length === 0) availableRecipes = [RECIPES[0]]; 
-        // 生成符合当前关卡的随机订单，最多 3 道菜
-        const maxPerOrder = 3;
-        const desired = Math.ceil(Math.random() * game.getDishesPerOrder(game.level));
-        const count = Math.min(desired, maxPerOrder);
+            // [史诗级修复] 队列耗尽后的兜底逻辑：必须继续使用今日的【专属活跃菜单池】！ 
+            const level = game.level; 
+            
+            // 优先使用今日的固定池子 
+            let pool = game.dailyActivePool; 
+            // 极端异常兜底：如果没有池子，再取全部已解锁 
+            if (!pool || pool.length === 0) { 
+                pool = RECIPES.filter(r => (r.reqLevel || 1) <= level); 
+                if (pool.length === 0) pool = [RECIPES[0]]; 
+            } 
+        // 生成符合当前池子的随机订单，最多 3 道菜 
+        const maxPerOrder = 3; 
+        const desired = Math.ceil(Math.random() * game.getDishesPerOrder(game.level)); 
+        const count = Math.min(desired, maxPerOrder); 
         const dishes = []; 
         for(let i=0; i<count; i++) { 
-            // 从“已解锁池”中随机，绝不使用全局 RECIPES 
-            const recipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)]; 
+            // 核心：从今日固定池子中抽取，保持一整天的菜品种类连贯！ 
+            const recipe = pool[Math.floor(Math.random() * pool.length)]; 
             dishes.push(recipe); 
         } 
         order = { id: Date.now() + Math.random(), dishes }; 
@@ -6548,7 +6939,8 @@ function takeOrder(order) {
     let label = `+¥${price}`;
     if (quality < 1) label += ` (${Math.floor(quality * 100)}%)`;
     const color = quality === 1 ? "#2ecc71" : (quality >= 0.7 ? "#e67e22" : "#e74c3c");
-    triggerFeedback(rect.left + rect.width / 2, rect.top - 20, label, color);
+    // [UI Style] Optimize earnings text animation: start from bottom and float up
+    triggerFeedback(rect.left + rect.width / 2, rect.bottom + 5, label, color, 'float-text-earnings', 3500);
 
     // [核心修复] 更新统计数据
     game.dailyRevenue += price;
@@ -6637,8 +7029,13 @@ function update() {
                 fill.style.height = pct + '%';
                 
                 // 颜色逻辑保持不变
-                if (pct < 30) fill.style.backgroundColor = '#e74c3c'; // Red warning
-                else fill.style.backgroundColor = '#2ecc71'; // Green (Reset from yellow if needed)
+                if (pct < 30) {
+                    fill.style.backgroundColor = '#e74c3c'; // Red warning
+                } else if (order.isVIP) {
+                    fill.style.backgroundColor = '#27ae60'; // VIP Green
+                } else {
+                    fill.style.backgroundColor = '#2ecc71'; // Normal Green
+                }
             }
         }
 
@@ -6679,9 +7076,9 @@ function update() {
     requestAnimationFrame(update);
 }
 
-function triggerFeedback(x, y, text, color) {
+function triggerFeedback(x, y, text, color, className, duration) {
     const div = document.createElement('div');
-    div.className = 'float-text';
+    div.className = className || 'float-text';
     div.innerText = text;
     document.body.appendChild(div);
     
@@ -6691,7 +7088,7 @@ function triggerFeedback(x, y, text, color) {
     div.style.top = y + 'px';
     div.style.color = color;
     
-    setTimeout(() => div.remove(), 1200);
+    setTimeout(() => div.remove(), duration || 2000);
 }
 
 function showToast(text, duration = 2000) {
@@ -6820,8 +7217,8 @@ function renderStation(sid, updateMode = 'full') {
                 btnDisabled = 'disabled style="cursor:not-allowed;"';
                 btnText = '<img src="assets/ui/等待空闲.png" alt="等待空闲">';
             } else if (game.kmesActive && game.inventory && game.inventory.kmes >= 2 && s.autoCookAt) {
-                // [新增] KMES 托管中状态 (电子屏质感)
-                btnDisabled = 'disabled style="background:#001a00; color:#2ecc71; font-family:\'Courier New\', monospace; font-weight:bold; border:1px solid #333; box-shadow:inset 0 0 5px rgba(0,255,0,0.1); text-shadow:0 0 2px #2ecc71; cursor:not-allowed; transform:none;"';
+                // [新增] KMES 托管中状态 (电子屏质感，不透明)
+                btnDisabled = 'disabled style="background:#001a00 !important; color:#2ecc71 !important; font-family:\'Courier New\', monospace; font-weight:bold; border:1px solid #333; box-shadow:inset 0 0 5px rgba(0,255,0,0.1); text-shadow:0 0 2px #2ecc71; cursor:not-allowed; transform:none !important; opacity: 1 !important; filter: none !important;"';
                 btnText = 'KMES托管中';
             } else {
                 btnDisabled = '';
@@ -7343,9 +7740,18 @@ function analyzeDish(ingredients) {
     for (const recipe of RECIPES) {
         // Count how many of this recipe's ingredients are in the pot
         const matchCount = recipe.ingredients.filter(id => ingredients.includes(id)).length;
-        if (matchCount > 0 && matchCount > bestMatchCount) {
-            bestMatchCount = matchCount;
-            bestMatch = recipe;
+        
+        if (matchCount > 0) {
+            // [Fix] Logic to handle subset recipes (e.g. "Shrimp Egg" vs "Yeung Chow Fried Rice")
+            // If match counts are equal, prefer the recipe with fewer total ingredients (closer to full match)
+            if (matchCount > bestMatchCount) {
+                bestMatchCount = matchCount;
+                bestMatch = recipe;
+            } else if (matchCount === bestMatchCount) {
+                if (bestMatch && recipe.ingredients.length < bestMatch.ingredients.length) {
+                    bestMatch = recipe;
+                }
+            }
         }
     }
     
@@ -7484,6 +7890,244 @@ function playPantryAudio(type) {
     }
 }
 
+// [新增] 冷气烟雾动画管理器
+const ColdMistManager = {
+    timerId: null,
+    rafId: null, // Request Animation Frame ID
+    lastTime: 0,
+    startTime: 0,
+    
+    // [配置接口] 可在此调整动画参数
+    config: {
+        // 强度系数 (动态调整)
+        intensity: 1.0, 
+        
+        // 基础参数 (100% 状态)
+        intervalBase: 33, // 30fps = ~33ms
+        
+        // 每次生成数量 (受 intensity 影响)
+        countBase: 1,
+        
+        // 物理属性 (px)
+        sizeBase: 4,
+        sizeVariance: 8,         // 4 + 0..8 = 4..12px
+        
+        // 扩散位移 (px) (受 intensity 影响)
+        txBase: 30,
+        txVariance: 50,          // 30..80px
+        tyBase: 10,
+        tyVariance: 40,          // 10..50px
+        
+        // 动画属性
+        durationBase: 2,
+        durationVariance: 1,     // 2..3s (Strictly controlled)
+        scaleEndBase: 2.0,
+        scaleEndVariance: 1.5,   // 2.0..3.5倍
+        opacityPeakBase: 0.4,
+        opacityPeakVariance: 0.2 // 0.4..0.6
+    },
+    
+    // 触发开启冷气动画
+    playOpenSequence: function(drawer) {
+        if (!drawer || !drawer.classList.contains('fridge-style')) return;
+        
+        let container = this._getContainer(drawer);
+        container.innerHTML = ''; // Clear previous
+        this.stop(); // Stop any existing loop
+        
+        // 初始状态：高强度
+        this.startTime = performance.now();
+        this.config.intensity = 2.0; // 200% 强度
+        
+        // 启动循环
+        this.loop(container);
+    },
+    
+    // 触发关闭冷气动画
+    playCloseSequence: function(drawer) {
+        // 停止生成新粒子
+        this.stop();
+        
+        const container = drawer ? drawer.querySelector('.mist-container') : document.querySelector('.mist-container');
+        if (!container) return;
+        
+        // 1. 现有粒子快速消散 (Dissipate)
+        const particles = container.querySelectorAll('.mist-particle');
+        particles.forEach(p => {
+            // 立即停止当前动画并切换到消散
+            p.style.animation = 'mistDissipate 2.0s ease-out forwards';
+        });
+        
+        // 2. 生成“倒吸”粒子效果 (Sucked In) - 模拟冷气被带回
+        // 在外部生成一些粒子，向门缝移动
+        for(let i=0; i<8; i++) {
+            this._spawnClosingParticle(container);
+        }
+        
+        // 3. 清理 DOM
+        setTimeout(() => {
+            if (container && container.parentNode) {
+                container.innerHTML = ''; 
+            }
+        }, 2500); // 稍长于动画时间确保清理干净
+    },
+    
+    // 内部: 获取或创建容器
+    _getContainer: function(drawer) {
+        let container = drawer.querySelector('.mist-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'mist-container';
+            container.style.cssText = "position:absolute; top:0; right:0; width:50px; height:100%; pointer-events:none; z-index:3002; overflow:visible;";
+            drawer.appendChild(container);
+        }
+        return container;
+    },
+    
+    _spawnClosingParticle: function(container) {
+        const p = document.createElement('div');
+        p.className = 'mist-particle-close';
+        
+        // 随机起始位置 (在柜门外)
+        const startX = 20 + Math.random() * 40; // 20-60px outside
+        const startY = Math.random() * 20 - 10; // -10 to 10px vert offset
+        const size = 4 + Math.random() * 6;
+        const top = Math.random() * 100;
+        
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        p.style.top = `${top}%`;
+        p.style.right = '0px'; 
+        
+        p.style.setProperty('--start-x', `${startX}px`);
+        p.style.setProperty('--start-y', `${startY}px`);
+        
+        p.style.animation = `mistSuckedIn 1.5s ease-in forwards`; // 快速吸入
+        
+        container.appendChild(p);
+    },
+
+    loop: function(container) {
+        if (!container.parentNode || !document.body.contains(container)) {
+            this.stop();
+            return;
+        }
+        
+        const now = performance.now();
+        const elapsed = (now - this.startTime) / 1000; // seconds
+        
+        // Update Intensity based on time
+        if (elapsed < 0.5) {
+            // 0-0.5s: 保持高强度 (200%)
+            this.config.intensity = 2.0;
+        } else if (elapsed < 2.0) {
+            // 0.5-2.0s: 线性插值 200% -> 120%
+            // t goes from 0 to 1 as elapsed goes from 0.5 to 2.0
+            const t = (elapsed - 0.5) / 1.5;
+            this.config.intensity = 2.0 - (0.8 * t); // 2.0 -> 1.2
+        } else if (elapsed < 3.0) {
+             // 2.0-3.0s: 平滑过渡 120% -> 100%
+             const t = (elapsed - 2.0) / 1.0;
+             this.config.intensity = 1.2 - (0.2 * t); // 1.2 -> 1.0
+        } else {
+             // 3.0s+: 常态 (100%)
+             this.config.intensity = 1.0;
+        }
+        
+        // Check frame time (30fps limit)
+        if (now - this.lastTime > this.config.intervalBase) {
+            this.lastTime = now;
+            
+            // Calculate spawn count based on intensity
+            // Base: 1, Intensity 2.0 -> 2, Intensity 1.0 -> 1
+            // Use probability for fractional counts
+            let count = Math.floor(this.config.countBase * this.config.intensity);
+            if (Math.random() < (this.config.countBase * this.config.intensity) % 1) {
+                count++;
+            }
+            
+            for(let i=0; i<count; i++) {
+                this.spawnParticle(container);
+            }
+        }
+        
+        this.rafId = requestAnimationFrame(() => this.loop(container));
+    },
+    
+    stop: function(drawer) {
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = null;
+        }
+    },
+    
+    spawnParticle: function(container) {
+        const p = document.createElement('div');
+        p.className = 'mist-particle';
+        
+        const intensity = this.config.intensity;
+        
+        // 随机参数计算
+        const size = this.config.sizeBase + Math.random() * this.config.sizeVariance;
+        const top = Math.random() * 100; 
+        let duration = this.config.durationBase + Math.random() * this.config.durationVariance;
+        
+        // 扩散范围受强度影响
+        // Intensity 2.0 -> 1.5x diffusion range
+        // Intensity 1.0 -> 1.0x diffusion range
+        // Mapping: 1.0 -> 1.0, 2.0 -> 1.5. Formula: 0.5 * intensity + 0.5
+        const spreadFactor = 0.5 * intensity + 0.5;
+        
+        let tx = (this.config.txBase + Math.random() * this.config.txVariance) * spreadFactor; 
+        const ty = (this.config.tyBase + Math.random() * this.config.tyVariance) * spreadFactor;
+        
+        let scaleEnd = this.config.scaleEndBase + Math.random() * this.config.scaleEndVariance;
+        
+        // 透明度：初始0.8 (强度高时) -> 0.4-0.6 (常态)
+        // High intensity starts with higher opacity?
+        // User asked: "常态化烟雾... 透明度：0.4-0.6之间随机波动"
+        // User asked: "开启瞬间... 初始透明度为0.8"
+        
+        let opacityPeak;
+        if (intensity > 1.2) {
+             opacityPeak = 0.8;
+        } else {
+             opacityPeak = this.config.opacityPeakBase + Math.random() * this.config.opacityPeakVariance;
+        }
+        
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        p.style.top = `${top}%`;
+        p.style.right = '0px'; 
+        
+        p.style.setProperty('--tx', `${tx}px`);
+        p.style.setProperty('--ty', `${ty}px`);
+        p.style.setProperty('--scale-end', scaleEnd.toFixed(2));
+        p.style.setProperty('--opacity-peak', opacityPeak.toFixed(2));
+        
+        // 渐变衰减：强度高时衰减快? No, user said "初始透明度为0.8，快速衰减"
+        // We use the same animation keyframes, but opacityPeak controls the peak visibility.
+        // mistFloatOut handles 0 -> peak -> 0
+        
+        p.style.animation = `mistFloatOut ${duration}s ease-out forwards`;
+        
+        container.appendChild(p);
+        
+        // Cleanup
+        setTimeout(() => {
+            if (p.parentNode) p.remove();
+        }, duration * 1000);
+    },
+    
+    randInt: function(min, max) {
+        return Math.floor(min + Math.random() * (max - min + 1));
+    }
+};
+
 // 切换抽屉开关 
 // [交互] 切换抽屉状态 (带音效) 
 window.togglePantry = function() { 
@@ -7503,12 +8147,18 @@ window.togglePantry = function() {
 
         // 播放打开音效
         playPantryAudio('open');
+        
+        // [动画] 启动冷气烟雾
+        ColdMistManager.playOpenSequence(drawer);
     } else { 
         // 关闭 
         drawer.classList.remove('open'); 
         drawer.classList.add('closed'); 
         // 播放关闭音效
         playPantryAudio('close');
+        
+        // [动画] 停止冷气烟雾 (改为播放关闭动画)
+        ColdMistManager.playCloseSequence(drawer);
     } 
 };
 
@@ -7551,6 +8201,20 @@ function updateInventoryDisplay() {
     
     const allItems = Object.values(INGREDIENTS).filter(ing => allowedIngIds.has(ing.id));
     
+    // [优化] 按照库存数量从多到少排序 (仅在非第一关生效)
+    // Sort ingredients by stock quantity descending (High -> Low)
+    if (currentLevel > 1) {
+        allItems.sort((a, b) => {
+            const stockA = (game.dailyInventory && game.dailyInventory[a.id] !== undefined) ? game.dailyInventory[a.id] : 0;
+            const stockB = (game.dailyInventory && game.dailyInventory[b.id] !== undefined) ? game.dailyInventory[b.id] : 0;
+            // Descending order
+            if (stockB !== stockA) {
+                return stockB - stockA;
+            }
+            return 0; // Keep original relative order
+        });
+    }
+    
     // 分页计算
     const totalLayers = Math.ceil(allItems.length / ITEMS_PER_LAYER) || 1;
     if (pantryLayer > totalLayers) pantryLayer = totalLayers;
@@ -7591,9 +8255,10 @@ function updateInventoryDisplay() {
                 // [注意] 这里移除了 togglePantry()，保持抽屉打开
             };
             
-            if (!isDayOne && stock <= 0) {
-                div.style.opacity = '0.6';
-            }
+            // [用户调整] 食材为0时也不要置灰
+            // if (!isDayOne && stock <= 0) {
+            //     div.style.opacity = '0.6';
+            // }
         } else {
             // 空格子占位
             div.style.opacity = '0.3';
@@ -7652,11 +8317,12 @@ function updateCursor() {
             } else if (holdingThing.type === 'DISH') {
                 const dishName = holdingThing.val.name;
                 const dishIcon = holdingThing.val.icon || '🥘';
+                // [UI调整] 放大抓取时的菜品图片 (60px -> 80px) 并增加阴影
                 newHTML = `
                     <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
-                         style="width:60px; height:60px; object-fit:contain; display:block;"
+                         style="width:80px; height:80px; object-fit:contain; display:block; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                    <span style="display:none; font-size:40px;">${dishIcon}</span>
+                    <span style="display:none; font-size:60px;">${dishIcon}</span>
                 `;
             }
             cursor.innerHTML = newHTML;
@@ -9748,7 +10414,27 @@ function resetDailyStats() {
     renderOrders(); 
 }
 
+// [UI] 根据保鲜冷库等级更新储物柜样式
+function updatePantryStyle() {
+    const pantry = document.getElementById('pantry-drawer');
+    if (!pantry) return;
+    
+    // Check if player owns "Freshness Fridge" (Level 1+)
+    const fridgeLevel = (game.inventory && game.inventory.fridge) ? game.inventory.fridge : 0;
+    
+    if (fridgeLevel >= 1) {
+        if (!pantry.classList.contains('fridge-style')) {
+            pantry.classList.add('fridge-style');
+        }
+    } else {
+        pantry.classList.remove('fridge-style');
+    }
+}
+
 function initLevel(regenerateOrders = true) {
+    // [UI] Apply pantry style on level init
+    updatePantryStyle();
+
     // Reset Timer
     game.timeRemaining = 120;
     game.lastTime = Date.now();
@@ -9956,53 +10642,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
     
 function initDailyInventory() {
-    const fridgeLevel = game.inventory.fridge || 0;
+    // [Freshness Fridge] Logic: 
+    // - Level 0 (Shelf): Clears all inventory daily.
+    // - Level 1 (Fridge): Retains inventory.
+    const fridgeLevel = (game.inventory && game.inventory.fridge) ? game.inventory.fridge : 0;
+    
+    // Safety check: ensure game.dailyInventory exists
+    if (!game.dailyInventory) game.dailyInventory = {};
+
     if (fridgeLevel < 1) {
-        // Reset if no Cold Storage
-        game.dailyInventory = {};
-        Object.keys(INGREDIENTS).forEach(key => {
+        // [Logic] Reset if no Cold Storage
+        // We only clear count, but keep keys to avoid undefined errors
+        Object.keys(game.dailyInventory).forEach(key => {
             game.dailyInventory[key] = 0;
         });
+        console.log("❄️ [Fridge] Level 0: Inventory cleared.");
     } else {
-        // Keep existing, but ensure all keys exist
-        if (!game.dailyInventory) game.dailyInventory = {};
-        Object.keys(INGREDIENTS).forEach(key => {
-            if (game.dailyInventory[key] === undefined) {
-                game.dailyInventory[key] = 0;
-            }
-        });
+        // [Logic] Keep existing inventory
+        // Ensure all INGREDIENTS keys exist for safety
+        if (typeof INGREDIENTS !== 'undefined') {
+            Object.keys(INGREDIENTS).forEach(key => {
+                if (game.dailyInventory[key] === undefined) {
+                    game.dailyInventory[key] = 0;
+                }
+            });
+        }
+        console.log("❄️ [Fridge] Level 1+: Inventory retained.");
     }
 }
 
-function renderPrepUI() { 
-    const container = document.getElementById('prep-grid'); 
-    if (!container || typeof INGREDIENTS === 'undefined') return; 
 
-    container.innerHTML = ''; 
-    Object.entries(INGREDIENTS).forEach(([id, data]) => { 
-        const current = window.tempInventory[id] || 0; 
-        // 检查是否有足够的钱买至少一个 
-        const canAfford = window.tempCoins >= data.price; 
-
-        const card = document.createElement('div'); 
-        card.className = `market-item-card ${current > 0 ? 'active' : ''}`; 
-
-        card.innerHTML = ` 
-            <div class="pc-icon">${data.icon}</div> 
-            <div class="pc-name">${data.name}</div> 
-            <div class="pc-price">¥${data.price}/份</div> 
-            
-            <div class="pc-controls"> 
-                <button class="pc-btn pc-btn-minus" onclick="changePrep('${id}', -1)">-</button> 
-                <div class="pc-count" id="prep-cnt-${id}">${current}</div> 
-                <button class="pc-btn pc-btn-plus" onclick="changePrep('${id}', 1)" ${!canAfford ? 'style="opacity:0.5"' : ''}>+</button> 
-            </div> 
-        `; 
-        container.appendChild(card); 
-    }); 
-
-    updatePrepFooter(); 
-}
 
 function updatePrepFooter() { 
     const walletEl = document.getElementById('prep-wallet-display'); 
@@ -10014,44 +10683,55 @@ function updatePrepFooter() {
     if(costEl) costEl.innerText = `¥${totalCost}`; 
 }
 
-window.changePrep = function(id, delta) { 
-    const price = INGREDIENTS[id].price; 
-    const isDayOne = game.level === 1; // [新增] 
+
+
+// [系统新增] 货箱购买逻辑
+window.buyCrate = function(type) {
+    const crates = {
+        // 鲜肉箱：主肉类 + 炒肉/炖肉必须的辅料 (土豆、青椒、洋葱、番茄等) + 保底鸡蛋
+        'meat': {
+            cost: 400,
+            items: {
+                'pork': 20, 'beef': 15, 'pork_ribs': 10, 'chicken': 10,
+                'potato': 15, 'pepper': 15, 'onion': 15, 'tomato': 10, 'egg': 10, 'rice': 10
+            }
+        },
+        // 蔬菜箱：主蔬菜 + 做地三鲜/炒蛋所需的辅料 (茄子、鸡蛋、米饭)
+        'vege': {
+            cost: 250,
+            items: {
+                'tomato': 25, 'potato': 25, 'pepper': 20, 'eggplant': 15, 'onion': 15,
+                'egg': 20, 'rice': 15
+            }
+        },
+        // 海鲜箱：主海鲜 + 清蒸鱼/虾仁炒蛋/扬州炒饭必须的辅料 (葱姜、鸡蛋、米饭、以及炒饭用的少许猪肉)
+        'seafood': {
+            cost: 450,
+            items: {
+                'shrimp': 20, 'fish': 15,
+                'ginger': 15, 'egg': 15, 'rice': 15, 'pork': 10, 'onion': 10
+            }
+        }
+    };
+    const crate = crates[type];
+    if (!crate) return;
     
-    // Day 1 允许无限加购，不检查余额 
-    if (!isDayOne && delta > 0 && window.tempCoins < price) { 
-        if(typeof playSfx === 'function') playSfx(150, 'sawtooth', 0.2); 
-        if(typeof showToast === 'function') showToast("老板，资金不足啦！", 1000); 
-        return; 
-    } 
-    
-    const current = window.tempInventory[id] || 0; 
-    const newValue = Math.max(0, current + delta); 
-    
-    if (newValue !== current) { 
-        window.tempInventory[id] = newValue; 
+    // 使用临时变量 window.tempCoins，而非直接扣除 game.coins
+    if (window.tempCoins >= crate.cost) {
+        window.tempCoins -= crate.cost;
+        Object.keys(crate.items).forEach(key => {
+            window.tempInventory[key] = (window.tempInventory[key] || 0) + crate.items[key];
+        });
         
-        // [核心修改] Day 1 不扣钱 
-        if (!isDayOne) { 
-            window.tempCoins -= (newValue - current) * price; 
-        } 
+        if (typeof playSfx === 'function') playSfx(600, 'square', 0.1);
+        if (typeof showToast === 'function') showToast("📦 批发货箱购买成功！");
         
-        if(typeof playSfx === 'function') { 
-            if(delta > 0) playSfx(400, 'sine', 0.1); 
-            else playSfx(300, 'square', 0.1); 
-        } 
-        
-        const countEl = document.getElementById(`prep-cnt-${id}`); 
-        const cardEl = countEl ? countEl.closest('.market-item-card') : null; 
-        
-        if (countEl) countEl.innerText = newValue; 
-        if (cardEl) { 
-            if (newValue > 0) cardEl.classList.add('active'); 
-            else cardEl.classList.remove('active'); 
-        } 
-        
-        updatePrepFooter(); 
-    } 
+        // 刷新 UI
+        if (typeof renderPrepUI === 'function') renderPrepUI();
+    } else {
+        if (typeof showToast === 'function') showToast("金币不足！");
+        if (typeof playSfx === 'function') playSfx(150, 'sawtooth', 0.2);
+    }
 };
 
 window.confirmPrep = async function() { 
@@ -10162,11 +10842,16 @@ function showPrepModal() {
     // 1. 基础清理
     document.querySelectorAll('#cover, #start-screen, .loading-screen').forEach(el => el.style.display = 'none');
     
+    // [新增] 重置购买倍率
+
+    
     // 2. 数据初始化
+    // [Freshness Fridge] Apply inventory retention/clearing logic BEFORE creating tempInventory
+    initDailyInventory();
+
     window.tempInventory = Object.assign({}, game.dailyInventory || {});
     window.tempCoins = (game.coins !== undefined) ? game.coins : 500;
     window.startCoins = window.tempCoins;
-    initDailyInventory();
 
     // 3. 创建/获取 Modal 容器
     let modal = document.getElementById('prep-modal');
@@ -10233,6 +10918,9 @@ function showPrepModal() {
                 </button>
             </div>
             
+            <!-- [UI新增] 供应商货箱与倍率控制器 (注入到 grid 上方) -->
+            <div id="prep-top-controls" class="prep-ui-hidden" style="padding: 0 15px;"></div>
+
             <div id="prep-grid" class="prep-grid prep-ui-hidden"></div>
             
             <div id="prep-footer" class="prep-footer prep-ui-hidden">
@@ -10261,6 +10949,33 @@ function showPrepModal() {
         loadBackgroundImageWithRetry(bgEl, 'assets/bg/白天菜市场.png', '1.0');
     }
 
+    // [新增] 注入供应商货箱与倍率控制器逻辑
+    const topControls = document.getElementById('prep-top-controls');
+    if (topControls) {
+        topControls.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <div style="font-size: 13px; color: #7f8c8d; margin-bottom: 8px; font-weight: bold;">📦 供应商批发箱 (享8折优惠，请谨慎投资！)</div>
+                <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
+                    <div class="supplier-crate" onclick="buyCrate('meat')" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #c0392b, #e74c3c); padding: 10px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 2px solid transparent; transition: all 0.2s;">
+                        <div style="color: #fff; font-weight: bold; font-size: 14px;">🥩 鲜肉全包箱</div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 11px; margin: 4px 0;">巨量肉类 + 葱/薯/椒等辅料</div>
+                        <div style="color: #f1c40f; font-weight: 900; font-size: 13px;">¥400</div>
+                    </div>
+                    <div class="supplier-crate" onclick="buyCrate('vege')" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #27ae60, #2ecc71); padding: 10px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 2px solid transparent; transition: all 0.2s;">
+                        <div style="color: #fff; font-weight: bold; font-size: 14px;">🥬 农场全素筐</div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 11px; margin: 4px 0;">全品类蔬菜 + 鸡蛋/米饭</div>
+                        <div style="color: #f1c40f; font-weight: 900; font-size: 13px;">¥250</div>
+                    </div>
+                    <div class="supplier-crate" onclick="buyCrate('seafood')" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #2980b9, #3498db); padding: 10px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 2px solid transparent; transition: all 0.2s;">
+                        <div style="color: #fff; font-weight: bold; font-size: 14px;">🦐 码头海鲜桶</div>
+                        <div style="color: rgba(255,255,255,0.9); font-size: 11px; margin: 4px 0;">虾/鱼 + 葱姜/鸡蛋/猪肉</div>
+                        <div style="color: #f1c40f; font-weight: 900; font-size: 13px;">¥450</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     // 6. 渲染商品内容 (此时虽然不可见但已存在 DOM 中)
     renderPrepUI();
     
@@ -10278,16 +10993,14 @@ function renderPrepUI() {
     const container = document.getElementById('prep-grid'); 
     if (!container || typeof INGREDIENTS === 'undefined') return; 
     container.innerHTML = ''; 
+
     // 1. [核心逻辑] 计算当前关卡已解锁的食材列表 
     const currentLevel = game.level; 
     const allowedIngredients = new Set(); 
     // [Refactor] 动态解锁逻辑
     const unlockedRecipes = RECIPES.filter(r => (r.reqLevel || 1) <= currentLevel); 
-
     // 提取食材 ID 
     unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngredients.add(i))); 
-
-    // Day 1 特殊逻辑：虽然只有番茄鸡蛋，但为了让界面好看，可以稍微多展示几个基础的（如洋葱/米饭），或者严格限制 // 这里我们严格限制，防止玩家买错 
 
     // 2. 定义分类字典 
     const categories = { 
@@ -10296,24 +11009,20 @@ function renderPrepUI() {
         'seafood': { title: '🦐 海鲜水产', items: [] }, 
         'other': { title: '🧂 其它调味', items: [] } 
     }; 
+    
     // 3. 智能归类 (仅包含已解锁的) 
     Object.entries(INGREDIENTS).forEach(([id, data]) => { 
-        // [过滤] 如果不在允许列表中，直接跳过 
         if (!allowedIngredients.has(id)) return; 
         
-        // [Optimized Classification] 扩展关键字匹配
         const name = data.name;
-        
         const isVeggie = ['tomato', 'potato', 'onion', 'lettuce', 'veg', 'eggplant', 'pepper', 'corn', 'carrot', 'cucumber', 'mushroom', 'pumpkin', 'asparagus', 'bean', 'ginger', 'garlic'].some(k => id.includes(k)) || 
                          ['菜', '菇', '茄', '瓜', '笋', '葱', '姜', '蒜', '豆', '椒', '薯'].some(k => name.includes(k));
-                         
         const isMeat = ['pork', 'beef', 'chicken', 'egg', 'meat', 'lamb', 'duck', 'sausage', 'bacon', 'ham', 'ribs', 'wagyu', 'quail'].some(k => id.includes(k)) || 
                        ['肉', '蛋', '排', '牛', '鸡', '鸭', '肠', '腿'].some(k => name.includes(k));
-                       
         const isSeafood = ['shrimp', 'fish', 'seafood', 'crab', 'clam', 'oyster', 'squid', 'abalone', 'maw', 'cucumber'].some(k => id.includes(k)) || 
                           ['虾', '鱼', '蟹', '贝', '参', '胶', '鲜'].some(k => name.includes(k));
 
-        if (isVeggie && !isMeat && !isSeafood) { // 简单互斥，优先判定
+        if (isVeggie && !isMeat && !isSeafood) { 
             categories.veggie.items.push({id, ...data}); 
         } else if (isMeat) { 
             categories.meat.items.push({id, ...data}); 
@@ -10323,42 +11032,112 @@ function renderPrepUI() {
             categories.other.items.push({id, ...data}); 
         } 
     }); 
+    
     // 4. 渲染分类区块 
     const isDayOne = game.level === 1; 
-    Object.values(categories).forEach(cat => { if (cat.items.length === 0) return; const catSection = document.createElement('div'); catSection.className = 'market-category'; 
-
-    let itemsHtml = ''; 
-    cat.items.forEach(item => { 
-        const current = window.tempInventory[item.id] || 0; 
+    
+    Object.values(categories).forEach(cat => { 
+        if (cat.items.length === 0) return; 
         
-        // Day 1 逻辑：虽然免费，但为了不让数字太夸张，我们可以锁定购买数量或者显示"∞" 
-        // 这里我们让玩家随意点，但是不扣钱 
-        const priceDisplay = isDayOne ? '<span style="color:#2ecc71">赠送</span>' : `¥${item.price}/份`; 
-        const canAfford = isDayOne ? true : (window.tempCoins >= item.price); 
+        const catSection = document.createElement('div'); 
+        catSection.className = 'market-category'; 
         
-        itemsHtml += ` 
-            <div class="market-item-card ${current > 0 ? 'active' : ''}"> 
-                <div class="pc-icon">${item.icon}</div> 
-                <div class="pc-info"> 
-                    <div class="pc-name">${item.name}</div> 
-                    <div class="pc-price">${priceDisplay}</div> 
+        // Title
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'category-title';
+        titleDiv.innerText = cat.title;
+        catSection.appendChild(titleDiv);
+        
+        // Items Container
+        const itemsDiv = document.createElement('div');
+        itemsDiv.className = 'category-items';
+        
+        cat.items.forEach(item => { 
+            const ingId = item.id;
+            const currentStock = window.tempInventory[ingId] || 0;
+            const displayPrice = item.price;
+            
+            const card = document.createElement('div');
+            card.className = 'ingredient-card'; 
+            if (currentStock > 0) card.classList.add('active-card');
+            
+            card.innerHTML = ` 
+                <div class="ing-icon" style="font-size: 38px;">${item.icon}</div> 
+                <div class="ing-name">${item.name}</div> 
+                <div class="ing-info-row">
+                    <div class="ing-price">¥${displayPrice}</div> 
+                    <div class="market-stock-badge">库存: ${currentStock}</div> 
+                </div>
+                <div class="buy-btn-group"> 
+                    <button class="buy-btn btn-minus" data-qty="-1">-</button> 
+                    <button class="buy-btn" data-qty="1">+1</button> 
+                    <button class="buy-btn" data-qty="5">+5</button> 
+                    <button class="buy-btn" data-qty="10">+10</button> 
                 </div> 
-                <div class="pc-controls"> 
-                    <button class="pc-btn pc-btn-minus" onclick="changePrep('${item.id}', -1)">-</button> 
-                    <div class="pc-count" id="prep-cnt-${item.id}">${current}</div> 
-                    <button class="pc-btn pc-btn-plus" onclick="changePrep('${item.id}', 1)" ${!canAfford ? 'style="opacity:0.5"' : ''}>+</button> 
-                </div> 
-            </div> 
-        `; 
-    }); 
+            `; 
 
-    catSection.innerHTML = ` 
-        <div class="category-title">${cat.title}</div> 
-        <div class="category-items">${itemsHtml}</div> 
-    `; 
-    container.appendChild(catSection); 
-    }); 
 
+            
+            // Bind events
+            const buyBtns = card.querySelectorAll('.buy-btn'); 
+            buyBtns.forEach(btn => { 
+                btn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    const qty = parseInt(e.target.getAttribute('data-qty')); 
+                    const totalCost = item.price * qty; 
+                    
+                    if (qty > 0) {
+                        // 买入逻辑
+                        if (isDayOne || window.tempCoins >= totalCost) { 
+                            if (!isDayOne) window.tempCoins -= totalCost; 
+                            window.tempInventory[ingId] = (window.tempInventory[ingId] || 0) + qty; 
+                            
+                            // Reset freshness
+                            if (!game.ingredientAge) game.ingredientAge = {};
+                            game.ingredientAge[ingId] = 0; 
+                            
+                            if (typeof playSfx === 'function') playSfx(400 + (qty*20), 'sine', 0.1); 
+                        } else { 
+                            if (typeof showToast === 'function') showToast("金币不足！"); 
+                            if (typeof playSfx === 'function') playSfx(150, 'sawtooth', 0.2);
+                            return; // 终止后续刷新
+                        }
+                    } else {
+                        // 卖出/退货逻辑 (qty is negative)
+                        // 检查是否有足够库存可以退 (只能退当前库存，假设都是新的或者不区分)
+                        const current = window.tempInventory[ingId] || 0;
+                        if (current >= Math.abs(qty)) {
+                             // 退钱 (按原价退)
+                             window.tempCoins -= totalCost; // totalCost is negative, so this adds coins
+                             window.tempInventory[ingId] += qty; // qty is negative
+                             
+                             if (typeof playSfx === 'function') playSfx(300, 'square', 0.1); 
+                        } else {
+                            // 库存不足以扣减
+                            if (typeof playSfx === 'function') playSfx(150, 'sawtooth', 0.2);
+                            return;
+                        }
+                    }
+
+                    // 统一刷新 UI
+                    const stockBadge = card.querySelector('.market-stock-badge'); 
+                    if (stockBadge) stockBadge.innerText = `库存: ${window.tempInventory[ingId]}`; 
+
+                    // 刷新 active 状态
+                    if (window.tempInventory[ingId] > 0) card.classList.add('active-card');
+                    else card.classList.remove('active-card');
+                    
+                    if (typeof updatePrepFooter === 'function') updatePrepFooter(); 
+                }; 
+            });
+            
+            itemsDiv.appendChild(card);
+        });
+        
+        catSection.appendChild(itemsDiv);
+        container.appendChild(catSection);
+    });
+    
     // 补丁：更新底部预算
     if (typeof updatePrepFooter === 'function') updatePrepFooter();
 }
@@ -10937,7 +11716,7 @@ function kmesAutoCook() {
                 const stationEl = document.getElementById('s_' + sid);
                 if (stationEl) {
                     const rect = stationEl.getBoundingClientRect();
-                    triggerFeedback(rect.left + rect.width/2, rect.top - 20, "🤖 自动烹饪", "#e67e22");
+                    // triggerFeedback(rect.left + rect.width/2, rect.top - 20, "🤖 自动烹饪", "#e67e22");
                 }
             }
         } else {
@@ -10999,7 +11778,7 @@ function kmesAutoServe() {
                 const stationEl = document.getElementById('s_' + sid);
                 if (stationEl) {
                     const rect = stationEl.getBoundingClientRect();
-                    triggerFeedback(rect.left + rect.width/2, rect.top - 40, "🤖 自动出餐", "#27ae60");
+                    // triggerFeedback(rect.left + rect.width/2, rect.top - 40, "🤖 自动出餐", "#27ae60");
                 }
             }
         }
