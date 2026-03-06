@@ -1,0 +1,34 @@
+:root {
+    /* Supplier Crate Design Tokens */
+    
+    /* Colors & Gradients (Muted/Earthy) */
+    --crate-bg-meat: linear-gradient(135deg, rgba(160, 82, 77, 0.85) 0%, rgba(189, 107, 102, 0.85) 100%);
+    --crate-bg-vege: linear-gradient(135deg, rgba(85, 122, 95, 0.85) 0%, rgba(115, 156, 125, 0.85) 100%);
+    --crate-bg-seafood: linear-gradient(135deg, rgba(74, 105, 133, 0.85) 0%, rgba(106, 137, 166, 0.85) 100%);
+    --crate-glass-bg: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+    
+    /* Dimensions & Spacing */
+    --crate-border-radius: 16px;
+    --crate-padding: 16px;
+    --crate-min-width: 140px;
+    
+    /* Typography */
+    --crate-title-size: 18px;
+    --crate-title-weight: 700;
+    --crate-desc-size: 14px;
+    --crate-desc-color: rgba(255, 255, 255, 0.95); /* WCAG AA Compliant */
+    --crate-line-height-title: 1.4;
+    --crate-line-height-desc: 1.5;
+    
+    /* Effects */
+    --crate-shadow-normal: 0 4px 10px rgba(0, 0, 0, 0.15);
+    --crate-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.25);
+    --crate-border: 1px solid rgba(255, 255, 255, 0.15);
+    --crate-backdrop-blur: 10px;
+    
+    /* Animation */
+    --crate-transition-duration: 0.25s;
+    --crate-transition-easing: ease-out;
+    --crate-hover-scale: 1.02;
+    --crate-hover-lift: -4px;
+}
