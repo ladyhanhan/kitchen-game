@@ -196,4 +196,262 @@ const Tests = {
             }
             console.log("Angry Sound System Test Completed.");
     }
+    ,
+    testGlobalTitleConsistency: function() {
+        console.log("Running Global Title Consistency Test...");
+        if (!window.game) { console.error("FAIL: game object not found."); return; }
+        if (typeof loadStoreContext !== 'function') { console.error("FAIL: loadStoreContext missing."); return; }
+        if (typeof reconcilePlayerProfile !== 'function') { console.error("FAIL: reconcilePlayerProfile missing."); return; }
+        if (typeof updatePlayerTitle !== 'function') { console.error("FAIL: updatePlayerTitle missing."); return; }
+        if (typeof saveGameState !== 'function') { console.error("FAIL: saveGameState missing."); return; }
+        if (typeof saveStoreContext !== 'function') { console.error("FAIL: saveStoreContext missing."); return; }
+
+        const backup = {
+            activeStoreId: game.activeStoreId,
+            stores: JSON.stringify(game.stores || {}),
+            inventory: JSON.stringify(game.inventory || {}),
+            level: game.level,
+            titleLevel: game.titleLevel,
+            playerProfile: JSON.stringify(game.playerProfile || null)
+        };
+
+        const assertEq = (name, a, b) => {
+            if (a === b) console.log("PASS: " + name);
+            else console.error(`FAIL: ${name}. Expected ${b}, got ${a}`);
+        };
+
+        try {
+            game.stores = {
+                'cn:main': { level: 1, inventory: { pot: 0, belt: 0, fridge: 0, expansion: 2 }, ingredientAge: {} },
+                'jp:shibuya': { level: 1, inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0 }, ingredientAge: {} }
+            };
+
+            loadStoreContext('cn:main');
+            reconcilePlayerProfile();
+            updatePlayerTitle();
+            assertEq("title level derived from max expansion (cn=2)", game.playerProfile.titleLevel, 3);
+
+            loadStoreContext('jp:shibuya');
+            reconcilePlayerProfile();
+            updatePlayerTitle();
+            assertEq("title level stays global after switching to jp", game.playerProfile.titleLevel, 3);
+
+            game.inventory.expansion = 4;
+            saveStoreContext();
+            reconcilePlayerProfile();
+            updatePlayerTitle();
+            assertEq("title level increases when any store upgrades (jp=4)", game.playerProfile.titleLevel, 5);
+
+            loadStoreContext('cn:main');
+            reconcilePlayerProfile();
+            updatePlayerTitle();
+            assertEq("title level remains after switching back to cn", game.playerProfile.titleLevel, 5);
+
+            const originalSetItem = localStorage.setItem.bind(localStorage);
+            try {
+                localStorage.setItem = function() { throw new Error("mock storage failure"); };
+                saveGameState();
+                const pending = window.__pendingGameStateWrites && window.__pendingGameStateWrites['gameState'];
+                if (pending && typeof pending.json === 'string' && pending.json.includes('"playerProfile"')) {
+                    console.log("PASS: save falls back to pending write cache on storage failure.");
+                } else {
+                    console.error("FAIL: pending write cache missing or incomplete on storage failure.");
+                }
+            } finally {
+                localStorage.setItem = originalSetItem;
+            }
+        } catch (e) {
+            console.error("FAIL: Global Title Consistency Test crashed:", e);
+        } finally {
+            try {
+                game.activeStoreId = backup.activeStoreId;
+                game.stores = JSON.parse(backup.stores || "{}");
+                game.inventory = JSON.parse(backup.inventory || "{}");
+                game.level = backup.level;
+                game.titleLevel = backup.titleLevel;
+                game.playerProfile = backup.playerProfile ? JSON.parse(backup.playerProfile) : null;
+                if (typeof reconcilePlayerProfile === 'function') reconcilePlayerProfile();
+                if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
+            } catch (_) {}
+        }
+        console.log("Global Title Consistency Test Completed.");
+    }
+    ,
+    testSettlementTrendPerStore: function() {
+        console.log("Running Settlement Trend Per Store Test...");
+        if (!window.game) { console.error("FAIL: game object not found."); return; }
+        if (typeof showResult !== 'function') { console.error("FAIL: showResult missing."); return; }
+        if (typeof loadStoreContext !== 'function') { console.error("FAIL: loadStoreContext missing."); return; }
+
+        const backup = {
+            activeStoreId: game.activeStoreId,
+            stores: JSON.stringify(game.stores || {}),
+            history: JSON.stringify(game.history || []),
+            isLive: game.isLive,
+            isPaused: game.isPaused
+        };
+
+        const originals = {
+            playResultSfx: window.playResultSfx,
+            stopKMES: window.stopKMES,
+            updateGameBackground: window.updateGameBackground,
+            switchScreen: window.switchScreen,
+            stopMusic: window.stopMusic
+        };
+
+        try {
+            window.playResultSfx = () => {};
+            window.stopKMES = () => {};
+            window.updateGameBackground = () => {};
+            window.switchScreen = () => {};
+            window.stopMusic = () => {};
+
+            game.history = [
+                { day: 1, revenue: 111, rate: 90 },
+                { day: 2, revenue: 222, rate: 90 }
+            ];
+            game.stores = {
+                'cn:main': { level: 1, inventory: { expansion: 0 }, ingredientAge: {}, history: [
+                    { day: 1, revenue: 100, rate: 90 },
+                    { day: 2, revenue: 200, rate: 90 }
+                ] },
+                'jp:shibuya': { level: 1, inventory: { expansion: 0 }, ingredientAge: {}, history: [
+                    { day: 1, revenue: 7777, rate: 90 },
+                    { day: 2, revenue: 8888, rate: 90 },
+                    { day: 3, revenue: 9999, rate: 90 }
+                ] }
+            };
+
+            loadStoreContext('jp:shibuya');
+            game.isLive = false;
+            game.isPaused = false;
+
+            showResult("<b>Test</b><br>");
+            const desc = document.getElementById('modal-desc');
+            if (!desc) {
+                console.error("FAIL: modal-desc not found.");
+                return;
+            }
+            const html = desc.innerHTML || "";
+            if (html.includes("营收: ¥9999") && html.includes("营收: ¥7777")) {
+                console.log("PASS: Settlement trend uses active store history (jp).");
+            } else if (html.includes("营收: ¥222") || html.includes("营收: ¥111")) {
+                console.error("FAIL: Settlement trend still uses global history.");
+            } else {
+                console.error("FAIL: Could not verify settlement trend source.");
+            }
+        } catch (e) {
+            console.error("FAIL: Settlement Trend Per Store Test crashed:", e);
+        } finally {
+            try {
+                game.activeStoreId = backup.activeStoreId;
+                game.stores = JSON.parse(backup.stores || "{}");
+                game.history = JSON.parse(backup.history || "[]");
+                game.isLive = backup.isLive;
+                game.isPaused = backup.isPaused;
+            } catch (_) {}
+            window.playResultSfx = originals.playResultSfx;
+            window.stopKMES = originals.stopKMES;
+            window.updateGameBackground = originals.updateGameBackground;
+            window.switchScreen = originals.switchScreen;
+            window.stopMusic = originals.stopMusic;
+        }
+        console.log("Settlement Trend Per Store Test Completed.");
+    }
+    ,
+    testHomeProfileCard: function() {
+        console.log("Running Home Profile Card Test...");
+        if (!window.game) { console.error("FAIL: game object not found."); return; }
+        if (typeof updateHomeProfileCard !== 'function') { console.error("FAIL: updateHomeProfileCard missing."); return; }
+
+        const card = document.getElementById('home-profile-card');
+        const balance = document.getElementById('home-balance');
+        const days = document.getElementById('home-store-days');
+        const fill = document.getElementById('title-progress-fill');
+        const track = card ? card.querySelector('.title-progress-track') : null;
+        const nodes = document.querySelectorAll('#title-progress-nodes .tp-node');
+        const titleLevelHeader = card ? card.querySelector('.home-title-level-label') : null;
+        const titleIcon = titleLevelHeader ? titleLevelHeader.querySelector('img[alt="头衔"]') : null;
+        const walletIcon = card ? card.querySelector('.home-wallet-row img[alt="钱包"]') : null;
+
+        if (!card || !balance || !days || !fill || !track) {
+            console.error("FAIL: home profile card DOM missing.");
+            return;
+        }
+
+        if (titleLevelHeader && titleLevelHeader.textContent.includes('头衔等级')) console.log("PASS: header label is 头衔等级.");
+        else console.error("FAIL: header label not updated to 头衔等级.");
+
+        if (titleIcon && walletIcon) {
+            const tr = titleIcon.getBoundingClientRect();
+            const wr = walletIcon.getBoundingClientRect();
+            const ts = Math.min(tr.width, tr.height);
+            const ws = Math.min(wr.width, wr.height);
+            if (Math.abs(ts - ws) < 1) console.log("PASS: title icon size matches wallet icon.");
+            else console.error(`FAIL: title icon size mismatch (title=${ts}, wallet=${ws}).`);
+        } else {
+            console.error("FAIL: title icon or wallet icon missing in card.");
+        }
+
+        if (nodes.length === 6) console.log("PASS: progress bar has 6 nodes.");
+        else console.error("FAIL: progress node count expected 6, got " + nodes.length);
+
+        const prev = game.playerProfile ? game.playerProfile.titleLevel : 1;
+        if (!game.playerProfile) game.playerProfile = { titleLevel: 1, updatedAt: Date.now(), version: 1 };
+        game.playerProfile.titleLevel = 1;
+        updateHomeProfileCard();
+        const label1 = document.querySelector('#title-progress-nodes .title-node-label.is-active');
+        const node1 = document.querySelector('#title-progress-nodes .tp-node[data-lv="1"]');
+        if (label1 && (label1.textContent || '').includes('初创店长')) console.log("PASS: active label shows 初创店长 at level 1.");
+        else console.error("FAIL: active label not 初创店长 at level 1.");
+        if (label1 && node1) {
+            const cx = (r) => r.left + r.width / 2;
+            const dr = Math.abs(cx(label1.getBoundingClientRect()) - cx(node1.getBoundingClientRect()));
+            if (dr < 2) console.log("PASS: label centered under node 1.");
+            else console.error("FAIL: label not centered under node 1 (dx=" + dr + ").");
+        }
+
+        game.playerProfile.titleLevel = 2;
+        updateHomeProfileCard();
+        const label2 = document.querySelector('#title-progress-nodes .title-node-label.is-active');
+        const node2 = document.querySelector('#title-progress-nodes .tp-node[data-lv="2"]');
+        if (label2 && (label2.textContent || '').includes('星级店长')) console.log("PASS: active label shows 星级店长 at level 2.");
+        else console.error("FAIL: active label not 星级店长 at level 2.");
+        if (label2 && node2) {
+            const cx = (r) => r.left + r.width / 2;
+            const dr = Math.abs(cx(label2.getBoundingClientRect()) - cx(node2.getBoundingClientRect()));
+            if (dr < 2) console.log("PASS: label centered under node 2.");
+            else console.error("FAIL: label not centered under node 2 (dx=" + dr + ").");
+        }
+
+        const tr = track.getBoundingClientRect();
+        const fr = fill.getBoundingClientRect();
+        const ratio = tr.width > 0 ? (fr.width / tr.width) : 0;
+        if (Math.abs(ratio - 0.2) < 0.06) {
+            console.log("PASS: progress fill reaches node 2 at 星级店长 (≈20%).");
+        } else {
+            console.error(`FAIL: progress fill ratio unexpected (ratio=${ratio}).`);
+        }
+
+        const activeNodes = document.querySelectorAll('#title-progress-nodes .tp-node.is-active').length;
+        if (activeNodes === 2) console.log("PASS: 2 nodes active at level 2.");
+        else console.error("FAIL: active node count expected 2, got " + activeNodes);
+
+        game.playerProfile.titleLevel = 6;
+        updateHomeProfileCard();
+        const label6 = document.querySelector('#title-progress-nodes .title-node-label.is-active');
+        const node6 = document.querySelector('#title-progress-nodes .tp-node[data-lv="6"]');
+        if (label6 && (label6.textContent || '').includes('餐饮帝国')) console.log("PASS: active label shows 餐饮帝国 at level 6.");
+        else console.error("FAIL: active label not 餐饮帝国 at level 6.");
+        if (label6 && node6) {
+            const cx = (r) => r.left + r.width / 2;
+            const dr = Math.abs(cx(label6.getBoundingClientRect()) - cx(node6.getBoundingClientRect()));
+            if (dr < 2) console.log("PASS: label centered under node 6.");
+            else console.error("FAIL: label not centered under node 6 (dx=" + dr + ").");
+        }
+
+        game.playerProfile.titleLevel = prev;
+        updateHomeProfileCard();
+        console.log("Home Profile Card Test Completed.");
+    }
 };

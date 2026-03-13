@@ -8,6 +8,7 @@
     <title>不停餐饮大亨 - 后厨模拟器</title>
     <link rel="preload" as="image" href="assets/bg/家庭厨房.jpeg">
     <link rel="preload" as="image" href="assets/bg/门店后厨.jpg">
+    <link rel="preload" as="image" href="assets/bg/日本主题.jpg">
     <link rel="preload" as="image" href="assets/bg/餐厅解锁地图.jpg">
     <link rel="preload" as="image" href="assets/bg/商店背景.jpg">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1164,6 +1165,22 @@
             transform: translateY(-10px);
             pointer-events: none;
         }
+        #loading .loading-bg-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            display: none;
+            pointer-events: none;
+        }
+        #loading.is-jp {
+            background: #000 !important;
+        }
+        #loading.is-jp .loading-bg-video {
+            display: block;
+        }
 
         #start-screen {
             position: absolute;
@@ -1174,6 +1191,20 @@
             justify-content: center;
             color: #FFFFFF;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        #start-screen .home-bg-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+        }
+        #start-screen.is-jp-intro .home-bg-video {
+            opacity: 1;
         }
         #start-screen.active {
             display: flex;
@@ -3078,50 +3109,122 @@
     /* [核心] 帝国卡片：清透水晶风格 */
     .empire-card {
         /* 去除深色背景，改用高亮白透 */
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.10);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 16px;
-        padding: 12px;
-        min-width: 140px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        border-radius: 18px;
+        padding: 14px;
+        width: clamp(220px, 26vw, 260px);
+        min-height: 240px;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
         cursor: pointer;
         transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 柔和阴影 */
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
         position: relative;
-        overflow: hidden;
+        overflow: visible;
+        z-index: 1;
     }
 
     /* 悬停高光 */
     .empire-card:hover {
-        transform: translateY(-5px) scale(1.02);
-        background: rgba(255, 255, 255, 0.25);
-        border-color: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255,255,255,0.2);
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 16px 44px rgba(0, 0, 0, 0.24), inset 0 0 22px rgba(255,255,255,0.14);
+        z-index: 20;
     }
 
-    /* 文字增强：确保在地图背景上可见 */
-    .empire-name {
-        font-size: 14px;
-        font-weight: 900;
-        color: #fff;
-        text-align: center;
-        margin: 4px 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.8); /* 强投影 */
-        line-height: 1.2;
+    .empire-card.thumb-hover {
+        z-index: 20;
     }
-    .empire-info-row {
+
+    .empire-card .card-badge {
+        left: 12px;
+        right: auto;
+        top: 12px;
+        width: auto;
+        padding: 4px 10px;
+        border-radius: 999px;
         font-size: 11px;
-        color: #fff;
+        letter-spacing: 0.2px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(10px);
+    }
+
+    .empire-thumb {
+        width: 100%;
+        height: clamp(112px, 14vw, 132px);
+        margin-top: 14px;
+        border-radius: 16px;
+        object-fit: contain;
+        display: block;
+        position: relative;
+        z-index: 2;
+        filter: drop-shadow(0 10px 10px rgba(0,0,0,0.22));
+        transform: scale(1);
+        transform-origin: center;
+        transition: transform 0.3s ease-out;
+    }
+
+    .empire-card:hover .empire-thumb,
+    .empire-card.thumb-hover .empire-thumb {
+        transform: scale(1.25);
+        z-index: 30;
+    }
+
+    .empire-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+        flex: 1;
+        min-width: 0;
+    }
+    .empire-card-title {
+        font-size: 16px;
+        font-weight: 900;
+        color: rgba(255,255,255,0.98);
+        line-height: 1.15;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .empire-card-subtitle {
+        font-size: 12px;
         font-weight: 700;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        background: rgba(0,0,0,0.3);
-        padding: 2px 8px;
-        border-radius: 10px;
-        margin-top: 4px;
+        color: rgba(255,255,255,0.82);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+    .empire-card-meta {
+        margin-top: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+    .empire-meta-chip {
+        font-size: 11px;
+        font-weight: 800;
+        color: rgba(255,255,255,0.92);
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(0,0,0,0.18);
+        border: 1px solid rgba(255,255,255,0.16);
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
+    }
+    .empire-meta-chip.is-live {
+        background: rgba(46, 204, 113, 0.18);
+        border-color: rgba(46, 204, 113, 0.35);
+        color: rgba(255,255,255,0.98);
     }
 
     /* [UI 升级] 全局图标按钮通用样式 */
@@ -4180,41 +4283,177 @@
         text-shadow: none !important; 
     }
         
-    /* [UI升级] 动态头衔徽章 */
-        .title-badge {
-            position: absolute;
-            top: 24px; /* [优化] 移至左上角原钱包位置 */
-            left: 30px; /* 对齐原钱包左边距 */
-            display: flex;
-            align-items: center;
-            padding: 6px 16px;
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            border: 2px solid #7f8c8d;
-            border-radius: 30px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            -webkit-tap-highlight-color: transparent;
+    .home-profile-card {
+        position: absolute;
+        top: 24px;
+        left: 30px;
+        width: clamp(300px, 38vw, 420px);
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+        color: #fff;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        cursor: pointer;
+        transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, background 0.25s ease-out;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .home-profile-card .wallet-icon {
+        width: 30px;
+        height: 30px;
+        margin-right: 0;
+    }
+    .home-profile-card:hover {
+        transform: translateY(-2px);
+        background: rgba(0, 0, 0, 0.32);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+    }
+    .home-profile-card:active {
+        transform: translateY(0) scale(0.99);
+    }
+    .home-profile-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        min-width: 0;
+    }
+    .home-wallet-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+    .home-days-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+    .home-wallet-row #home-balance {
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+    .home-store-days {
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.86);
+        white-space: nowrap;
+    }
+    .home-title-progress-head {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        min-width: 0;
+    }
+    .home-title-progress-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.88);
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+    .home-title-level-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+    .title-progress {
+        position: relative;
+        width: 100%;
+        height: 42px;
+        margin-top: 6px;
+    }
+    .title-progress-track {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 11px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .title-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, rgba(241, 196, 15, 0.85), rgba(230, 126, 34, 0.9));
+        border-radius: 999px;
+        transition: width 0.35s ease-out;
+    }
+    .title-progress-grid {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: 24px 18px;
+        pointer-events: none;
+    }
+    .title-progress-grid .tp-node {
+        grid-row: 1;
+        justify-self: center;
+        align-self: center;
+    }
+    .title-node-label {
+        grid-row: 2;
+        justify-self: center;
+        align-self: end;
+        width: 4em;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 900;
+        color: rgba(255, 255, 255, 0.78);
+        opacity: 0;
+        transition: opacity 0.2s ease-out, color 0.2s ease-out;
+        white-space: nowrap;
+    }
+    .title-node-label.is-active {
+        opacity: 1;
+        color: rgba(241, 196, 15, 0.92);
+    }
+    .tp-node {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #dfe6e9;
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+        transition: transform 0.25s ease-out, background 0.25s ease-out, border-color 0.25s ease-out;
+    }
+    .tp-node.is-active {
+        background: #f1c40f;
+        border-color: #f1c40f;
+        transform: scale(1.08);
+    }
+    @media (max-width: 600px) {
+        .home-profile-card {
+            top: 16px;
+            left: 16px;
+            width: clamp(280px, 78vw, 380px);
+            padding: 12px 14px;
         }
-        .title-badge:hover {
-            transform: scale(1.05) translateY(-2px);
-        }
-        .title-icon {
-            font-size: 18px;
-            margin-right: 6px;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
-        }
-        .title-icon:empty {
-            display: none;
-        }
-        #player-title-text {
-            color: #fff;
-            font-weight: 800;
+        .home-wallet-row #home-balance {
             font-size: 15px;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
+        .tp-node {
+            width: 11px;
+            height: 11px;
+        }
+        .home-profile-card .wallet-icon {
+            width: 28px;
+            height: 28px;
+        }
+    }
 
         /* Supplier Crate Card Redesign */
         .supplier-crate {
@@ -4595,24 +4834,61 @@
 
 
     <div id="start-screen">
-        <!-- Player Title Badge (Moved to Top Left) -->
-        <div id="player-title-badge" class="title-badge" onclick="if(typeof showToast === 'function') showToast('提升厨房等级或扩张版图以晋升头衔！')">
-            <span class="title-icon"></span>
-            <span id="player-title-text">初创店长</span>
+        <video id="home-jp-intro-video" class="home-bg-video" muted playsinline preload="auto">
+            <source src="assets/bg/日本主题.mp4" type="video/mp4">
+        </video>
+        <div id="home-profile-card" class="home-profile-card" onclick="if(typeof showToast === 'function') showToast('提升厨房等级或扩张版图以晋升头衔！')">
+            <div class="home-profile-top">
+                <div class="home-wallet-row">
+                    <img src="assets/icons/icon_wallet.png" class="wallet-icon" alt="钱包">
+                    <span id="home-balance">¥0</span>
+                </div>
+                <div class="home-days-row">
+                    <img src="assets/icons/icon_日历.png" class="wallet-icon" alt="日历">
+                    <span id="home-store-days" class="home-store-days">已营业 0 天</span>
+                </div>
+            </div>
+            <div class="home-title-progress">
+                <div class="home-title-progress-head">
+                    <span class="home-title-progress-label home-title-level-label">
+                        <img src="assets/icons/icon_头衔.png" class="wallet-icon" alt="头衔">
+                        <span>头衔等级</span>
+                    </span>
+                </div>
+                <div class="title-progress" role="progressbar" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1">
+                    <div class="title-progress-track">
+                        <div id="title-progress-fill" class="title-progress-fill"></div>
+                    </div>
+                    <div id="title-progress-nodes" class="title-progress-grid">
+                        <span class="tp-node" data-lv="1"></span>
+                        <span class="tp-node" data-lv="2"></span>
+                        <span class="tp-node" data-lv="3"></span>
+                        <span class="tp-node" data-lv="4"></span>
+                        <span class="tp-node" data-lv="5"></span>
+                        <span class="tp-node" data-lv="6"></span>
+                        <span class="title-node-label" data-lv="1"></span>
+                        <span class="title-node-label" data-lv="2"></span>
+                        <span class="title-node-label" data-lv="3"></span>
+                        <span class="title-node-label" data-lv="4"></span>
+                        <span class="title-node-label" data-lv="5"></span>
+                        <span class="title-node-label" data-lv="6"></span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Top Right: Balance, Business Map, Shop (Consolidated) -->
         <div class="home-top-right">
-            <!-- 1. Wallet/Balance -->
-            <div class="icon-btn" style="cursor: default;">
-                <img src="assets/icons/icon_wallet.png" alt="钱包">
-                <span id="home-balance">¥0</span>
-            </div>
-
             <!-- 2. Business Map -->
             <button class="icon-btn" onclick="playCoin(); showLocationSelection()">
                 <img src="assets/icons/icon_map.png" alt="商业版图">
                 <span>商业版图</span>
+            </button>
+
+            <!-- 2.5. Japan Branch Preview -->
+            <button class="icon-btn" onclick="unlockJapanPreview()">
+                <img src="assets/icons/icon_map.png" alt="日本分店预览">
+                <span>日本分店(预览)</span>
             </button>
 
             <!-- 3. Shop -->
@@ -4640,6 +4916,66 @@
         </div>
         <div class="home-main-actions">
             <button id="btn-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开始</button>
+            <button onclick="(function(){ 
+                // 1. 保存当前进度到临时存储
+                const backup = {
+                    level: game.level,
+                    coins: game.coins,
+                    inventory: JSON.parse(JSON.stringify(game.inventory || {})),
+                    hasSeenOmniStory: localStorage.getItem('hasSeenOmniStory'),
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('game_backup_for_test', JSON.stringify(backup));
+
+                // 2. 设置测试环境
+                game.level=5; 
+                game.coins=2000; 
+                localStorage.removeItem('hasSeenOmniStory'); 
+                
+                // 3. [修复] 强制重置 inventory 为标准状态，确保没有 Omni 锅
+                // 如果继承了存档里的 Omni 锅，就不会触发“无灵魂”剧情了
+                game.inventory = {
+                    pot: 1, // 强制降级为普通锅
+                    knife: 1,
+                    expansion: 0,
+                    ingredients: {} 
+                };
+                
+                // [新增] 强制清除已完成订单记录，确保Day5能重新生成高升排骨
+                game.history = [];
+                game.day = 5; // 确保是Day5
+                
+                saveGameState(); 
+                location.reload(); 
+            })()" id="btn-test-gaosheng" style="display:none; margin-top:10px; padding:10px; background:#e74c3c; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow:0 4px 0 #c0392b;">测试：高升排骨剧情 (Lv.5)</button>
+            
+            <!-- [新增] 退出测试按钮 (仅当存在备份时显示) -->
+            <button id="btn-exit-test" onclick="(function(){
+                const backup = JSON.parse(localStorage.getItem('game_backup_for_test'));
+                if(backup) {
+                    game.level = backup.level;
+                    game.coins = backup.coins;
+                    game.inventory = backup.inventory;
+                    if(backup.hasSeenOmniStory) {
+                        localStorage.setItem('hasSeenOmniStory', backup.hasSeenOmniStory);
+                    } else {
+                        localStorage.removeItem('hasSeenOmniStory');
+                    }
+                    localStorage.removeItem('game_backup_for_test');
+                    saveGameState();
+                    location.reload();
+                }
+            })()" style="display:none; margin-top:10px; padding:10px; background:#34495e; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow:0 4px 0 #2c3e50;">退出测试模式 (还原进度)</button>
+            
+            <script>
+                // 检查是否在测试模式，显示退出按钮
+                (function(){
+                    if(localStorage.getItem('game_backup_for_test')) {
+                        const btn = document.getElementById('btn-exit-test');
+                        if(btn) btn.style.display = 'block';
+                    }
+                })();
+            </script>
             <!-- Icons moved to corners -->
         </div>
     </div>
@@ -4767,6 +5103,9 @@
 <div id="drag-cursor"></div>
 
 <div id="loading" style="position:fixed; inset:0; background:#000 url('assets/bg/门店后厨.jpg') no-repeat center center / cover; z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s ease;">
+    <video id="loading-jp-video" class="loading-bg-video" muted loop playsinline preload="auto">
+        <source src="assets/bg/日本主题.mp4" type="video/mp4">
+    </video>
     <div id="loading-content" style="position:relative; z-index:2; font-size:24px; font-weight:bold; color:#FFFFFF; display:flex; flex-direction:column; align-items:center; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
         <!-- [修改] 移除Emoji，使用动态素材轮播 -->
         <div id="loading-icon" class="loading-icon"></div>
@@ -4870,6 +5209,27 @@
         </div>
     </div>
 
+    <div id="store-switch-confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:3200; align-items:center; justify-content:center;">
+        <div class="modal" style="background:white; padding:30px; border-radius:15px; text-align:center; max-width:420px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <h2 style="margin-top:0; color:#2c3e50; font-size:22px;">确认切换门店</h2>
+            <p style="color:#555; font-size:16px; line-height:1.6; margin:20px 0;">即将切换到：<b id="store-switch-target"></b><br><span style="font-size:14px; color:#7f8c8d;">当前门店进度将自动保存</span></p>
+            <div style="display:flex; justify-content:center; gap:20px; margin-top:25px;">
+                <button onclick="hideStoreSwitchConfirmModal()" style="padding:10px 25px; background:#95a5a6; border-bottom:4px solid #7f8c8d; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">取消</button>
+                <button onclick="executeStoreSwitch()" style="padding:10px 25px; background:#3498db; border-bottom:4px solid #2c81ba; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">确认切换</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="title-upgrade-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; flex-direction: column;">
+        <div style="background: linear-gradient(135deg, #2c3e50, #34495e); border: 2px solid #f1c40f; border-radius: 16px; padding: 30px; text-align: center; width: 80%; max-width: 400px; box-shadow: 0 0 30px rgba(241, 196, 15, 0.4);">
+            <div style="font-size: 50px; margin-bottom: 10px; animation: bounce 1s infinite;">🎉</div>
+            <h2 style="color: #f1c40f; margin-top: 0;">恭喜！头衔晋升</h2>
+            <p style="color: #ecf0f1; font-size: 16px;">你的商业版图与影响力进一步扩大了！</p>
+            <div id="new-title-display" style="font-size: 28px; font-weight: bold; color: #fff; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 20px 0;"></div>
+            <button id="btn-upgrade-home" style="background: #f1c40f; color: #2c3e50; font-weight: bold; border: none; padding: 12px 30px; font-size: 18px; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">返回首页</button>
+        </div>
+    </div>
+
 <script src="tests.js"></script>
 <script>
 // [系统新增] 玩家头衔配置表 (星级名流风)
@@ -4882,38 +5242,143 @@ const TITLE_CONFIG = {
     6: { name: "餐饮帝国", color: "#f39c12", border: "#f1c40f", icon: "", glow: "rgba(241,196,15,0.7)" }  // 耀金
 };
 
+function ensurePlayerProfile() {
+    if (!game.playerProfile || typeof game.playerProfile !== 'object') {
+        game.playerProfile = { titleLevel: 1, updatedAt: Date.now(), version: 1 };
+    }
+    if (typeof game.playerProfile.titleLevel !== 'number' || !Number.isFinite(game.playerProfile.titleLevel)) {
+        game.playerProfile.titleLevel = 1;
+    }
+    game.playerProfile.titleLevel = Math.max(1, Math.min(Object.keys(TITLE_CONFIG).length, Math.floor(game.playerProfile.titleLevel)));
+    if (typeof game.playerProfile.lastAnnouncedTitleLevel !== 'number' || !Number.isFinite(game.playerProfile.lastAnnouncedTitleLevel)) {
+        game.playerProfile.lastAnnouncedTitleLevel = game.playerProfile.titleLevel;
+    }
+    game.playerProfile.lastAnnouncedTitleLevel = Math.max(1, Math.min(Object.keys(TITLE_CONFIG).length, Math.floor(game.playerProfile.lastAnnouncedTitleLevel)));
+    if (typeof game.playerProfile.updatedAt !== 'number' || !Number.isFinite(game.playerProfile.updatedAt)) {
+        game.playerProfile.updatedAt = Date.now();
+    }
+    if (typeof game.playerProfile.version !== 'number' || !Number.isFinite(game.playerProfile.version)) {
+        game.playerProfile.version = 1;
+    }
+}
+
 // [系统新增] 刷新并检测头衔状态
 window.updatePlayerTitle = function() {
-    if (!game.titleLevel) game.titleLevel = 1;
+    ensurePlayerProfile();
+    const currentTitleLevel = game.playerProfile.lastAnnouncedTitleLevel || game.titleLevel || game.playerProfile.titleLevel || 1;
+    const computed = computeGlobalTitleLevel();
+    const computedLevel = Math.max(1, Math.min(Object.keys(TITLE_CONFIG).length, Math.floor(computed)));
+    const newTitleLevel = Math.max(game.playerProfile.titleLevel || 1, computedLevel);
 
-    // 现阶段的自动晋升逻辑：与厨房扩建等级挂钩 (后续将加入OMNI和分店检测)
-    const expLvl = (game.inventory && game.inventory.expansion) ? game.inventory.expansion : 0;
-    // 厨房0级=1级头衔，厨房1级=2级头衔，厨房2级=3级头衔
-    const targetLevel = Math.max(game.titleLevel, expLvl + 1);
+    const config = TITLE_CONFIG ? TITLE_CONFIG[newTitleLevel] : null;
+    const titleEl = document.getElementById('player-title');
+    if (titleEl && config) {
+        titleEl.innerText = config.name;
+        titleEl.style.color = config.color;
+        titleEl.style.textShadow = `0 0 10px ${config.glow || config.color}`;
+    }
 
-    // 检测到晋升
-    if (targetLevel > game.titleLevel) {
-        game.titleLevel = targetLevel;
+    if (newTitleLevel > currentTitleLevel) {
+        game.playerProfile.lastAnnouncedTitleLevel = newTitleLevel;
+        game.playerProfile.titleLevel = Math.max(game.playerProfile.titleLevel || 1, newTitleLevel);
+        game.titleLevel = game.playerProfile.titleLevel;
+        game.playerProfile.updatedAt = Date.now();
         if (typeof saveGameState === 'function') saveGameState();
-        if (typeof playSfx === 'function') playSfx(600, 'sine', 0.2); // 播放升级音效
-        if (typeof showToast === 'function') showToast(`🎉 恭喜晋升：【${TITLE_CONFIG[targetLevel].name}】！`);
+        if (typeof playSfx === 'function') playSfx(600, 'sine', 0.2);
+        if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard();
+        return newTitleLevel;
     }
 
-    // 更新 UI 外观
-    const badge = document.getElementById('player-title-badge');
-    const text = document.getElementById('player-title-text');
-    const config = TITLE_CONFIG[game.titleLevel];
-
-    if (badge && text && config) {
-        text.innerText = config.name;
-        badge.querySelector('.title-icon').innerText = config.icon;
-
-        // 动态赋予材质颜色
-        badge.style.background = `linear-gradient(135deg, #2c3e50 30%, ${config.color})`;
-        badge.style.borderColor = config.border;
-        badge.style.boxShadow = `0 4px 15px ${config.glow}, inset 0 1px 1px rgba(255,255,255,0.3)`;
-    }
+    if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard();
+    return false;
 };
+
+window.showTitleUpgradeModal = function(newTitleLevel) {
+    const modal = document.getElementById('title-upgrade-modal');
+    const nameDisplay = document.getElementById('new-title-display');
+    const btn = document.getElementById('btn-upgrade-home');
+    if (!modal || !nameDisplay || !btn) return;
+
+    const config = TITLE_CONFIG ? TITLE_CONFIG[newTitleLevel] : { name: "未知头衔", color: "#fff" };
+    nameDisplay.innerText = `【 ${config.name} 】`;
+    nameDisplay.style.color = config.color;
+
+    const panelsToHide = ['overlay', 'shop-overlay', 'pause-overlay', 'map-screen', 'loading', 'achievement-modal', 'settings-modal', 'end-game-modal', 'prep-modal'];
+    panelsToHide.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    if (game) game.isPaused = true;
+    modal.style.display = 'flex';
+
+    btn.onclick = function() {
+        modal.style.display = 'none';
+        if (game) game.isPaused = false;
+        if (typeof switchScreen === 'function') switchScreen('start-screen');
+
+        if (typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
+            if (newTitleLevel === 2) checkAndTriggerStory('title_t2', STORY_EVENTS.TITLE_T2);
+            if (newTitleLevel === 3) checkAndTriggerStory('title_t3', STORY_EVENTS.TITLE_T3);
+            if (newTitleLevel === 4) checkAndTriggerStory('title_t4', STORY_EVENTS.TITLE_T4);
+            if (newTitleLevel === 5) checkAndTriggerStory('title_t5', STORY_EVENTS.TITLE_T5);
+            if (newTitleLevel === 6) checkAndTriggerStory('title_t6', STORY_EVENTS.TITLE_T6);
+        }
+    };
+};
+
+function getActiveStoreDaysOperated() {
+    try {
+        const hist = typeof getActiveStoreHistory === 'function' ? getActiveStoreHistory() : null;
+        if (Array.isArray(hist) && hist.length) {
+            let maxDay = 0;
+            for (const h of hist) {
+                const d = h && typeof h.day === 'number' && Number.isFinite(h.day) ? Math.floor(h.day) : 0;
+                if (d > maxDay) maxDay = d;
+            }
+            return Math.max(0, maxDay);
+        }
+    } catch (_) {}
+    const lvl = (game && typeof game.level === 'number' && Number.isFinite(game.level)) ? game.level : 1;
+    return Math.max(0, Math.floor(lvl) - 1);
+}
+
+function updateHomeProfileCard() {
+    const balanceEl = document.getElementById('home-balance');
+    if (balanceEl) balanceEl.innerText = `¥${game.coins}`;
+
+    const daysEl = document.getElementById('home-store-days');
+    if (daysEl) daysEl.innerText = `已营业 ${getActiveStoreDaysOperated()} 天`;
+
+    const titleLv = (game && game.playerProfile && typeof game.playerProfile.titleLevel === 'number') ? Math.max(1, Math.min(6, Math.floor(game.playerProfile.titleLevel))) : 1;
+    const bar = document.querySelector('#home-profile-card .title-progress');
+    if (bar) bar.setAttribute('aria-valuenow', String(titleLv));
+
+    const fill = document.getElementById('title-progress-fill');
+    if (fill) {
+        const pct = ((titleLv - 1) / 5) * 100;
+        fill.style.width = `${pct}%`;
+    }
+
+    const nodesWrap = document.getElementById('title-progress-nodes');
+    if (nodesWrap) {
+        nodesWrap.querySelectorAll('.tp-node').forEach(node => {
+            const lv = parseInt(node.getAttribute('data-lv') || '0', 10);
+            if (Number.isFinite(lv) && lv > 0 && lv <= titleLv) node.classList.add('is-active');
+            else node.classList.remove('is-active');
+        });
+    }
+    if (nodesWrap) {
+        const labels = nodesWrap.querySelectorAll('.title-node-label');
+        labels.forEach(label => {
+            const lv = parseInt(label.getAttribute('data-lv') || '0', 10);
+            const name = (TITLE_CONFIG[lv] && TITLE_CONFIG[lv].name) ? TITLE_CONFIG[lv].name : '';
+            if (label.textContent !== name) label.textContent = name;
+            if (lv === titleLv) label.classList.add('is-active');
+            else label.classList.remove('is-active');
+        });
+    }
+}
 
 // [Audio System] Global Audio Controller
 const AudioController = {
@@ -5094,7 +5559,33 @@ window.tempCoins = 0;
      { name: "金汤花胶鸡", ingredients: ["chicken", "fish_maw", "pumpkin_mash", "broth"], price: 158, icon: "🍲", reqLevel: 14 }, 
      { name: "黑松露和牛炒饭", ingredients: ["wagyu", "truffle", "rice", "asparagus"], price: 168, icon: "🍛", reqLevel: 16 }, 
      { name: "佛跳墙", ingredients: ["shrimp", "abalone", "mushroom", "chicken"], price: 188, icon: "🥘", reqLevel: 18 }, 
-     { name: "九龙戏珠", ingredients: ["shrimp", "quail_egg", "sea_cucumber", "broth"], price: 198, icon: "🍡", reqLevel: 20 }
+     { name: "九龙戏珠", ingredients: ["shrimp", "quail_egg", "sea_cucumber", "broth"], price: 198, icon: "🍡", reqLevel: 20 },
+
+     // --- 🇯🇵 日本银座店专属菜谱 (20道) --- 
+     // 基础入门 
+     { id: "jp_01", name: "铁板炒豆芽", ingredients: ["bean_sprout", "soy_sauce"], reqLevel: 1, reqEquip: 'pot_1', perfectEquip: 'pot_1', price: 120, region: 'jp', icon: "🌱" }, 
+     { id: "jp_02", name: "味噌炒青椒", ingredients: ["pepper", "miso"], reqLevel: 1, reqEquip: 'pot_1', perfectEquip: 'pot_1', price: 130, region: 'jp', icon: "🫑" }, 
+     { id: "jp_03", name: "培根炒菠菜", ingredients: ["bacon", "spinach"], reqLevel: 2, reqEquip: 'pot_1', perfectEquip: 'pot_1', price: 150, region: 'jp', icon: "🥓" }, 
+     { id: "jp_04", name: "炒肝尖配豆芽", ingredients: ["pork_liver", "bean_sprout"], reqLevel: 2, reqEquip: 'pot_1', perfectEquip: 'pot_1', price: 160, region: 'jp', icon: "🥩" }, 
+     { id: "jp_05", name: "蒜香炒饭", ingredients: ["rice", "garlic"], reqLevel: 2, reqEquip: 'pot_1', perfectEquip: 'pot_1', price: 180, region: 'jp', icon: "🍚" }, 
+     // 进阶硬菜 
+     { id: "jp_06", name: "麸杂炒", ingredients: ["kuruma_fu", "egg", "spam"], reqLevel: 3, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 320, region: 'jp', icon: "🥖" }, 
+     { id: "jp_07", name: "木瓜杂炒", ingredients: ["green_papaya", "tuna"], reqLevel: 3, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 340, region: 'jp', icon: "🥗" }, 
+     { id: "jp_08", name: "姜汁烧猪肉", ingredients: ["pork", "onion", "ginger"], reqLevel: 4, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 350, region: 'jp', icon: "🧅" }, 
+     { id: "jp_09", name: "鸡肉酱炒", ingredients: ["chicken_leg", "cabbage", "special_sauce"], reqLevel: 4, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 380, region: 'jp', icon: "🍗" }, 
+     { id: "jp_10", name: "文字烧", ingredients: ["flour", "cabbage", "cheese"], reqLevel: 4, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 420, region: 'jp', icon: "🥞" }, 
+     // 大师名菜 
+     { id: "jp_11", name: "炒明太子魔芋丝", ingredients: ["konjac", "mentaiko", "chili"], reqLevel: 4, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 620, region: 'jp', icon: "🍝" }, 
+     { id: "jp_12", name: "蒜苔炒猪肝", ingredients: ["pork_liver", "garlic_sprout", "chili", "soy_sauce"], reqLevel: 4, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 650, region: 'jp', icon: "☘️" }, 
+     { id: "jp_13", name: "横手炒面", ingredients: ["thick_ramen", "cabbage", "egg", "fukujinzuke"], reqLevel: 4, reqEquip: 'pot_2', perfectEquip: 'pot_2', price: 680, region: 'jp', icon: "🍜" }, 
+     { id: "jp_14", name: "内脏炒乌冬", ingredients: ["udon", "beef_intestine", "miso"], reqLevel: 5, reqEquip: 'omni_1', perfectEquip: 'omni_1', price: 690, region: 'jp', icon: "🌭" }, 
+     { id: "jp_15", name: "广岛风肉蛋炒", ingredients: ["pork", "egg", "cabbage", "yakisoba_sauce"], reqLevel: 5, reqEquip: 'omni_1', perfectEquip: 'omni_1', price: 720, region: 'jp', icon: "🍳" }, 
+     { id: "jp_16", name: "那霸炒苦瓜", ingredients: ["bitter_melon", "tofu", "egg", "pork"], reqLevel: 5, reqEquip: 'omni_1', perfectEquip: 'omni_1', price: 750, region: 'jp', icon: "🥒" }, 
+     // 传奇料理 
+     { id: "jp_17", name: "铁板牛筋", ingredients: ["wagyu_tendon", "konjac", "miso", "leek"], reqLevel: 6, reqEquip: 'omni_1', perfectEquip: 'omni_2', price: 1200, region: 'jp', icon: "🍘" }, 
+     { id: "jp_18", name: "太子炒小乌贼", ingredients: ["squid", "mentaiko", "butter", "sake"], reqLevel: 6, reqEquip: 'omni_1', perfectEquip: 'omni_2', price: 1350, region: 'jp', icon: "🦑" }, 
+     { id: "jp_19", name: "骨付鸟", ingredients: ["chicken_leg", "leek", "secret_spice", "cabbage"], reqLevel: 6, reqEquip: 'omni_1', perfectEquip: 'omni_2', price: 1550, region: 'jp', icon: "🍗" }, 
+     { id: "jp_20", name: "成田炒鳗鱼肝", ingredients: ["eel_liver", "eel_sauce", "sansho_powder", "leek"], reqLevel: 6, reqEquip: 'omni_1', perfectEquip: 'omni_2', price: 1800, region: 'jp', icon: "🐙" }
 ]; 
  
  const INGREDIENTS = { 
@@ -5141,7 +5632,43 @@ window.tempCoins = 0;
     "rock_sugar": { id: "rock_sugar", name: "冰糖", icon: "🍡", stock: 0, price: 2 }, 
     "vinegar": { id: "vinegar", name: "米醋", icon: "🍶", stock: 0, price: 2 }, 
     "shaoxing_wine": { id: "shaoxing_wine", name: "绍兴酒", icon: "🍺", stock: 0, price: 3 }, 
-    "broth": { id: "broth", name: "浓缩高汤", icon: "🍲", stock: 0, price: 4 }
+    "broth": { id: "broth", name: "浓缩高汤", icon: "🍲", stock: 0, price: 4 },
+
+    // --- 🇯🇵 日本店专属及新增食材 --- 
+    "bean_sprout": { id: "bean_sprout", name: "豆芽", icon: "🌱", stock: 0, price: 15 }, 
+    "soy_sauce": { id: "soy_sauce", name: "酱油", icon: "🍯", stock: 0, price: 10 }, 
+    "miso": { id: "miso", name: "味噌", icon: "🧂", stock: 0, price: 15 }, 
+    "bacon": { id: "bacon", name: "培根", icon: "🥓", stock: 0, price: 25 }, 
+    "spinach": { id: "spinach", name: "菠菜", icon: "🥦", stock: 0, price: 18 }, 
+    "pork_liver": { id: "pork_liver", name: "猪肝", icon: "🥩", stock: 0, price: 30 }, 
+    "garlic": { id: "garlic", name: "大蒜", icon: "🧄", stock: 0, price: 8 }, 
+    "kuruma_fu": { id: "kuruma_fu", name: "车麸", icon: "🥖", stock: 0, price: 35 }, 
+    "spam": { id: "spam", name: "午餐肉", icon: "🥫", stock: 0, price: 40 }, 
+    "green_papaya": { id: "green_papaya", name: "青木瓜", icon: "🥗", stock: 0, price: 45 }, 
+    "tuna": { id: "tuna", name: "细金枪鱼", icon: "🦈", stock: 0, price: 80 }, 
+    "chicken_leg": { id: "chicken_leg", name: "鸡腿", icon: "🍗", stock: 0, price: 50 }, 
+    "cabbage": { id: "cabbage", name: "卷心菜", icon: "🌳", stock: 0, price: 20 }, 
+    "special_sauce": { id: "special_sauce", name: "特调酱汁", icon: "🧴", stock: 0, price: 60 }, 
+    "flour": { id: "flour", name: "小麦粉", icon: "🥣", stock: 0, price: 15 }, 
+    "cheese": { id: "cheese", name: "芝士", icon: "🧀", stock: 0, price: 45 }, 
+    "konjac": { id: "konjac", name: "魔芋丝", icon: "⬜", stock: 0, price: 40 }, 
+    "mentaiko": { id: "mentaiko", name: "明太子鱼", icon: "🐠", stock: 0, price: 120 }, 
+    "garlic_sprout": { id: "garlic_sprout", name: "蒜苔", icon: "☘️", stock: 0, price: 25 }, 
+    "thick_ramen": { id: "thick_ramen", name: "粗拉面", icon: "🍜", stock: 0, price: 35 }, 
+    "fukujinzuke": { id: "fukujinzuke", name: "福神渍", icon: "🥘", stock: 0, price: 30 }, 
+    "udon": { id: "udon", name: "乌冬面", icon: "🍝", stock: 0, price: 40 }, 
+    "beef_intestine": { id: "beef_intestine", name: "牛大肠", icon: "🌭", stock: 0, price: 150 }, 
+    "yakisoba_sauce": { id: "yakisoba_sauce", name: "炒面酱", icon: "⚱️", stock: 0, price: 50 }, 
+    "bitter_melon": { id: "bitter_melon", name: "苦瓜", icon: "🥒", stock: 0, price: 35 }, 
+    "wagyu_tendon": { id: "wagyu_tendon", name: "和牛牛筋", icon: "🍘", stock: 0, price: 300 }, 
+    "leek": { id: "leek", name: "大葱", icon: "🌿", stock: 0, price: 15 }, 
+    "squid": { id: "squid", name: "极品小乌贼", icon: "🦑", stock: 0, price: 350 }, 
+    "butter": { id: "butter", name: "黄油", icon: "🧈", stock: 0, price: 80 }, 
+    "sake": { id: "sake", name: "清酒", icon: "🍸", stock: 0, price: 100 }, 
+    "secret_spice": { id: "secret_spice", name: "密传辛香料", icon: "🌷", stock: 0, price: 200 }, 
+    "eel_liver": { id: "eel_liver", name: "鳗鱼肝", icon: "🐙", stock: 0, price: 450 }, 
+    "eel_sauce": { id: "eel_sauce", name: "浓缩鳗鱼汁", icon: "🥃", stock: 0, price: 150 }, 
+    "sansho_powder": { id: "sansho_powder", name: "山椒粉", icon: "🫓", stock: 0, price: 120 }
  };
 
 // Global State
@@ -5230,18 +5757,138 @@ function setGameBgVisual(filter, overlay) {
     }
 }
 
+function getCurrentRegionId() {
+    let region = (game.activeStoreId || 'cn:main').split(':')[0];
+    if (region === 'china') region = 'cn';
+    return region || 'cn';
+}
+
+function getActiveRecipes() {
+    const region = getCurrentRegionId();
+    return RECIPES.filter(r => (r.region || 'cn') === region);
+}
+
+function getHomeBgImage() {
+    const region = getCurrentRegionId();
+    if (region === 'jp') return 'assets/bg/日本主题.jpg';
+    return GAME_BG_ALT;
+}
+
+function updateHomeBackground() {
+    const homeBg = getHomeBgImage();
+    setGameBgVisual('saturate(1) brightness(1) contrast(1)', 0.34);
+    setGameBgImage(homeBg, GAME_BG_ALT);
+    if (typeof updateHomeIntroVideo === 'function') updateHomeIntroVideo();
+}
+
+function updateHomeIntroVideo() {
+    const startScreen = document.getElementById('start-screen');
+    if (!startScreen) return;
+    const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : 'cn';
+    const video = document.getElementById('home-jp-intro-video');
+    if (!video) return;
+    const isHomeVisible = startScreen.style.display !== 'none';
+
+    if (!isHomeVisible) {
+        startScreen.classList.remove('is-jp-intro');
+        try { video.pause(); } catch (_) {}
+        return;
+    }
+
+    if (region !== 'jp') {
+        startScreen.classList.remove('is-jp-intro');
+        try { video.pause(); } catch (_) {}
+        try { video.currentTime = 0; } catch (_) {}
+        return;
+    }
+
+    try { video.currentTime = 0; } catch (_) {}
+    const startPlayback = () => {
+        startScreen.classList.add('is-jp-intro');
+        const prev = video.__jpIntroEndedHandler;
+        if (prev) video.removeEventListener('ended', prev);
+        const onEnded = () => {
+            startScreen.classList.remove('is-jp-intro');
+            video.__jpIntroEndedHandler = null;
+            setTimeout(() => {
+                try { video.pause(); } catch (_) {}
+            }, 650);
+        };
+        video.__jpIntroEndedHandler = onEnded;
+        video.addEventListener('ended', onEnded, { once: true });
+    };
+
+    const p = video.play();
+    if (p && typeof p.then === 'function') {
+        p.then(startPlayback).catch(() => {
+            startScreen.classList.remove('is-jp-intro');
+            try { video.pause(); } catch (_) {}
+        });
+    } else {
+        startPlayback();
+    }
+}
+
+function updateLoadingBackground() {
+    const loadingEl = document.getElementById('loading');
+    if (!loadingEl) return;
+    const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : 'cn';
+    const video = document.getElementById('loading-jp-video');
+    if (region === 'jp') {
+        loadingEl.classList.add('is-jp');
+        if (video) {
+            video.muted = true;
+            const p = video.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+        }
+    } else {
+        loadingEl.classList.remove('is-jp');
+        if (video) {
+            try { video.pause(); } catch (_) {}
+        }
+    }
+}
+
+function updateGaoshengTestEntryVisibility() {
+    const btn = document.getElementById('btn-test-gaosheng');
+    if (!btn) return;
+    btn.style.display = (getCurrentRegionId() === 'cn') ? 'block' : 'none';
+}
+
+function getCuisineLabelByRegion(region) {
+    if (region === 'jp') return '日式';
+    return '中式';
+}
+
+function localizeDecorName(name, region) {
+    if (!name) return name;
+    const parts = String(name).split('·');
+    if (parts.length < 2) return name;
+    parts[0] = getCuisineLabelByRegion(region);
+    return parts.join('·');
+}
+
+function getDishImageSrc(dish, fallbackUrl = null) {
+    const dishName = dish && dish.name ? String(dish.name) : '';
+    if (!dishName) return fallbackUrl || '';
+    const region = (dish && dish.region) ? String(dish.region) : getCurrentRegionId();
+    const folder = (region === 'jp') ? 'jp' : 'cn';
+    return `assets/dishes/${folder}/${dishName}.png`;
+}
+
 // [新增] 根据国家和装修等级获取背景图路径
 function getDynamicKitchenBg() {
-    // 1. 获取当前区域 (默认为 cn)
-    const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
-    const region = (ngParams.location || 'cn:main').split(':')[0];
+    const region = getCurrentRegionId();
+    
     // 2. 获取当前装修等级 (0:标准, 1:扩容, 2:星级)
     const expansion = game.inventory.expansion || 0;
     // 3. 构建文件名规范
     // 格式: assets/bg/kitchen_{国家代码}_lv{等级}.jpg
-    // 例如: assets/bg/kitchen_cn_lv0.jpg (中国标准)
-    // 例如: assets/bg/kitchen_jp_lv2.jpg (日本星级)
     return `assets/bg/kitchen_${region}_lv${expansion}.jpg`;
+}
+
+function getDynamicKitchenBgFallback() {
+    return 'assets/bg/家庭厨房.jpeg';
 }
 
 async function setGameBgImage(url, fallbackUrl = null) {
@@ -5312,8 +5959,8 @@ function updateGameBackground(stateStage = null) {
         setGameBgVisual('grayscale(0.35) brightness(0.72) contrast(1.05)', 0.60);
         // [核心修复] 暂停时也要显示当前的动态背景，而不是回退到 GAME_BG_PLAY
         const targetBg = getDynamicKitchenBg();
-        const defaultBg = 'assets/bg/家庭厨房.jpeg';
-        setGameBgImage(targetBg, defaultBg);
+        const fallbackBg = getDynamicKitchenBgFallback();
+        setGameBgImage(targetBg, fallbackBg);
         return;
     }
 
@@ -5326,9 +5973,8 @@ function updateGameBackground(stateStage = null) {
 
     // [核心修改] 使用动态背景逻辑
     const targetBg = getDynamicKitchenBg();
-    const defaultBg = 'assets/bg/家庭厨房.jpeg'; // 兜底默认图
-    // 尝试设置动态背景，如果文件不存在则回退到默认图
-    setGameBgImage(targetBg, defaultBg);
+    const fallbackBg = getDynamicKitchenBgFallback();
+    setGameBgImage(targetBg, fallbackBg);
 }
 
 function playSfx(f, t='sine', d=0.1, v=0.1) {
@@ -6256,9 +6902,7 @@ function renderShop() {
     const overlay = document.getElementById('shop-overlay');
     if (!overlay) return;
 
-    // [新增] 获取当前区域 ID (例如 'cn', 'jp')
-    const ngParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
-    const currentRegion = (ngParams.location || 'cn:main').split(':')[0];
+    const currentRegion = getCurrentRegionId();
 
     const currentTab = SHOP_TABS.find(t => t.id === currentShopTab) || SHOP_TABS[0];
     const types = currentTab.types;
@@ -6276,7 +6920,8 @@ function renderShop() {
 
             const isOwned = levelIdx <= currentLevelIdx;
             const isNext = levelIdx === currentLevelIdx + 1;
-            const itemName = levelData.name;
+            let itemName = levelData.name;
+            if (key === 'expansion') itemName = localizeDecorName(itemName, currentRegion);
             const isDigital = levelData.isDigital;
             let iconHtml = getShopItemIcon(key);
 
@@ -6601,8 +7246,23 @@ function buyUpgrade(type, btnEl) {
         
         renderShop();
         
-        // [新增] 刷新头衔显示
-        if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
+        const upgradedTitle = (typeof updatePlayerTitle === 'function') ? updatePlayerTitle() : false;
+        if (upgradedTitle && typeof showTitleUpgradeModal === 'function') showTitleUpgradeModal(upgradedTitle);
+
+        if (type === 'pot' && nextLevelIdx >= 3) {
+            if (typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
+                checkAndTriggerStory('buy_omni', STORY_EVENTS.BUY_OMNI);
+            }
+        }
+
+        if (type === 'kmes' && nextLevelIdx >= 3) {
+            const currentStore = (game && game.stores) ? game.stores[game.activeStoreId || 'cn:main'] : null;
+            if (currentStore && currentStore.isAutomated) {
+                if (typeof showToast === 'function') {
+                    showToast("🎉 OMNI与KMES羁绊激活！当前店铺已实现全自动托管，开始产生后台收益！", 4000);
+                }
+            }
+        }
         
         // [UI] 即时更新储物柜样式
         if (type === 'fridge') {
@@ -6623,7 +7283,8 @@ const GameStateManager = {
             'restaurant_game_save', // 兼容可能的旧存档名
             'yesterdayRate',      // 昨日评分
             'ng_params',          // 新征程参数
-            'dailyLegacyIncome'
+            'dailyLegacyIncome',
+            'playerProfileCache'
         ];
         
         // [关键] 只有在非继承模式下，才删除旧店存档列表
@@ -6640,8 +7301,23 @@ const GameStateManager = {
         }
         
         keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        if (!keepLegacy) {
+            try {
+                const toRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('story_')) toRemove.push(k);
+                }
+                toRemove.forEach(k => localStorage.removeItem(k));
+            } catch (_) {}
+        }
         
         // 重置运行时对象
+        if (!keepLegacy) {
+            game.activeStoreId = 'cn:main';
+            game.stores = {};
+        }
         game.level = 1;
         game.totalRevenue = 0;
         game.dailyRevenue = 0;
@@ -6649,6 +7325,8 @@ const GameStateManager = {
         game.orderQueue = [];
         game.coins = 0;
         game.inventory = { pot: 0, belt: 0, fridge: 0, expansion: 0 };
+        game.playerProfile = { titleLevel: 1, updatedAt: Date.now(), version: 1 };
+        game.titleLevel = 1;
         
         window.tempInventory = {};
         window.tempCoins = 0;
@@ -6683,6 +7361,10 @@ window.executeReset = function() {
 };
 
 let game = {
+    // [系统新增] 商业版图：店铺上下文管理
+    activeStoreId: 'cn:main', // 默认中国首店
+    stores: {}, 
+
     buyMultiplier: 1, // [新增] 购买倍率
     level: 1, revenue: 0, served: 0, total: 0, spawned: 0, isLive: true, isPaused: false, dayEnded: false,
     dailyRevenue: 0, totalRevenue: 0, targetRevenue: 1000,
@@ -6710,6 +7392,272 @@ let game = {
     timeRemaining: 120, // Global Timer
     lastTime: 0
 };
+
+// [系统新增] 商业版图：店铺上下文管理
+// 将当前内存中的店面数据打包存入抽屉 
+function saveStoreContext() { 
+    const currentId = game.activeStoreId; 
+    if (!game.stores[currentId]) game.stores[currentId] = {}; 
+    
+    // 保存单店独立资产 
+    game.stores[currentId].level = game.level || 1; 
+    game.stores[currentId].inventory = JSON.parse(JSON.stringify(game.inventory || {})); 
+    game.stores[currentId].ingredientAge = JSON.parse(JSON.stringify(game.ingredientAge || {})); 
+    game.stores[currentId].history = JSON.parse(JSON.stringify(getActiveStoreHistory() || []));
+    // 如果有单独的设备对象，也在这里保存，例如 game.equipment 
+} 
+
+// 从抽屉中取出指定店面数据，覆盖当前内存 
+function loadStoreContext(storeId) { 
+    if (!game.stores[storeId]) { 
+        // 如果是首次进入新店，初始化新店的白板数据 
+        game.stores[storeId] = { 
+            level: 1, 
+            inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0 }, // 默认空装备
+            ingredientAge: {},
+            history: []
+        }; 
+    } 
+    
+    game.activeStoreId = storeId; 
+    const data = game.stores[storeId]; 
+    if (data && data.isNew) {
+        data.level = 1;
+        data.inventory = { pot: 0, belt: 0, fridge: 0, expansion: 0 };
+        data.ingredientAge = {};
+        data.history = [];
+        data.isNew = false;
+    }
+    // 覆盖当前工作区内存 (注意：全局的 game.coins 绝对不要覆盖) 
+    game.level = data.level || 1; 
+    game.inventory = JSON.parse(JSON.stringify(data.inventory || {})); 
+    game.ingredientAge = JSON.parse(JSON.stringify(data.ingredientAge || {})); 
+    
+    // 清理当天的临时状态 
+    game.dailyTrend = null; 
+    game.dailyGossip = null; 
+    game.dailyActivePool = []; 
+    game.orderQueue = []; 
+    game.activeOrders = []; 
+    
+    if (typeof reconcilePlayerProfile === 'function') reconcilePlayerProfile();
+    if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
+    if (typeof updateLoadingBackground === 'function') updateLoadingBackground();
+
+    console.log(`[店铺切换] 已加载店铺上下文: ${storeId}`, data);
+} 
+
+function getStoreHistory(storeId) {
+    if (!game || !game.stores || !storeId) return null;
+    const store = game.stores[storeId];
+    if (!store || typeof store !== 'object') return null;
+    if (!Array.isArray(store.history)) store.history = [];
+    return store.history;
+}
+
+function getActiveStoreHistory() {
+    const activeId = game && game.activeStoreId ? game.activeStoreId : null;
+    const storeHistory = activeId ? getStoreHistory(activeId) : null;
+    if (storeHistory) return storeHistory;
+    if (Array.isArray(game.history)) return game.history;
+    return [];
+}
+
+function pushActiveStoreHistoryEntry(entry) {
+    const activeId = game && game.activeStoreId ? game.activeStoreId : null;
+    const storeHistory = activeId ? getStoreHistory(activeId) : null;
+    if (storeHistory) storeHistory.push(entry);
+    if (Array.isArray(game.history)) game.history.push(entry);
+}
+
+function computeGlobalExpansionLevel() {
+    let maxLvl = 0;
+    if (game && game.stores) {
+        Object.values(game.stores).forEach(store => {
+            const lv = store && store.inventory && typeof store.inventory.expansion === 'number' ? store.inventory.expansion : 0;
+            if (lv > maxLvl) maxLvl = lv;
+        });
+    }
+    const activeLv = game && game.inventory && typeof game.inventory.expansion === 'number' ? game.inventory.expansion : 0;
+    if (activeLv > maxLvl) maxLvl = activeLv;
+    const maxCfg = Object.keys(TITLE_CONFIG).length || 1;
+    return Math.max(0, Math.min(maxCfg - 1, Math.floor(maxLvl)));
+}
+
+function computeGlobalTitleLevel() {
+    const maxCfg = Object.keys(TITLE_CONFIG).length || 1;
+    let titleLevel = 1;
+
+    const stores = (game && game.stores && typeof game.stores === 'object') ? game.stores : {};
+    const storeIds = Object.keys(stores);
+
+    const checkAutomation = (store) => {
+        if (!store || !store.inventory) return false;
+        const inv = store.inventory;
+        const hasOmni = (typeof inv.pot === 'number' && Number.isFinite(inv.pot) && inv.pot >= 3);
+        const hasKmesMax = (typeof inv.kmes === 'number' && Number.isFinite(inv.kmes) && inv.kmes >= 3);
+        return !!(hasOmni && hasKmesMax);
+    };
+
+    storeIds.forEach(id => {
+        const s = stores[id];
+        if (!s || typeof s !== 'object') return;
+        s.isAutomated = checkAutomation(s);
+    });
+
+    const findStoreByRegion = (regionId) => {
+        const sid = storeIds.find(id => id.startsWith(regionId + ':'));
+        return sid ? stores[sid] : null;
+    };
+
+    const cnStore = findStoreByRegion('cn');
+    const jpStore = findStoreByRegion('jp');
+    const frStore = findStoreByRegion('fr');
+
+    const hasJapan = storeIds.some(id => id.startsWith('jp:'));
+    const hasFrance = storeIds.some(id => id.startsWith('fr:'));
+
+    if (cnStore && typeof cnStore.level === 'number' && Number.isFinite(cnStore.level) && cnStore.level >= 3) titleLevel = 2;
+    if (cnStore && cnStore.isAutomated) titleLevel = 3;
+    if (hasJapan) titleLevel = 4;
+    if (hasJapan && jpStore && jpStore.isAutomated) titleLevel = 5;
+    if (hasFrance && cnStore && cnStore.isAutomated && jpStore && jpStore.isAutomated && frStore && frStore.isAutomated) titleLevel = 6;
+
+    return Math.max(1, Math.min(maxCfg, Math.floor(titleLevel)));
+}
+
+function initAutoIncomeSystem() {
+    if (window.autoIncomeTimer) return;
+    window.autoIncomeTimer = setInterval(() => {
+        if (!game || !game.stores) return;
+        try { computeGlobalTitleLevel(); } catch (_) {}
+
+        let totalAutoIncome = 0;
+        Object.keys(game.stores).forEach(storeId => {
+            const store = game.stores[storeId];
+            if (store && store.isAutomated) {
+                const storeLevel = (typeof store.level === 'number' && Number.isFinite(store.level)) ? store.level : 1;
+                totalAutoIncome += 20 + (storeLevel * 5);
+            }
+        });
+
+        if (totalAutoIncome > 0) {
+            const coins = (typeof game.coins === 'number' && Number.isFinite(game.coins)) ? game.coins : 0;
+            game.coins = coins + totalAutoIncome;
+            if (typeof saveGameState === 'function') saveGameState();
+            if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
+            if (typeof updateHUD === 'function') updateHUD();
+        }
+    }, 10000);
+}
+
+function getPlayerProfileCache() {
+    try {
+        const raw = localStorage.getItem('playerProfileCache');
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function persistPlayerProfileCache() {
+    try {
+        if (!game || !game.playerProfile) return;
+        localStorage.setItem('playerProfileCache', JSON.stringify(game.playerProfile));
+    } catch (_) {}
+}
+
+function applyIncomingPlayerProfile(incoming) {
+    if (!incoming || typeof incoming !== 'object') return false;
+    ensurePlayerProfile();
+    const inLevelRaw = incoming.titleLevel;
+    const inLevel = (typeof inLevelRaw === 'number' && Number.isFinite(inLevelRaw)) ? Math.floor(inLevelRaw) : 1;
+    const inUpdated = (typeof incoming.updatedAt === 'number' && Number.isFinite(incoming.updatedAt)) ? incoming.updatedAt : 0;
+
+    const curLevel = game.playerProfile.titleLevel || 1;
+    const curUpdated = game.playerProfile.updatedAt || 0;
+
+    const maxCfg = Object.keys(TITLE_CONFIG).length || 1;
+    const nextLevel = Math.max(curLevel, Math.max(1, Math.min(maxCfg, inLevel)));
+    const takeIncoming = inUpdated > curUpdated || nextLevel > curLevel;
+    if (!takeIncoming) return false;
+
+    game.playerProfile.titleLevel = nextLevel;
+    game.playerProfile.updatedAt = Math.max(Date.now(), inUpdated, curUpdated);
+    game.titleLevel = game.playerProfile.titleLevel;
+    persistPlayerProfileCache();
+    return true;
+}
+
+function reconcilePlayerProfile() {
+    ensurePlayerProfile();
+    const cache = getPlayerProfileCache();
+    if (cache) applyIncomingPlayerProfile(cache);
+
+    const computed = computeGlobalTitleLevel();
+    const maxCfg = Object.keys(TITLE_CONFIG).length || 1;
+    const current = Math.max(1, Math.min(maxCfg, Math.floor(game.playerProfile.titleLevel || 1)));
+    const next = Math.max(current, computed, (typeof game.titleLevel === 'number' ? Math.floor(game.titleLevel) : 1));
+
+    if (next !== current) {
+        game.playerProfile.titleLevel = next;
+        game.playerProfile.updatedAt = Date.now();
+    }
+    game.titleLevel = game.playerProfile.titleLevel;
+    persistPlayerProfileCache();
+}
+
+function schedulePendingGameStateWrite(key, json) {
+    if (!window.__pendingGameStateWrites) window.__pendingGameStateWrites = {};
+    window.__pendingGameStateWrites[key] = { json, at: Date.now() };
+    if (window.__pendingGameStateRetryTimer) return;
+    window.__pendingGameStateRetryTimer = setTimeout(() => {
+        window.__pendingGameStateRetryTimer = null;
+        if (!window.__pendingGameStateWrites) return;
+        const entries = Object.entries(window.__pendingGameStateWrites);
+        window.__pendingGameStateWrites = {};
+        entries.forEach(([k, v]) => {
+            try { localStorage.setItem(k, v.json); } catch (_) {
+                if (!window.__pendingGameStateWrites) window.__pendingGameStateWrites = {};
+                window.__pendingGameStateWrites[k] = v;
+            }
+        });
+    }, 1500);
+}
+
+window.addEventListener('online', () => {
+    if (!window.__pendingGameStateWrites) return;
+    const entries = Object.entries(window.__pendingGameStateWrites);
+    window.__pendingGameStateWrites = {};
+    entries.forEach(([k, v]) => {
+        try { localStorage.setItem(k, v.json); } catch (_) {
+            if (!window.__pendingGameStateWrites) window.__pendingGameStateWrites = {};
+            window.__pendingGameStateWrites[k] = v;
+        }
+    });
+});
+
+window.addEventListener('storage', (e) => {
+    if (!e || !e.key) return;
+    if (e.key === 'playerProfileCache' && e.newValue) {
+        try {
+            const incoming = JSON.parse(e.newValue);
+            if (applyIncomingPlayerProfile(incoming)) {
+                if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
+            }
+        } catch (_) {}
+        return;
+    }
+    if (e.key === 'gameState' && e.newValue) {
+        try {
+            const state = JSON.parse(e.newValue);
+            if (state && state.playerProfile && applyIncomingPlayerProfile(state.playerProfile)) {
+                if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
+            }
+        } catch (_) {}
+    }
+});
+
 
 function getKnifeEffect() {
     const level = game.inventory.knife || 0;
@@ -6743,18 +7691,34 @@ function getRequiredPrepClicks(dish) {
 }
 
 // Persistence Helpers
-function saveGameState() {
+function saveGameState(options = {}) {
     try {
+        if (!options.skipStoreContextSave) {
+            saveStoreContext();
+        }
+
+        if (typeof reconcilePlayerProfile === 'function') reconcilePlayerProfile();
+
         const state = {
-            level: game.level,
+            activeStoreId: game.activeStoreId,
+            stores: game.stores,
+            level: game.level, // 保留作为备份/当前显示
             coins: game.coins,
-            inventory: game.inventory,
+            inventory: game.inventory, // 保留作为备份/当前显示
+            playerProfile: game.playerProfile,
+            titleLevel: game && game.playerProfile ? game.playerProfile.titleLevel : game.titleLevel,
             totalRevenue: game.totalRevenue,
             totalOrdersCompleted: game.totalOrdersCompleted,
             totalDishesServed: game.totalDishesServed,
             history: game.history
         };
-        localStorage.setItem('gameState', JSON.stringify(state));
+        const json = JSON.stringify(state);
+        try {
+            localStorage.setItem('gameState', json);
+        } catch (e) {
+            schedulePendingGameStateWrite('gameState', json);
+        }
+        try { persistPlayerProfileCache(); } catch (_) {}
         console.log("Game Saved:", state);
     } catch (e) { console.error("Save failed:", e); }
 }
@@ -6774,18 +7738,84 @@ function loadGameState() {
     try {
         const raw = localStorage.getItem('gameState');
         if (raw) {
-            const state = JSON.parse(raw);
+            let state = null;
+            try {
+                state = JSON.parse(raw);
+            } catch (_) {
+                state = null;
+            }
+            if (!state || typeof state !== 'object') {
+                const cached = getPlayerProfileCache();
+                if (cached) {
+                    ensurePlayerProfile();
+                    applyIncomingPlayerProfile(cached);
+                    if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
+                }
+                return;
+            }
+            
+            // [系统新增] 读取上下文信息
+            if (state.activeStoreId) {
+                // [修复] 兼容旧存档的 'china' ID，统一迁移至 'cn:main'
+                game.activeStoreId = (state.activeStoreId === 'china') ? 'cn:main' : state.activeStoreId;
+            } else {
+                game.activeStoreId = 'cn:main';
+            }
+
+            if (state.stores) {
+                game.stores = state.stores;
+                // [修复] 迁移旧 store key (将 'china' 数据迁移至 'cn:main')
+                if (game.stores['china']) {
+                    game.stores['cn:main'] = game.stores['china'];
+                    delete game.stores['china'];
+                }
+                Object.values(game.stores).forEach(s => {
+                    if (s && typeof s === 'object' && !Array.isArray(s.history)) s.history = [];
+                });
+            }
+
             if (state.level) game.level = state.level;
             if (state.coins !== undefined) game.coins = state.coins;
             if (state.inventory) {
                 game.inventory = state.inventory;
                 if (game.inventory.expansion === undefined) game.inventory.expansion = 0; // Backwards compatibility
             }
+            if (state.playerProfile) {
+                game.playerProfile = state.playerProfile;
+                ensurePlayerProfile();
+                persistPlayerProfileCache();
+            } else if (state.titleLevel !== undefined) {
+                ensurePlayerProfile();
+                applyIncomingPlayerProfile({ titleLevel: state.titleLevel, updatedAt: Date.now(), version: 1 });
+            } else if (game.titleLevel !== undefined) {
+                ensurePlayerProfile();
+                applyIncomingPlayerProfile({ titleLevel: game.titleLevel, updatedAt: Date.now(), version: 1 });
+            }
+            // 尝试读取可能存在的 ingredientAge (旧存档可能包含)
+            if (state.ingredientAge) game.ingredientAge = state.ingredientAge;
             
             if (state.totalRevenue) game.totalRevenue = state.totalRevenue;
             if (state.totalOrdersCompleted) game.totalOrdersCompleted = state.totalOrdersCompleted;
             if (state.totalDishesServed) game.totalDishesServed = state.totalDishesServed;
             if (state.history) game.history = state.history;
+            
+            // [系统新增] 兼容旧版本：如果存档里没有 stores 结构，说明是老玩家/旧存档
+            if (!game.stores || Object.keys(game.stores).length === 0) {
+                game.stores = {};
+                // 把现有的老数据全部划归给 'cn:main' (中国总店)
+                game.stores['cn:main'] = {
+                    level: game.level || 1,
+                    inventory: JSON.parse(JSON.stringify(game.inventory || {})),
+                    ingredientAge: JSON.parse(JSON.stringify(game.ingredientAge || {})),
+                    history: JSON.parse(JSON.stringify(Array.isArray(game.history) ? game.history : []))
+                };
+                game.activeStoreId = 'cn:main';
+            }
+
+            // [系统新增] 强制加载当前激活的店铺上下文，确保数据就位
+            loadStoreContext(game.activeStoreId || 'cn:main');
+            if (typeof reconcilePlayerProfile === 'function') reconcilePlayerProfile();
+            if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
             
             console.log("Game Loaded:", state);
         }
@@ -6797,8 +7827,9 @@ function generateDailyOrders(level) {
         const goal = game.getGoal(level); 
         game.orderQueue = []; 
         // 1. 获取当前等级已解锁的所有菜谱 
-        const availableRecipes = RECIPES.filter(r => (r.reqLevel || 1) <= level); 
-        if (availableRecipes.length === 0) availableRecipes.push(RECIPES[0]); 
+        const activeRecipes = getActiveRecipes();
+        const availableRecipes = activeRecipes.filter(r => (r.reqLevel || 1) <= level); 
+        if (availableRecipes.length === 0 && activeRecipes.length > 0) availableRecipes.push(activeRecipes[0]); 
         // 2. 读取集市获取的今日趋势 
         const todayTrend = game.dailyTrend || 'balanced'; 
         console.log(`[订单生成] 当前关卡: ${level}, 今日趋势: ${todayTrend}`); 
@@ -6807,6 +7838,11 @@ function generateDailyOrders(level) {
         // [类别A] 基础保底菜：永远有番茄炒蛋/洋葱炒蛋，给玩家垫底的安全感 
         const basicDishes = availableRecipes.slice(0, 2); 
         basicDishes.forEach(d => { if (!dailyActivePool.includes(d)) dailyActivePool.push(d); }); 
+        
+        // [Fix] 优先加入当前等级刚解锁的新菜谱，确保玩家能体验到新内容
+        const newRecipes = availableRecipes.filter(r => r.reqLevel === level);
+        newRecipes.forEach(d => { if (!dailyActivePool.includes(d)) dailyActivePool.push(d); });
+
         // [类别B] 趋势主打菜：根据集市暗示筛选 
         const trendDishes = availableRecipes.filter(r => { 
             const ings = r.ingredients; 
@@ -6928,7 +7964,7 @@ function checkSpawn() {
          // 增加了 onerror 处理：如果图片不存在，回退显示 Emoji (d.icon) 
          return ` 
              <div class="order-item"> 
-                 <img src="assets/dishes/${d.name}.png" class="item-icon" alt="${d.name}"
+                 <img src="${getDishImageSrc(d)}" class="item-icon" alt="${d.name}"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"> 
                  <span class="item-icon" style="display:none; font-size:24px;">${d.icon || '🥘'}</span> 
                  
@@ -6953,33 +7989,50 @@ function spawnOrder(slotIdx, requeuedOrder = null) {
          order = requeuedOrder; 
          order.patience = 2500; // 重置耐心值 
      } else { 
-         if (game.orderQueue && game.orderQueue.length > 0) { 
-             // 优先使用每日预设队列 
-             order = game.orderQueue.shift(); 
-             saveGameState(); 
-        } else { 
-            // [史诗级修复] 队列耗尽后的兜底逻辑：必须继续使用今日的【专属活跃菜单池】！ 
-            const level = game.level; 
-            
-            // 优先使用今日的固定池子 
-            let pool = game.dailyActivePool; 
-            // 极端异常兜底：如果没有池子，再取全部已解锁 
-            if (!pool || pool.length === 0) { 
-                pool = RECIPES.filter(r => (r.reqLevel || 1) <= level); 
-                if (pool.length === 0) pool = [RECIPES[0]]; 
-            } 
-        // 生成符合当前池子的随机订单，最多 3 道菜 
-        const maxPerOrder = 3; 
-        const desired = Math.ceil(Math.random() * game.getDishesPerOrder(game.level)); 
-        const count = Math.min(desired, maxPerOrder); 
-        const dishes = []; 
-        for(let i=0; i<count; i++) { 
-            // 核心：从今日固定池子中抽取，保持一整天的菜品种类连贯！ 
-            const recipe = pool[Math.floor(Math.random() * pool.length)]; 
-            dishes.push(recipe); 
+         // [核心剧情] Day5 第三单必定触发“高升排骨”
+        // [修复] 使用 game.level 替代 game.day，并前置判断以覆盖 orderQueue
+        const currentRegion = getCurrentRegionId();
+        if (currentRegion === 'cn' && game.level === 5 && game.spawned === 2) {
+             const porkRibs = getActiveRecipes().find(r => r.name === "高升排骨");
+             if (porkRibs) {
+                 order = { id: Date.now() + Math.random(), dishes: [porkRibs] };
+                 // 如果强制生成了剧情订单，且队列里还有预设订单，消耗掉一个以保持进度平衡
+                 if (game.orderQueue && game.orderQueue.length > 0) {
+                     game.orderQueue.shift();
+                 }
+             }
+        }
+
+        if (!order) {
+            if (game.orderQueue && game.orderQueue.length > 0) { 
+                // 优先使用每日预设队列 
+                order = game.orderQueue.shift(); 
+                saveGameState(); 
+            } else { 
+                // [史诗级修复] 队列耗尽后的兜底逻辑：必须继续使用今日的【专属活跃菜单池】！ 
+                const level = game.level; 
+                
+                // 优先使用今日的固定池子 
+                let pool = game.dailyActivePool; 
+                // 极端异常兜底：如果没有池子，再取全部已解锁 
+                if (!pool || pool.length === 0) { 
+                    const activeRecipes = getActiveRecipes();
+                    pool = activeRecipes.filter(r => (r.reqLevel || 1) <= level); 
+                    if (pool.length === 0 && activeRecipes.length > 0) pool = [activeRecipes[0]]; 
+                } 
+                // 生成符合当前池子的随机订单，最多 3 道菜 
+                const maxPerOrder = 3; 
+                const desired = Math.ceil(Math.random() * game.getDishesPerOrder(game.level)); 
+                const count = Math.min(desired, maxPerOrder); 
+                const dishes = []; 
+                for(let i=0; i<count; i++) { 
+                    // 核心：从今日固定池子中抽取，保持一整天的菜品种类连贯！ 
+                    const recipe = pool[Math.floor(Math.random() * pool.length)]; 
+                    dishes.push(recipe); 
+                } 
+                order = { id: Date.now() + Math.random(), dishes }; 
+            }
         } 
-        order = { id: Date.now() + Math.random(), dishes }; 
-    } 
 
     // 任何来源的订单，统一限制最多 3 道菜
     if (!Array.isArray(order.dishes)) order.dishes = [];
@@ -6994,7 +8047,7 @@ function spawnOrder(slotIdx, requeuedOrder = null) {
  let isVIP = false;
  if (order.dishes) {
      isVIP = order.dishes.some(dish => {
-         const r = RECIPES.find(recipe => (recipe.name === dish.name) || (recipe.id === dish.id));
+         const r = getActiveRecipes().find(recipe => (recipe.name === dish.name) || (recipe.id === dish.id));
          return (r && r.price >= 100) || (dish.price >= 100);
      });
  }
@@ -7077,7 +8130,7 @@ function takeOrder(order) {
     }
     // 2. 匹配成功：执行交单
     // 识别对应菜谱和基础价格 
-    const targetRecipe = RECIPES.find(r => r.name === heldDish.name); 
+    const targetRecipe = getActiveRecipes().find(r => r.name === heldDish.name); 
     const basePrice = targetRecipe ? targetRecipe.price : (heldDish.price || 10); 
     const quality = heldDish.quality !== undefined ? heldDish.quality : 1; 
     let price = Math.ceil(basePrice * quality); 
@@ -7099,6 +8152,25 @@ function takeOrder(order) {
             label = `没有灵魂！退钱！ <img src="${downgradedIcon}" class="revenue-icon"> ¥${price}`; 
             color = "#f1c40f"; // [修改] 红色文字统一为金黄色
             if (typeof playSfx === 'function') playSfx(200, 'sawtooth', 0.1); 
+
+            // [核心新增] 首次失败触发剧情 
+            const hasSeenOmniStory = localStorage.getItem('hasSeenOmniStory'); 
+            if (!hasSeenOmniStory) { 
+                // 标记为已看 
+                localStorage.setItem('hasSeenOmniStory', 'true'); 
+                
+                // 延迟半秒弹出剧情，让玩家先看清红色的“退钱”飘字受点刺激 
+                setTimeout(() => { 
+                    // 暂停游戏计时 
+                    game.isPaused = true; 
+                    if (typeof renderStoryModal === 'function') { 
+                        renderStoryModal(OMNI_STORY, () => { 
+                            // 剧情结束后恢复游戏 
+                            game.isPaused = false; 
+                        }); 
+                    } 
+                }, 500); 
+            }
         } else { 
             label = `就是这个老味道！ ${coinHtml} ¥${price}`; 
             color = "#f1c40f"; 
@@ -7636,7 +8708,7 @@ function renderStation(sid, updateMode = 'full') {
             }
 
             // [核心修复] 生成菜品图标 (dishHtml) - Omni 出餐口特效优化
-            const dishImg = (s.recipe && s.recipe.image) ? s.recipe.image : `assets/dishes/${dishName}.png`;
+            const dishImg = getDishImageSrc(s.recipe || { name: dishName }, (s.recipe && s.recipe.image) ? s.recipe.image : null);
             
             // 基础样式：居中, 64px (覆盖 class 中的 45px)
             let dishStyle = 'width:64px; height:64px; object-fit:contain; pointer-events:auto; transition: all 0.2s ease-out;';
@@ -7813,12 +8885,11 @@ function updateHUD() {
 
 function updateBalanceDisplay() {
     const shopBalance = document.getElementById('shop-balance');
-    const homeBalance = document.getElementById('home-balance');
     if (shopBalance) shopBalance.innerText = `¥${game.coins}`;
-    if (homeBalance) homeBalance.innerText = `¥${game.coins}`;
+    if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard();
 
-    // [新增] 刷新头衔显示
-    if (typeof updatePlayerTitle === 'function') updatePlayerTitle();
+    const upgradedTitle = (typeof updatePlayerTitle === 'function') ? updatePlayerTitle() : false;
+    if (upgradedTitle && typeof showTitleUpgradeModal === 'function') showTitleUpgradeModal(upgradedTitle);
 }
 
 function switchScreen(screenId) {
@@ -7880,6 +8951,7 @@ function switchScreen(screenId) {
         uiState = 'HOME';
         // stopMusic(); // [Fixed] Removed to allow seamless transition (AudioController handles mutex)
         startMusic();
+        updateHomeBackground();
     } else if (screenId === 'game-container') {
         // --- 游戏模式 ---
         if (startScreen) startScreen.style.display = 'none';
@@ -7888,6 +8960,7 @@ function switchScreen(screenId) {
         if (belt) belt.style.display = 'flex';
         
         uiState = 'GAME';
+        if (typeof updateHomeIntroVideo === 'function') updateHomeIntroVideo();
     } else {
         // --- 通用弹窗模式 (如 map-screen) ---
         // 如果目标是一个覆盖层，直接显示它
@@ -7904,6 +8977,7 @@ function switchScreen(screenId) {
                 AudioController.playTheme();
             }
         }
+        if (typeof updateHomeIntroVideo === 'function') updateHomeIntroVideo();
     }
 }
 
@@ -7917,7 +8991,7 @@ function analyzeDish(ingredients) {
     let bestMatch = null;
     let bestMatchCount = 0;
     
-    for (const recipe of RECIPES) {
+    for (const recipe of getActiveRecipes()) {
         // Count how many of this recipe's ingredients are in the pot
         const matchCount = recipe.ingredients.filter(id => ingredients.includes(id)).length;
         
@@ -8347,10 +9421,18 @@ window.changePantryLayer = function(delta) {
     const currentLevel = game.level;
     const allowedIngIds = new Set();
     // [Refactor] 动态解锁逻辑
-    const unlockedRecipes = RECIPES.filter(r => (r.reqLevel || 1) <= currentLevel);
+    const unlockedRecipes = getActiveRecipes().filter(r => (r.reqLevel || 1) <= currentLevel);
     unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngIds.add(i)));
     // 保持 Level 1 基础食材可见 (兼容旧逻辑)
-    if (currentLevel === 1) ['tomato', 'egg', 'onion'].forEach(id => allowedIngIds.add(id));
+    if (currentLevel === 1) {
+        const currentRegion = getCurrentRegionId();
+        if (currentRegion === 'cn') {
+            ['tomato', 'egg', 'onion'].forEach(id => allowedIngIds.add(id));
+        } else if (currentRegion === 'jp') {
+            // [修正] 替换为真正的日本 Day 1 基础食材
+            ['bean_sprout', 'soy_sauce', 'pepper', 'miso'].forEach(id => allowedIngIds.add(id));
+        }
+    }
     
     const allItems = Object.values(INGREDIENTS).filter(ing => allowedIngIds.has(ing.id));
     const maxLayers = Math.ceil(allItems.length / ITEMS_PER_LAYER) || 1; 
@@ -8374,10 +9456,17 @@ function updateInventoryDisplay() {
     const currentLevel = game.level; 
     const allowedIngIds = new Set(); 
     // [Refactor] 动态解锁逻辑
-    const unlockedRecipes = RECIPES.filter(r => (r.reqLevel || 1) <= currentLevel);
+    const unlockedRecipes = getActiveRecipes().filter(r => (r.reqLevel || 1) <= currentLevel);
     unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngIds.add(i))); 
     // 保持 Level 1 基础食材可见 (兼容旧逻辑)
-    if (currentLevel === 1) ['tomato', 'egg', 'onion'].forEach(id => allowedIngIds.add(id)); 
+    if (currentLevel === 1) { 
+        const currentRegion = getCurrentRegionId();
+        if (currentRegion === 'cn') { 
+            ['tomato', 'egg', 'onion'].forEach(id => allowedIngIds.add(id)); 
+        } else if (currentRegion === 'jp') { 
+            ['bean_sprout', 'soy_sauce', 'pepper', 'miso'].forEach(id => allowedIngIds.add(id)); 
+        } 
+    } 
     
     const allItems = Object.values(INGREDIENTS).filter(ing => allowedIngIds.has(ing.id));
     
@@ -8499,7 +9588,7 @@ function updateCursor() {
                 const dishIcon = holdingThing.val.icon || '🥘';
                 // [UI调整] 放大抓取时的菜品图片 (60px -> 80px) 并增加阴影
                 newHTML = `
-                    <img src="assets/dishes/${dishName}.png" alt="${dishName}" 
+                    <img src="${getDishImageSrc(holdingThing.val)}" alt="${dishName}" 
                          style="width:80px; height:80px; object-fit:contain; display:block; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                     <span style="display:none; font-size:60px;">${dishIcon}</span>
@@ -9194,7 +10283,13 @@ window.onload = () => {
     if (btnShop) btnShop.onclick = showShop;
 
     loadGameState();
+    updateLoadingBackground();
+    initAutoIncomeSystem();
     updateBalanceDisplay();
+    updateGaoshengTestEntryVisibility();
+    window.addEventListener('resize', () => {
+        if (typeof updateHomeProfileCard === 'function') requestAnimationFrame(updateHomeProfileCard);
+    });
 
     // [核心修改] 检查是否有新征程参数
     const ngParamsRaw = localStorage.getItem('ng_params');
@@ -9468,7 +10563,7 @@ function showResult(msg) {
         let chartHtml = '<div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">';
         chartHtml += '<div style="font-size:14px; color:#666; margin-bottom:10px;">近7日营收趋势</div>';
         
-        const historySource = Array.isArray(game.history) ? game.history : [];
+        const historySource = getActiveStoreHistory();
         const uniqueHistory = [];
         historySource.forEach(h => {
             if (uniqueHistory.length > 0 && uniqueHistory[uniqueHistory.length - 1].day === h.day) {
@@ -9841,6 +10936,51 @@ function closeLocationSelection() {
     switchScreen('start-screen');
 }
 
+let pendingStoreSwitch = null;
+
+function showStoreSwitchConfirmModal(storeId, displayName) {
+    pendingStoreSwitch = { storeId, displayName };
+    const modal = document.getElementById('store-switch-confirm-modal');
+    const target = document.getElementById('store-switch-target');
+    if (target) target.innerText = displayName || '';
+    if (modal) modal.style.display = 'flex';
+}
+
+function hideStoreSwitchConfirmModal() {
+    const modal = document.getElementById('store-switch-confirm-modal');
+    if (modal) modal.style.display = 'none';
+    pendingStoreSwitch = null;
+}
+
+function executeStoreSwitch() {
+    if (!pendingStoreSwitch || !pendingStoreSwitch.storeId) return;
+    const { storeId } = pendingStoreSwitch;
+    hideStoreSwitchConfirmModal();
+    saveStoreContext();
+    game.activeStoreId = storeId;
+    saveGameState({ skipStoreContextSave: true });
+    location.reload();
+}
+
+function unlockJapanPreview() {
+    const jpStoreId = 'jp:shibuya';
+    if (confirm('预览模式：将直接创建/解锁【日本分店】并切换过去，不消耗金币。\n\n继续？')) {
+        saveStoreContext();
+        if (!game.stores) game.stores = {};
+        if (!game.stores[jpStoreId]) {
+            game.stores[jpStoreId] = {
+                level: 1,
+                inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0 },
+                ingredientAge: {},
+                isNew: true
+            };
+        }
+        game.activeStoreId = jpStoreId;
+        saveGameState({ skipStoreContextSave: true });
+        location.reload();
+    }
+}
+
 let selectedLocationId = 'cn-shenzhen:cbd';
 let selectedRegionId = null;
 let selectedDistrictId = null;
@@ -9850,24 +10990,24 @@ const WORLD_REGIONS = [
     { 
         id: 'cn', 
         country: '中国', 
-        city: '中华美食总店', 
+        city: '总店', 
         flag: '🇨🇳', 
         desc: '梦开始的地方', 
         isStarter: true, // 标记为初始 
         unlocked: true,  // 默认解锁 
         districts: [ 
-            { id: 'main', name: '总店·商业街', unlocked: true, unlockCost: 0, customerProfile: { type: '街坊邻居', spend: '中', patience: '中' } } 
+            { id: 'main', name: '总店', unlocked: true, unlockCost: 0, customerProfile: { type: '街坊邻居', spend: '中', patience: '中' } } 
         ] 
     }, 
     { 
         id: 'jp', 
         country: '日本', 
-        city: '东京分店', 
+        city: '东京', 
         flag: '🇯🇵', 
         desc: '精致快节奏', 
         unlocked: true, 
         districts: [ 
-            { id: 'shibuya', name: '涩谷·十字街头', unlocked: true, unlockCost: 5000, customerProfile: { type: '上班族', spend: '中', patience: '低' } } 
+            { id: 'shibuya', name: '东京', unlocked: true, unlockCost: 5000, customerProfile: { type: '上班族', spend: '中', patience: '低' } } 
         ] 
     }, 
     { 
@@ -9918,44 +11058,55 @@ function renderLocationStep1() {
     const oldBar = document.getElementById('map-bottom-bar'); 
     if (oldBar) oldBar.remove(); 
 
-    // 数据准备 
-    const legacyList = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]'); 
-    const currentParams = JSON.parse(localStorage.getItem('ng_params') || '{}'); 
-    const currentName = currentParams.branchName || "中国 · 总店商业街"; 
-    const currentLocId = currentParams.location ? currentParams.location.split(':')[0] : 'cn'; 
-    
-    // 构建列表 
-    const currentShopObj = { 
-        isCurrent: true, 
-        name: currentName, 
-        regionId: currentLocId, 
-        expansion: game.inventory.expansion || 0, 
-        income: calculateLegacyDailyIncome() 
-    }; 
-    const allShops = [currentShopObj, ...legacyList]; 
-    
-    // --- A. 顶部：我的店铺 --- 
-    // [修改] 移除冗余的 sectionTitle，直接渲染容器 
+    // --- A. 顶部：我的商业版图 (My Empire) --- 
     const empireContainer = document.createElement('div'); 
     empireContainer.className = 'empire-scroll-container'; 
-    // 增加一点顶部间距，避免稍微挡住大标题 
     empireContainer.style.marginTop = "10px"; 
     
-    allShops.forEach(shop => { 
-        const regionInfo = getRegionById(shop.regionId) || WORLD_REGIONS[0]; 
-        const card = document.createElement('div'); 
-        card.className = 'empire-card'; 
-        
-        const isLive = shop.isCurrent; 
-        // [核心修复] 传入 regionId 以匹配新文件名
-        const imgSrc = getShopImage(shop.regionId, shop.expansion || 0);
-        
-        // 计算托管收益
-        const level = (shop.expansion || 0);
-        const managedRevenue = 100 + (50 * level);
+    // [核心重构] 遍历 game.stores 获取真实店铺数据
+    const storeIds = Object.keys(game.stores || {});
+    // 容错：如果列表为空但有 activeStoreId，强制补录
+    if (storeIds.length === 0 && game.activeStoreId) {
+        storeIds.push(game.activeStoreId);
+        // 同时也补全数据结构，防止报错
+        if (!game.stores[game.activeStoreId]) {
+            game.stores[game.activeStoreId] = {
+                level: game.level,
+                inventory: JSON.parse(JSON.stringify(game.inventory)),
+                ingredientAge: JSON.parse(JSON.stringify(game.ingredientAge))
+            };
+        }
+    }
 
+    storeIds.forEach(storeId => { 
+        const storeData = game.stores[storeId];
+        if (!storeData) return;
+
+        // 解析 ID (例如 'cn:main')
+        const parts = storeId.split(':');
+        const rId = parts[0];
+        const dId = parts[1] || 'main';
+
+        const regionInfo = getRegionById(rId) || WORLD_REGIONS[0];
+        // 尝试获取具体商圈名
+        let districtName = "商业街";
+        if (regionInfo && regionInfo.districts) {
+             const dist = regionInfo.districts.find(d => d.id === dId);
+             if (dist) districtName = dist.name;
+        }
+        
+        const isLive = (storeId === game.activeStoreId);
+        // 构造显示名称
+        const displayName = `${regionInfo.country}·${districtName}`;
+
+        // [核心修复] 传入 regionId 以匹配新文件名
+        const expansionLv = (storeData.inventory && storeData.inventory.expansion) ? storeData.inventory.expansion : 0;
+        const imgSrc = getShopImage(rId, expansionLv);
+        
         // 样式逻辑
         let borderColor = isLive ? '#2ecc71' : '#bdc3c7'; 
+        const card = document.createElement('div'); 
+        card.className = 'empire-card'; 
         card.style.borderColor = borderColor; 
         
         let badgeHtml = ''; 
@@ -9964,21 +11115,29 @@ function renderLocationStep1() {
         
         card.innerHTML = ` 
             ${badgeHtml} 
-            <div style="width:60px; height:60px; margin: 10px 0 5px; display:flex; align-items:center; justify-content:center;"> 
-                <img src="${imgSrc}" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 4px rgba(0,0,0,0.4));" onerror="this.style.display='none'"> 
-            </div> 
-            <div class="empire-country-tag"> 
-                <span>${regionInfo.flag}</span> ${regionInfo.country} 
-            </div> 
-            <div class="empire-name">${shop.name}</div> 
-            <div class="empire-info-row"> 
-                ${isLive ? `预计 ¥${shop.income}/日` : `收益 ¥${managedRevenue}/日`} 
-            </div> 
+            <img class="empire-thumb" src="${imgSrc}" alt="${displayName}" loading="lazy" decoding="async" onerror="this.style.display='none'">
+            <div class="empire-card-body">
+                <div class="empire-card-title">${districtName}</div>
+                <div class="empire-card-subtitle">
+                    <span>${regionInfo.flag}</span>
+                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${regionInfo.country}</span>
+                </div>
+                <div class="empire-card-meta">
+                    <span class="empire-meta-chip">DAY ${storeData.level || 1}</span>
+                    <span class="empire-meta-chip ${isLive ? 'is-live' : ''}">${isLive ? '当前经营' : '点击切换'}</span>
+                </div>
+            </div>
         `; 
         
-        card.onclick = isLive ? 
-            () => { playSfx(400,'sine',0.1); closeLocationSelection(); } : 
-            () => { playSfx(400,'sine',0.1); showLegacyManageModal(shop); };
+        card.onclick = () => { 
+            playSfx(400,'sine',0.1); 
+            if (isLive) {
+                closeLocationSelection();
+            } else {
+                // [核心功能] 切换分店逻辑
+                showStoreSwitchConfirmModal(storeId, displayName);
+            }
+        };
             
         empireContainer.appendChild(card); 
     }); 
@@ -10074,9 +11233,88 @@ const INTRO_STORY = [
     } 
 ]; 
 
+// [系统新增] OMNI设备引导剧情：传承与科技 
+const OMNI_STORY = [ 
+    { speaker: "高叔", text: "尝出来了……这排骨的味道，跟你爷爷当年的手艺，差了最关键的一口气啊。", image: "assets/characters/高叔.png", bg: "dark", audio: "assets/voice/intro_gao_5.mp3" }, 
+    { speaker: "我", text: "高叔……我已经把爷爷的菜谱精确到克了，为什么大家还是不买账？", image: "assets/characters/我.png", align: "right", bg: "dark" }, 
+    { speaker: "高叔", text: "老掌柜当年为了能做好这道菜，在后厨熬了大半辈子。你才拿了几天锅铲？做不出那个味道是正常的。", image: "assets/characters/高叔.png", bg: "dark", audio: "assets/voice/intro_gao_6.mp3" }, 
+    { speaker: "我", text: "那我该怎么办？我不想让老客人们失望。", image: "assets/characters/我.png", align: "right", bg: "dark" }, 
+    { speaker: "高叔", text: "人力有穷尽，但科技没有。去配一台 OMNI 机器吧。它能完美锁定油温和下料时机。", image: "assets/characters/高叔.png", bg: "dark", audio: "assets/voice/intro_gao_7.mp3" }, 
+    { speaker: "高叔", text: "只要能把这道招牌菜的味道传下去，用什么锅，又有什么关系呢？", image: "assets/characters/高叔.png", bg: "dark", audio: "assets/voice/intro_gao_8.mp3" } 
+]; 
+
+const STORY_EVENTS = {
+    DAY1_END: [
+        { speaker: "高叔", text: "第一天开业辛苦了。我看你刚才颠勺那满头大汗的样子，太狼狈了。", image: "assets/characters/高叔.png", bg: "dark" },
+        { speaker: "我", text: "高叔，那口老铁锅实在太重了，还容易糊底，我出餐根本快不起来。", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "做餐饮，效率就是生命！去商店里看看，换口好点的【不粘锅】。工具趁手了，你才能接下更多的单子。", image: "assets/characters/高叔.png", bg: "dark" }
+    ],
+    TITLE_T2: [
+        { speaker: "高叔", text: "恭喜啊，街坊们现在都叫你‘星级店长’了，这几天的客流量也越来越多了吧？", image: "assets/characters/高叔.png", bg: "dark" },
+        { speaker: "我", text: "是啊，但我发现每天进的食材很难精准预判，没用完的只能扔掉，太心疼了。", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "这就是你下一步要解决的难题！去商店添置一台【保鲜冷库】吧。把损耗降下来，把食材留到第二天，这才是当家做主的真本事。", image: "assets/characters/高叔.png", bg: "dark" }
+    ],
+    BUY_OMNI: [
+        { speaker: "我", text: "高叔……我买了这台 OMNI 设备，但总觉得用全自动机器炒菜，有点违背老店的传统。", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "违背传统？老掌柜晚年可是偷偷记录了自己的每一次颠勺和火候，就是为了把毕生心血一丝不苟地存进这台设备里！", image: "assets/characters/高叔.png", bg: "dark" },
+        { speaker: "我", text: "所以……这台机器里面，其实装着爷爷一辈子的手艺？", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "没错，这是他留给你最精确的‘数字菜谱’。别被过去的规矩困住，用好它，放开手脚去干吧！", image: "assets/characters/高叔.png", bg: "dark" }
+    ],
+    TITLE_T3: [
+        { speaker: "高叔", text: "看啊，KMES系统正在把订单完美地分发给 OMNI 。没有抱怨，没有糊锅，一切井井有条。感觉怎么样？", image: "assets/characters/高叔.png", bg: "dark" },
+        { speaker: "我", text: "感觉……我好像突然‘失业’了，但店里的流水却比以前任何时候都高。", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "这就对了！你已经不再是个只会在后厨吸油烟的厨子了。既然这家店已经能独立运转，是时候点开【商业版图】，去海外给他们一点小小的震撼了！", image: "assets/characters/高叔.png", bg: "dark" }
+    ],
+    TITLE_T4: [
+        { speaker: "高叔", text: "真不敢相信，咱们的招牌居然真的挂到了海外最繁华的街头！", image: "assets/characters/高叔.png", bg: "dark" },
+        { speaker: "我", text: "去了海外，面对全新的食材和挑剔的当地人，说实话我有点紧张，毕竟又要从零开始了。", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "别怕！到了那边，你确实得重新熟悉一切。但别忘了，你在国内有一家全自动运转的坚实后盾！首店的底蕴和资源会源源不断地支持你，放手去海外拓展吧！", image: "assets/characters/高叔.png", bg: "dark" }
+    ],
+    TITLE_T5: [
+        { speaker: "高叔", text: "刚收到海外分店的报表，那边也全面实现无人托管了？两家店的自动化流水合并在一起，真是壮观！", image: "assets/characters/高叔.png", bg: "dark" },
+        { speaker: "我", text: "科技加上咱们独有的配方，确实是降维打击。当地的传统餐厅都感受到了不小的压力。", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "这说明我们的方向对了！现在，你在全新的市场也站稳了脚跟。别停下，趁热打铁！在【商业版图】里看看最后一块待解锁的顶级地段吧，我们要把招牌挂满全世界！", image: "assets/characters/高叔.png", bg: "dark" }
+    ],
+    TITLE_T6: [
+        { speaker: "高叔", text: "今天，最具权威的美食杂志把我们评为了年度最具影响力的餐饮品牌。", image: "assets/characters/高叔.png", bg: "dark" },
+        { speaker: "我", text: "因为他们发现，即使没有厨师在场，我们的后厨依然能精准呈现完美的味道。", image: "assets/characters/我.png", align: "right", bg: "dark" },
+        { speaker: "高叔", text: "没错，这超越了传统的烹饪，是科技与美食的完美结合。看着现在的你，我总能想起当年的老店。老掌柜当年念叨的‘把招牌做大’，你不仅做到了，而且做成了超越时代的规模。孩子，你创造了奇迹！", image: "assets/characters/高叔.png", bg: "dark" }
+    ]
+};
+
 // [全局音频对象] 确保跨函数/跨调用时也能控制音频停止
 let currentVoiceAudio = null;
 let currentDialogueBgm = null; // [新增] 全局剧情 BGM 对象
+
+window.checkAndTriggerStory = function(storyId, storyData) {
+    try {
+        const storageKey = 'story_' + storyId;
+        const signature = Array.isArray(storyData)
+            ? storyData.map(frame => {
+                const s = frame && typeof frame.speaker === 'string' ? frame.speaker : '';
+                const t = frame && typeof frame.text === 'string' ? frame.text : '';
+                const a = frame && typeof frame.align === 'string' ? frame.align : '';
+                const b = frame && typeof frame.bg === 'string' ? frame.bg : '';
+                const i = frame && typeof frame.image === 'string' ? frame.image : '';
+                return [s, t, a, b, i].join('|');
+            }).join('||')
+            : '';
+        const stored = localStorage.getItem(storageKey);
+        if (stored !== signature && storyData) {
+            localStorage.setItem(storageKey, signature || 'v1');
+            setTimeout(() => {
+                if (game) game.isPaused = true;
+                if (typeof renderStoryModal === 'function') {
+                    renderStoryModal(storyData, () => {
+                        if (game) game.isPaused = false;
+                    });
+                } else if (game) {
+                    game.isPaused = false;
+                }
+            }, 800);
+        }
+    } catch (_) {}
+};
 
 function renderStoryModal(storyData, onComplete) { 
     let currentIndex = 0; 
@@ -10148,6 +11386,12 @@ function renderStoryModal(storyData, onComplete) {
                 currentDialogueBgm.currentTime = 0;
                 currentDialogueBgm = null;
             }
+
+            // [修复] 恢复之前的 BGM (如果不为空)
+            if (typeof AudioController !== 'undefined' && AudioController.currentBgm) {
+                AudioController.play(AudioController.currentBgm);
+            }
+
             overlay.remove(); 
             if (onComplete) onComplete(); 
             return; 
@@ -10174,6 +11418,9 @@ function renderStoryModal(storyData, onComplete) {
         // 背景切换 
         if (frame.reward) { 
             overlay.style.background = "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url('assets/bg/家庭厨房.jpeg') center/cover no-repeat"; 
+        } else if (frame.bg === 'dark') { 
+            // [核心修改] 纯深色半透明蒙层，透出背后的游戏后厨画面 
+            overlay.style.background = "rgba(0, 0, 0, 0.75)"; 
         } else { 
             overlay.style.background = "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('assets/bg/门店后厨.jpg') center/cover no-repeat"; 
         } 
@@ -10237,24 +11484,52 @@ function renderStoryModal(storyData, onComplete) {
             }; 
         } 
     
-    // [核心修改] 放大整体布局、立绘及气泡，将点击提示放入气泡内部 
-    overlay.innerHTML = ` 
+        // [核心修改] 动态判定排版方向与立绘 
+        const isRight = frame.align === 'right' || frame.speaker === '我'; 
+        const isGao = frame.speaker === '高叔';
+        const imgPath = frame.image || (frame.speaker === '我' ? 'assets/characters/我.png' : 'assets/characters/高叔.png'); 
+        
+        // [修复] 立绘变换逻辑：
+        // 1. “我”在右侧时镜像翻转 (scaleX(-1))
+        // 2. “高叔”在左侧时向左平移 (translateX(-60%)) 以避免遮挡文字
+        let imgTransform = 'translateX(-50%)';
+        if (frame.speaker === '我' && isRight) imgTransform += ' scaleX(-1)';
+        if (isGao && !isRight) imgTransform = 'translateX(-60%)';
+
+        // [优化] 气泡框样式逻辑
+        // 高叔气泡特殊处理：左边距负更多(拉长气泡)，左内边距更大(避让立绘)
+        let bubblePadding, bubbleMargin;
+        if (isRight) {
+            bubblePadding = '30px 120px 50px 40px';
+            bubbleMargin = 'margin-right: -70px';
+        } else {
+            if (isGao) {
+                bubblePadding = '30px 40px 50px 160px'; // 增加左内边距避让
+                bubbleMargin = 'margin-left: -100px';   // 增加负边距拉长气泡
+            } else {
+                bubblePadding = '30px 40px 50px 120px';
+                bubbleMargin = 'margin-left: -70px';
+            }
+        }
+
+        overlay.innerHTML = ` 
         <div style="width:95%; max-width:800px; margin:0 auto; padding:20px; position:relative; cursor:pointer; height:100%; display:flex; flex-direction:column; justify-content:flex-end;" onclick="advanceStory(event)"> 
-            <div class="chat-row left" style="display:flex; margin-bottom: 0; align-items: flex-end;"> 
+            
+            <div class="chat-row" style="display:flex; flex-direction: ${isRight ? 'row-reverse' : 'row'}; margin-bottom: 0; align-items: flex-end;"> 
                 
                 <div class="chat-portrait-box" style="width: 160px; height: 220px; flex-shrink: 0; position: relative; z-index: 10;"> 
-                    <img src="${frame.image}" 
+                    <img src="${imgPath}" 
                          class="chat-portrait-img" 
-                         style="display:block; width: 320px; height: 380px; max-width:none; position:absolute; bottom:0; left:50%; transform:translateX(-50%); object-fit:contain; object-position:bottom center;" 
+                         style="display:block; width: 320px; height: 380px; max-width:none; position:absolute; bottom:0; left:50%; transform:${imgTransform}; object-fit:contain; object-position:bottom center;" 
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"> 
-                    <div class="chat-portrait-placeholder" style="background:#e67e22; display:none; width:80px; height:80px; font-size:40px; line-height:80px; border-radius:10px;">高</div> 
+                    <div class="chat-portrait-placeholder" style="background:#e67e22; display:none; width:80px; height:80px; font-size:40px; line-height:80px; border-radius:10px; color:#fff; text-align:center;">${frame.speaker.charAt(0)}</div> 
                 </div> 
                 
-                <div class="chat-bubble" style="position:relative; flex-grow: 1; padding: 30px 40px 50px 120px !important; margin-left: -70px; z-index: 5; font-size: 18px; line-height: 1.6; min-height: 120px;"> 
-                    <span style="font-weight:bold; color:#d35400; display:block; margin-bottom:12px; font-size:22px;">${frame.speaker}</span> 
+                <div class="chat-bubble" style="position:relative; flex-grow: 1; padding: ${bubblePadding} !important; ${bubbleMargin}; z-index: 5; font-size: 18px; line-height: 1.6; min-height: 120px;"> 
+                    <span style="font-weight:bold; color:#d35400; display:block; margin-bottom:12px; font-size:22px; text-align: ${isRight ? 'right' : 'left'};">${frame.speaker}</span> 
                     ${frame.text} 
                     
-                    <div style="position:absolute; right:25px; bottom:15px; font-size:14px; color:#e67e22; font-weight:bold; animation:blink 1.2s infinite;"> 
+                    <div style="position:absolute; ${isRight ? 'left:25px' : 'right:25px'}; bottom:15px; font-size:14px; color:#e67e22; font-weight:bold; animation:blink 1.2s infinite;"> 
                         (点击屏幕继续) ▶ 
                     </div> 
                 </div> 
@@ -10298,10 +11573,8 @@ function renderLocationStep2(regionId) {
     selectedRegionId = regionId;
     selectedDistrictId = null;
 
-    // [核心修改] 获取当前所在的确切商圈 ID (如 'cn:main')
-    const currentParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
-    // 默认为 cn:main (因为第一关没有 ng_params 时就是在这里)
-    const myCurrentLocationId = currentParams.location || 'cn:main';
+    // [核心修改] 使用新的 store 上下文判断
+    const myCurrentLocationId = game.activeStoreId || 'cn:main';
 
     // Update Header
     document.getElementById('dp-flag').textContent = region.flag;
@@ -10325,6 +11598,9 @@ function renderLocationStep2(regionId) {
         
         const thisLocId = region.id + ':' + district.id;
         const isMyCurrentSpot = (thisLocId === myCurrentLocationId);
+        // [新增] 是否已拥有该店铺（即是否在 game.stores 中）
+        const isOwned = (game.stores && game.stores[thisLocId]);
+        
         const isAffordable = game.coins >= district.unlockCost;
         const isUnlocked = district.unlocked && region.unlocked;
         
@@ -10333,8 +11609,10 @@ function renderLocationStep2(regionId) {
         if (!isUnlocked) {
             tagHtml = '<span class="di-tag tag-locked">未开放</span>';
         } else if (isMyCurrentSpot) {
-            // [核心修改] 显示“已进驻”
-            tagHtml = '<span class="di-tag" style="background:#2ecc71; color:white;">✅ 已进驻</span>';
+            // [核心修改] 显示“营业中”
+            tagHtml = '<span class="di-tag" style="background:#2ecc71; color:white;">✅ 营业中</span>';
+        } else if (isOwned) {
+             tagHtml = '<span class="di-tag" style="background:#3498db; color:white;">🏠 已拥有</span>';
         } else if (!isAffordable) {
             tagHtml = '<span class="di-tag tag-expensive">资金不足</span>';
         } else {
@@ -10372,6 +11650,12 @@ function renderLocationStep2(regionId) {
                     confirmBtn.disabled = true;
                     confirmBtn.style.background = "#bdc3c7";
                     confirmBtn.style.cursor = "default";
+                } else if (isOwned) {
+                    // 已拥有但非当前 -> 允许切换
+                    confirmBtn.innerText = "切换至该分店";
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = "#3498db"; // 蓝色
+                    confirmBtn.style.cursor = "pointer";
                 } else if (!isAffordable) {
                     confirmBtn.innerText = "资金不足";
                     confirmBtn.disabled = true;
@@ -10388,6 +11672,9 @@ function renderLocationStep2(regionId) {
             if (isMyCurrentSpot) {
                 item.style.border = "1px solid #2ecc71";
                 item.style.background = "rgba(46, 204, 113, 0.1)";
+            } else if (isOwned) {
+                item.style.border = "1px solid #3498db";
+                item.style.background = "rgba(52, 152, 219, 0.1)";
             } else if (!isAffordable) {
                 item.style.opacity = '0.7';
             }
@@ -10432,41 +11719,45 @@ function confirmNewJourney() {
     const district = region.districts.find(d => d.id === selectedDistrictId);
     if (!district) return;
     
+    // 构造标准化的 Store ID (例如 'cn:main')
+    const newStoreId = selectedRegionId + ':' + selectedDistrictId;
+    
+    // 检查是否已经拥有该店铺
+    if (game.stores && game.stores[newStoreId]) {
+        // [路径A] 已拥有店铺：直接切换
+        showStoreSwitchConfirmModal(newStoreId, `${region.country} · ${district.name}`);
+        return;
+    }
+
+    // [路径B] 新店铺：需要购买/解锁
     if (game.coins < district.unlockCost) { showToast('资金不足', 1500); return; }
 
     const newBranchName = region.country + ' · ' + district.name;
     const remainingCoins = game.coins - district.unlockCost;
 
-    const currentParams = JSON.parse(localStorage.getItem('ng_params') || '{}');
-    const currentShopName = currentParams.branchName || "中国 · 总店商业街";
-    // [核心修复] 获取当前 regionId (例如 'cn')
-    const currentLoc = currentParams.location || 'cn:main';
-    const currentRegionId = currentLoc.split(':')[0];
-
-    const shopToArchive = {
-        id: Date.now().toString(),
-        name: currentShopName,
-        regionId: currentRegionId, // [关键] 保存国家ID
-        baseIncome: calculateLegacyDailyIncome(),
-        accumulatedCash: 0,
-        health: 100,
-        expansion: game.inventory.expansion || 0
-    };
-
-    let legacyList = JSON.parse(localStorage.getItem('legacy_shops_list') || '[]');
-    legacyList.push(shopToArchive);
-    localStorage.setItem('legacy_shops_list', JSON.stringify(legacyList));
-
-    if (confirm(`确认花费 ¥${district.unlockCost} 进驻 [${newBranchName}]？\n\n剩余资金 ¥${remainingCoins} 将带入新店。\n当前店铺 [${currentShopName}] 将转为托管模式。`)) {
-        GameStateManager.resetAllData(true);
+    if (confirm(`确认花费 ¥${district.unlockCost} 进驻 [${newBranchName}]？\n\n剩余资金 ¥${remainingCoins} 将带入新店。\n当前店铺将转为托管模式。`)) {
+        // 1. 扣款 (全局资产)
+        game.coins -= district.unlockCost;
         
-        const newGameParams = {
-            location: selectedLocationId,
-            branchName: newBranchName,
-            startCoins: remainingCoins,
-            isNGPlus: true
+        // 2. 保存当前店铺现场
+        saveStoreContext();
+        
+        // 3. 初始化新店铺数据 (白板开局)
+        if (!game.stores) game.stores = {};
+        game.stores[newStoreId] = {
+            level: 1,
+            inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0 },
+            ingredientAge: {},
+            history: [],
+            // 可以添加一些新店特有的初始标记
+            isNew: true
         };
-        localStorage.setItem('ng_params', JSON.stringify(newGameParams));
+        
+        // 4. 切换指针
+        game.activeStoreId = newStoreId;
+        
+        // 5. 存盘并重载
+        saveGameState({ skipStoreContextSave: true });
         location.reload();
     }
 }
@@ -10480,6 +11771,20 @@ function settleDay(reason = "营业结束") {
     game.isLive = false;
     game.dayEnded = true;
     Object.values(stations).forEach(s => { if (s.timer) { clearInterval(s.timer); s.timer = null; } });
+    if (typeof stations === 'object') {
+        Object.values(stations).forEach(s => {
+            if (s.audio) {
+                s.audio.pause();
+                s.audio = null;
+            }
+        });
+    }
+    if (typeof stopKMES === 'function') stopKMES();
+    game.isPaused = false;
+    const pauseOverlay = document.getElementById('pause-overlay');
+    if (pauseOverlay) pauseOverlay.style.display = 'none';
+    const trashCard = document.getElementById('global-trash-card');
+    if (trashCard) trashCard.style.display = 'none';
 
     const safeDailyDishCount = Number.isFinite(game.dailyDishCount) ? game.dailyDishCount : 0;
     const safeDailyQualitySum = Number.isFinite(game.dailyQualitySum) ? game.dailyQualitySum : 0;
@@ -10488,9 +11793,16 @@ function settleDay(reason = "营业结束") {
     const servedRate = game.total > 0 ? (game.served / game.total) : 0;
     localStorage.setItem('yesterdayRate', (servedRate * 100).toFixed(1));
 
-    game.history.push({ day: game.level, revenue: game.dailyRevenue, rate: ratePercent });
-    updateBalanceDisplay();
+    pushActiveStoreHistoryEntry({ day: game.level, revenue: game.dailyRevenue, rate: ratePercent });
     saveGameState();
+
+    const upgradedTitle = (typeof updatePlayerTitle === 'function') ? updatePlayerTitle() : false;
+    if (upgradedTitle && typeof showTitleUpgradeModal === 'function') {
+        showTitleUpgradeModal(upgradedTitle);
+        return;
+    }
+
+    updateBalanceDisplay();
 
     const rateHtml = `<span style="font-weight:900; color:${dailyRate >= 0.8 ? '#2ecc71' : '#f39c12'}">${ratePercent}%</span>`;
 
@@ -10503,6 +11815,13 @@ function settleDay(reason = "营业结束") {
 
     // [核心修复] 无论是否有钱，统一显示标准结算弹窗 
     // 不再跳转到 showAchievementDetails，避免逻辑断层 
+    const currentStore = (game && game.stores) ? game.stores[game.activeStoreId || 'cn:main'] : null;
+    const storeDay = currentStore && typeof currentStore.level === 'number' && Number.isFinite(currentStore.level) ? currentStore.level : game.level;
+    if (storeDay === 1) {
+        if (typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
+            checkAndTriggerStory('day1_end', STORY_EVENTS.DAY1_END);
+        }
+    }
     showResult(msg);
 }
 
@@ -10732,10 +12051,97 @@ function runPrepLogicTests() {
         const ok = Math.abs(a - b) < 1e-6;
         console[ok ? 'log' : 'error'](`[TEST] ${name}: ${ok ? 'PASS' : 'FAIL'} (${a} vs ${b})`);
     }
+    function assertOk(name, ok, extra = '') {
+        console[ok ? 'log' : 'error'](`[TEST] ${name}: ${ok ? 'PASS' : 'FAIL'}${extra ? ' ' + extra : ''}`);
+    }
+    function parseScaleFromTransform(transform) {
+        if (!transform || transform === 'none') return 1;
+        const raw = String(transform).trim();
+        if (raw.startsWith('matrix3d(')) {
+            const vals = raw.slice(9, -1).split(',').map(v => parseFloat(v.trim())).filter(v => !Number.isNaN(v));
+            const sx = vals[0];
+            const sy = vals[5];
+            if (typeof sx === 'number' && typeof sy === 'number') return (sx + sy) / 2;
+            return 1;
+        }
+        if (raw.startsWith('matrix(')) {
+            const vals = raw.slice(7, -1).split(',').map(v => parseFloat(v.trim())).filter(v => !Number.isNaN(v));
+            const sx = vals[0];
+            const sy = vals[3];
+            if (typeof sx === 'number' && typeof sy === 'number') return (sx + sy) / 2;
+            return 1;
+        }
+        return 1;
+    }
     assertEq('no penalty (10/10)', computePrepPenaltyPercent(10, 10), 0);
     assertEq('10% over -> 5% penalty', computePrepPenaltyPercent(10, 11), 5);
     assertEq('20% over -> 10% penalty', computePrepPenaltyPercent(10, 12), 10);
     assertEq('100% over capped to 40%', computePrepPenaltyPercent(10, 20), 40);
+
+    try {
+        const sandbox = document.createElement('div');
+        sandbox.style.cssText = 'position:fixed; left:-9999px; top:-9999px; width:900px; height:420px; display:flex; gap:16px; align-items:flex-start;';
+
+        const cardA = document.createElement('div');
+        cardA.className = 'empire-card';
+        cardA.innerHTML = `
+            <div class="card-badge badge-live">营业中</div>
+            <img class="empire-thumb" src="assets/equipment/kitchen_cn_lv0.png" alt="Test CN" />
+            <div class="empire-card-body">
+                <div class="empire-card-title">测试卡片A</div>
+                <div class="empire-card-subtitle"><span>🇨🇳</span><span>中国</span></div>
+                <div class="empire-card-meta"><span class="empire-meta-chip">DAY 1</span></div>
+            </div>
+        `;
+
+        const cardB = document.createElement('div');
+        cardB.className = 'empire-card';
+        cardB.innerHTML = `
+            <div class="card-badge" style="background:#34495e;">托管中</div>
+            <img class="empire-thumb" src="assets/equipment/kitchen_jp_lv0.png" alt="Test JP" />
+            <div class="empire-card-body">
+                <div class="empire-card-title">测试卡片B</div>
+                <div class="empire-card-subtitle"><span>🇯🇵</span><span>日本</span></div>
+                <div class="empire-card-meta"><span class="empire-meta-chip">DAY 1</span></div>
+            </div>
+        `;
+
+        sandbox.appendChild(cardA);
+        sandbox.appendChild(cardB);
+        document.body.appendChild(sandbox);
+
+        const bLeftBefore = cardB.getBoundingClientRect().left;
+
+        cardA.classList.add('thumb-hover');
+        void cardA.offsetWidth;
+
+        const thumb = cardA.querySelector('.empire-thumb');
+        const thumbStyle = window.getComputedStyle(thumb);
+        const cardAStyle = window.getComputedStyle(cardA);
+        const cardBStyle = window.getComputedStyle(cardB);
+
+        const scale = parseScaleFromTransform(thumbStyle.transform);
+        assertOk('empire thumb scale in [1.2, 1.3]', scale >= 1.2 && scale <= 1.3, `(scale=${scale})`);
+
+        const dur = thumbStyle.transitionDuration || '';
+        const durSeconds = dur.includes('ms') ? (parseFloat(dur) / 1000) : parseFloat(dur);
+        assertOk('empire thumb transition duration 0.3s', Math.abs(durSeconds - 0.3) < 0.02, `(duration=${dur})`);
+
+        const timing = thumbStyle.transitionTimingFunction || '';
+        const timingOk = timing.includes('ease-out') || timing.includes('cubic-bezier');
+        assertOk('empire thumb transition ease-out', timingOk, `(timing=${timing})`);
+
+        const zA = parseInt(cardAStyle.zIndex, 10);
+        const zB = parseInt(cardBStyle.zIndex, 10);
+        assertOk('hovered card z-index higher than neighbor', Number.isFinite(zA) && Number.isFinite(zB) && zA > zB, `(zA=${cardAStyle.zIndex}, zB=${cardBStyle.zIndex})`);
+
+        const bLeftAfter = cardB.getBoundingClientRect().left;
+        assertOk('neighbor layout unchanged by hover', Math.abs(bLeftAfter - bLeftBefore) < 0.5, `(before=${bLeftBefore}, after=${bLeftAfter})`);
+
+        sandbox.remove();
+    } catch (e) {
+        console.error('[TEST] empire thumb hover tests: FAIL', e);
+    }
 }
 
 // 绑定事件
@@ -11120,7 +12526,74 @@ function showPrepModal() {
                 <img src="assets/ui/开门营业.png" onclick="playButtonSound(); window.confirmPrep()" style="height: 80px; width: auto; cursor: pointer; transition: transform 0.2s; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
             </div>
         </div>
+
+        <!-- [新增] 破产援助遮罩层 -->
+        <div id="bankruptcy-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:20001; background:rgba(0,0,0,0.85); flex-direction:column; justify-content:flex-end; padding-bottom:15%;">
+             <div style="width:95%; max-width:800px; margin:0 auto; padding:20px; position:relative; cursor:pointer; height:100%; display:flex; flex-direction:column; justify-content:flex-end;">
+                
+                <div class="chat-row" style="display:flex; flex-direction: row; margin-bottom: 0; align-items: flex-end;">
+                    
+                    <!-- 高叔立绘 -->
+                    <div class="chat-portrait-box" style="width: 160px; height: 220px; flex-shrink: 0; position: relative; z-index: 10;">
+                        <img src="assets/characters/高叔.png" 
+                             class="chat-portrait-img" 
+                             style="display:block; width: 320px; height: 380px; max-width:none; position:absolute; bottom:0; left:50%; transform:translateX(-60%); object-fit:contain; object-position:bottom center;">
+                    </div>
+                    
+                    <!-- 气泡框 -->
+                    <div class="chat-bubble" style="position:relative; flex-grow: 1; padding: 30px 40px 50px 160px !important; margin-left: -100px; z-index: 5; font-size: 18px; line-height: 1.6; min-height: 120px; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                        <div class="speaker-name" style="color: #d35400; font-weight: 900; margin-bottom: 8px; font-size: 20px;">高叔</div>
+                        <div class="dialogue-text" style="color: #2c3e50;">
+                            丫头，做生意不能断了现金流！<br>
+                            这 <span style="color:#e74c3c; font-weight:bold;">¥200</span> 和应急食材你先拿着！<br>
+                            <span style="font-size:14px; color:#7f8c8d; margin-top:5px; display:block;">(高叔向你塞了一个红包和一袋番茄鸡蛋...)</span>
+                        </div>
+                        
+                        <!-- 确认按钮 -->
+                        <button onclick="acceptBankruptcyAid()" style="margin-top:15px; float:right; background:linear-gradient(135deg, #f1c40f, #f39c12); border:none; padding:10px 30px; border-radius:30px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow:0 4px 10px rgba(243, 156, 18, 0.4); color:#fff; transition: transform 0.1s;">谢谢高叔！</button>
+                        <div style="clear:both;"></div>
+                    </div>
+
+                </div>
+             </div>
+        </div>
     `;
+    
+    // [新增] 破产援助逻辑函数
+    window.triggerBankruptcyAid = function() {
+        const overlay = document.getElementById('bankruptcy-overlay');
+        if (overlay) {
+             overlay.style.display = 'flex';
+             if (typeof playSfx === 'function') playSfx(800, 'sine', 0.1);
+        }
+    };
+    
+    window.acceptBankruptcyAid = function() {
+        const overlay = document.getElementById('bankruptcy-overlay');
+        if (overlay) overlay.style.display = 'none';
+        
+        // 1. 发放援助
+        window.tempCoins += 200;
+        window.tempInventory['tomato'] = (window.tempInventory['tomato'] || 0) + 10;
+        window.tempInventory['egg'] = (window.tempInventory['egg'] || 0) + 10;
+        
+        // 2. 更新全局状态 (防止刷新丢失)
+        game.coins = window.tempCoins;
+        if (!game.inventory) game.inventory = {};
+        // 注意：这里只更新 temp，最终确认时会写入 game.inventory。
+        // 但为了保险起见，如果玩家在这里刷新页面，我们希望援助已经生效吗？
+        // 按照一般逻辑，确认收下后应该立即生效。
+        
+        // 3. 刷新 UI
+        const walletEl = document.getElementById('prep-wallet-display');
+        if (walletEl) walletEl.innerText = '¥' + window.tempCoins;
+        
+        // 重新渲染 Grid 以更新库存显示和按钮状态
+        renderPrepGrid();
+        
+        if (typeof showToast === 'function') showToast("已收到高叔的资金援助！");
+        if (typeof playSfx === 'function') playSfx(1000, 'sine', 0.2);
+    };
     
     // [修复] 动态加载背景图片，强制刷新缓存并监控状态
     const bgEl = modal.querySelector('.prep-bg');
@@ -11201,7 +12674,7 @@ function renderPrepUI() {
     const currentLevel = game.level; 
     const allowedIngredients = new Set(); 
     // [Refactor] 动态解锁逻辑
-    const unlockedRecipes = RECIPES.filter(r => (r.reqLevel || 1) <= currentLevel); 
+    const unlockedRecipes = getActiveRecipes().filter(r => (r.reqLevel || 1) <= currentLevel); 
     // 提取食材 ID 
     unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngredients.add(i))); 
 
@@ -11301,8 +12774,17 @@ function renderPrepUI() {
                             
                             if (typeof playSfx === 'function') playSfx(400 + (qty*20), 'sine', 0.1); 
                         } else { 
-                            if (typeof showToast === 'function') showToast("金币不足！"); 
-                            if (typeof playSfx === 'function') playSfx(150, 'sawtooth', 0.2);
+                            // [核心优化] 破产检测拦截
+                            const tomatoCount = window.tempInventory['tomato'] || 0; 
+                            const eggCount = window.tempInventory['egg'] || 0; 
+                            
+                            // 触发条件：钱不够买当前物品 + 总资产极低 + 基础食材不足
+                            if (window.tempCoins < 20 && tomatoCount < 2 && eggCount < 2) {
+                                triggerBankruptcyAid();
+                            } else {
+                                if (typeof showToast === 'function') showToast("金币不足！"); 
+                                if (typeof playSfx === 'function') playSfx(150, 'sawtooth', 0.2);
+                            }
                             return; // 终止后续刷新
                         }
                     } else {
@@ -11828,7 +13310,7 @@ function kmesAutoPrep() {
             
             if (current < countNeeded) {
                 // 候选菜品
-                const recipe = RECIPES.find(r => r.name === name);
+                    const recipe = getActiveRecipes().find(r => r.name === name);
                 if (!recipe) continue;
 
                 // 检查库存

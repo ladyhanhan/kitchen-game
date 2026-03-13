@@ -80,3 +80,20 @@ triggerFeedback(
 - **Positioning**: Uses `getBoundingClientRect()` to ensure correct placement relative to the order card regardless of screen size or resolution.
 - **Responsiveness**: The fixed positioning combined with viewport-relative coordinates ensures the text appears attached to the UI element even if the layout shifts slightly on different devices.
 - **Icon Scaling**: Icons are sized via CSS (`height: 32px`) to provide clear visual feedback, ensuring consistent alignment across resolutions.
+
+## 5. Home Header Components (Wallet Baseline)
+This project uses the **wallet button** as the baseline for the home header component style. The player title badge is normalized to the same visual system to avoid divergent UI patterns.
+
+### 5.1 Component: `.icon-btn` (Baseline)
+- **Layout**: Vertical stack, icon above label/value
+- **Icon**: `55px × 55px`, `object-fit: contain`, drop-shadow
+- **Text**: `14px`, `600`, white with text-shadow
+- **States**:
+  - `:hover` on icon: translateY + scale, brighten shadow
+  - `:active` on icon: pressed scale
+
+### 5.2 Component: Player Title Badge (Normalized)
+- **Markup**: `#player-title-badge` uses `class="icon-btn title-badge"`
+- **Positioning**: `title-badge` only provides top-left absolute positioning (no custom background/border)
+- **Icon Asset**: `assets/icons/icon_头衔.png` (same sizing rules as wallet icon via `.icon-btn img`)
+- **Disabled**: `aria-disabled="true"` reduces opacity and disables pointer events
