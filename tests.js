@@ -433,6 +433,14 @@ const Tests = {
             console.error(`FAIL: progress fill ratio unexpected (ratio=${ratio}).`);
         }
 
+        if (node2) {
+            const cx = (r) => r.left + r.width / 2;
+            const endX = fr.left + fr.width;
+            const dx = Math.abs(endX - cx(node2.getBoundingClientRect()));
+            if (dx < 2) console.log("PASS: progress fill end aligned to node 2 center.");
+            else console.error("FAIL: progress fill end not aligned to node 2 center (dx=" + dx + ").");
+        }
+
         const activeNodes = document.querySelectorAll('#title-progress-nodes .tp-node.is-active').length;
         if (activeNodes === 2) console.log("PASS: 2 nodes active at level 2.");
         else console.error("FAIL: active node count expected 2, got " + activeNodes);
@@ -450,8 +458,122 @@ const Tests = {
             else console.error("FAIL: label not centered under node 6 (dx=" + dr + ").");
         }
 
+        if (node6) {
+            const tr6 = track.getBoundingClientRect();
+            const fr6 = fill.getBoundingClientRect();
+            const cx = (r) => r.left + r.width / 2;
+            const endX = fr6.left + fr6.width;
+            const dx = Math.abs(endX - cx(node6.getBoundingClientRect()));
+            if (dx < 2) console.log("PASS: progress fill end aligned to node 6 center.");
+            else console.error("FAIL: progress fill end not aligned to node 6 center (dx=" + dx + ").");
+            if (Math.abs(fr6.width - tr6.width) < 2) console.log("PASS: progress fill fully covers track at level 6.");
+            else console.error("FAIL: progress fill does not fully cover track at level 6.");
+        }
+
         game.playerProfile.titleLevel = prev;
         updateHomeProfileCard();
         console.log("Home Profile Card Test Completed.");
+    },
+
+    testKMESInitDefaultClosed: function() {
+        console.log("Running KMES Init Default Closed Test...");
+        if (!window.game) { console.error("FAIL: game object not found."); return; }
+        if (typeof initLevel !== 'function') { console.error("FAIL: initLevel missing."); return; }
+
+        const assertEq = (name, a, b) => {
+            if (a === b) console.log("PASS: " + name);
+            else console.error(`FAIL: ${name}. Expected ${b}, got ${a}`);
+        };
+
+        const backup = {
+            kmesActive: game.kmesActive,
+            hasOpenedPantry: game.hasOpenedPantry,
+            level: game.level
+        };
+
+        const originals = {
+            updatePantryStyle: window.updatePantryStyle,
+            resetStations: window.resetStations,
+            resetHand: window.resetHand,
+            resetDailyStats: window.resetDailyStats,
+            generateDailyOrders: window.generateDailyOrders,
+            updateHUD: window.updateHUD,
+            updateBalanceDisplay: window.updateBalanceDisplay,
+            updateKMESCard: window.updateKMESCard,
+            startKMES: window.startKMES
+        };
+
+        try {
+            window.updatePantryStyle = () => {};
+            window.resetStations = () => {};
+            window.resetHand = () => {};
+            window.resetDailyStats = () => {};
+            window.generateDailyOrders = () => true;
+            window.updateHUD = () => {};
+            window.updateBalanceDisplay = () => {};
+            window.updateKMESCard = () => {};
+            window.startKMES = () => {};
+
+            game.level = (typeof game.level === 'number' && Number.isFinite(game.level)) ? game.level : 1;
+
+            game.kmesActive = true;
+            game.hasOpenedPantry = true;
+            initLevel(false);
+            assertEq("kmesActive forced OFF when previous ON", game.kmesActive, false);
+            assertEq("hasOpenedPantry reset to false", game.hasOpenedPantry, false);
+
+            game.kmesActive = false;
+            game.hasOpenedPantry = true;
+            initLevel(false);
+            assertEq("kmesActive stays OFF when previous OFF", game.kmesActive, false);
+            assertEq("hasOpenedPantry reset to false (again)", game.hasOpenedPantry, false);
+        } catch (e) {
+            console.error("FAIL: KMES Init Default Closed Test crashed:", e);
+        } finally {
+            game.kmesActive = backup.kmesActive;
+            game.hasOpenedPantry = backup.hasOpenedPantry;
+            game.level = backup.level;
+
+            window.updatePantryStyle = originals.updatePantryStyle;
+            window.resetStations = originals.resetStations;
+            window.resetHand = originals.resetHand;
+            window.resetDailyStats = originals.resetDailyStats;
+            window.generateDailyOrders = originals.generateDailyOrders;
+            window.updateHUD = originals.updateHUD;
+            window.updateBalanceDisplay = originals.updateBalanceDisplay;
+            window.updateKMESCard = originals.updateKMESCard;
+            window.startKMES = originals.startKMES;
+        }
+
+        console.log("KMES Init Default Closed Test Completed.");
+    },
+
+    testTitleT5RequiresAutomatedDay: function() {
+        console.log("Running Title T5 Requires Automated Day Test...");
+        if (!window.game) { console.error("FAIL: game object not found."); return; }
+        if (typeof computeGlobalTitleLevel !== 'function') { console.error("FAIL: computeGlobalTitleLevel missing."); return; }
+
+        const backup = JSON.stringify(game.stores || {});
+
+        const assertEq = (name, a, b) => {
+            if (a === b) console.log("PASS: " + name);
+            else console.error(`FAIL: ${name}. Expected ${b}, got ${a}`);
+        };
+
+        try {
+            game.stores = {
+                'cn:main': { level: 3, inventory: { pot: 3, kmes: 3, expansion: 0 }, ingredientAge: {}, history: [], automatedDaysPlayed: 999 },
+                'jp:shibuya': { level: 1, inventory: { pot: 3, kmes: 3, expansion: 0 }, ingredientAge: {}, history: [] }
+            };
+
+            assertEq("T4 when JP not completed automated day", computeGlobalTitleLevel(), 4);
+            game.stores['jp:shibuya'].automatedDaysPlayed = 1;
+            assertEq("T5 when JP completed automated day", computeGlobalTitleLevel(), 5);
+        } catch (e) {
+            console.error("FAIL: Title T5 Requires Automated Day Test crashed:", e);
+        } finally {
+            try { game.stores = JSON.parse(backup || "{}"); } catch (_) {}
+        }
+        console.log("Title T5 Requires Automated Day Test Completed.");
     }
 };
