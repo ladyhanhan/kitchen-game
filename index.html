@@ -140,6 +140,7 @@
         .toggle-btn:hover, .toggle:hover { transform: translateY(-1px); box-shadow: 0 5px 0 #bdbdbd; }
         
         #pause-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 3100; backdrop-filter: blur(2px); }
+        #pause-overlay .modal { transform-origin: center; animation: pausePopupBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
         #hud { 
             height: auto; 
@@ -415,6 +416,83 @@
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(255, 82, 82, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); }
+}
+
+@keyframes pausePopupBounce {
+    0% { transform: scale(0.92); }
+    60% { transform: scale(1.06); }
+    85% { transform: scale(0.99); }
+    100% { transform: scale(1.02); }
+}
+
+/* [系统重构] 精准定位气泡基础样式 */
+.tutorial-bubble {
+    position: absolute;
+    background: rgba(44, 62, 80, 0.95);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.5);
+    border: 2px solid #f39c12;
+    pointer-events: none;
+    z-index: 99999;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+.tutorial-bubble::after {
+    content: ''; position: absolute;
+}
+
+/* 右侧气泡 (在目标右边，箭头朝左，左右跳动) */
+.tutorial-bubble.pos-right {
+    animation: bounceLeftRight 1.5s infinite;
+}
+.tutorial-bubble.pos-right::after {
+    left: -8px; top: 50%; transform: translateY(-50%);
+    border-width: 8px 8px 8px 0; border-style: solid;
+    border-color: transparent #f39c12 transparent transparent;
+}
+
+/* 左侧气泡 (在目标左边，箭头朝右，左右跳动) */
+.tutorial-bubble.pos-left {
+    animation: bounceRightLeft 1.5s infinite;
+}
+.tutorial-bubble.pos-left::after {
+    right: -8px; top: 50%; transform: translateY(-50%);
+    border-width: 8px 0 8px 8px; border-style: solid;
+    border-color: transparent transparent transparent #f39c12;
+}
+
+/* 底部气泡 (在目标下边，箭头朝上，上下跳动) */
+.tutorial-bubble.pos-bottom {
+    animation: bounceUpDown 1.5s infinite;
+}
+.tutorial-bubble.pos-bottom::after {
+    top: -8px; left: 50%; transform: translateX(-50%);
+    border-width: 0 8px 8px 8px; border-style: solid;
+    border-color: transparent transparent #f39c12 transparent;
+}
+
+@keyframes bounceUpDown {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 8px); }
+}
+@keyframes bounceLeftRight {
+    0%, 100% { transform: translate(0, -50%); }
+    50% { transform: translate(8px, -50%); }
+}
+@keyframes bounceRightLeft {
+    0%, 100% { transform: translate(-100%, -50%); }
+    50% { transform: translate(calc(-100% - 8px), -50%); }
 }
 
 #btn-claim-bonus {
@@ -1073,6 +1151,30 @@
         .modal button { margin-top: 22px; padding: 12px 44px; border-radius: 14px; border: 3px solid var(--outline); background: var(--plate); color: white; font-weight: 900; cursor: pointer; font-size: 18px; box-shadow: 0 6px 0 rgba(0,0,0,0.25); transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease; flex-shrink: 0; }
         .modal button:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.05); }
         .modal button:active { transform: translateY(2px) scale(0.98); box-shadow: 0 3px 0 rgba(0,0,0,0.25); }
+
+        /* [系统新增] 拍立得推理卡片 */ 
+        .polaroid-card { 
+            width: 280px; background: #fff; padding: 15px 15px 40px 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); transform: rotate(-2deg); 
+            margin: 0 auto; text-align: center; position: relative; 
+        } 
+        .polaroid-photo { 
+            background: #fdf6e3; height: 180px; width: 100%; 
+            border: 1px solid #ddd; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; position: relative; 
+            overflow: hidden; 
+        } 
+        .polaroid-bg { font-size: 60px; position: absolute; opacity: 0.2; letter-spacing: 20px; } 
+        .polaroid-silhouettes { display: flex; gap: 20px; z-index: 2; } 
+        /* 核心魔法：将 Emoji 变成纯黑剪影 */ 
+        .silhouette-emoji { 
+            font-size: 50px; color: transparent; 
+            text-shadow: 0 0 0 rgba(44, 62, 80, 0.9); 
+        } 
+        .polaroid-label { 
+            font-family: 'Kaiti', 'STKaiti', serif; font-size: 18px; color: #34495e; 
+            position: absolute; bottom: 10px; left: 0; width: 100%; font-weight: bold; 
+        } 
         
             /* Pass Rate Trend Styles */
             .trend-box { display: inline-flex; align-items: center; margin-left: 8px; font-size: 12px; font-weight: bold; position: relative; cursor: help; }
@@ -3236,6 +3338,11 @@
         overflow: visible;
         z-index: 1;
     }
+    /* 收租气泡轻微跳动动画 */
+    @keyframes incomeBounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-5px); }
+    }
 
     /* 悬停高光 */
     .empire-card:hover {
@@ -4452,7 +4559,7 @@
         top: 24px;
         left: 30px;
         width: clamp(300px, 38vw, 420px);
-        padding: 14px 16px;
+        padding: 14px 16px 24px;
         border-radius: 16px;
         background: rgba(0, 0, 0, 0.28);
         border: 1px solid rgba(255, 255, 255, 0.18);
@@ -4518,6 +4625,7 @@
         justify-content: flex-start;
         gap: 10px;
         min-width: 0;
+        transform: translateY(4px);
     }
     .home-title-progress-label {
         font-size: 12px;
@@ -4532,11 +4640,14 @@
         gap: 6px;
         min-width: 0;
     }
+    .home-title-level-label > span {
+        transform: translateX(2px);
+    }
     .title-progress {
         position: relative;
         width: 100%;
-        height: 42px;
-        margin-top: 6px;
+        height: 70px;
+        margin-top: 26px;
         --tp-cols: 6;
         --tp-edge: calc(100% / (var(--tp-cols) * 2));
     }
@@ -4544,7 +4655,7 @@
         position: absolute;
         left: var(--tp-edge);
         right: var(--tp-edge);
-        top: 11px;
+        top: 19px;
         height: 6px;
         background: rgba(255, 255, 255, 0.14);
         border-radius: 999px;
@@ -4562,7 +4673,7 @@
         inset: 0;
         display: grid;
         grid-template-columns: repeat(6, 1fr);
-        grid-template-rows: 24px 18px;
+        grid-template-rows: 44px 26px;
         pointer-events: none;
     }
     .title-progress-grid .tp-node {
@@ -4582,11 +4693,18 @@
         opacity: 0;
         transition: opacity 0.2s ease-out, color 0.2s ease-out;
         white-space: nowrap;
+        transform: translateY(4px);
     }
     .title-node-label.is-active {
         opacity: 1;
         color: rgba(241, 196, 15, 0.92);
     }
+    .title-node-label.is-active[data-lv="1"] { color: #9DA2A9; }
+    .title-node-label.is-active[data-lv="2"] { color: #92ACD4; }
+    .title-node-label.is-active[data-lv="3"] { color: #9671DE; }
+    .title-node-label.is-active[data-lv="4"] { color: #E58B39; }
+    .title-node-label.is-active[data-lv="5"] { color: #E19AB0; }
+    .title-node-label.is-active[data-lv="6"] { color: #C6944B; }
     .tp-node {
         width: 12px;
         height: 12px;
@@ -4598,7 +4716,7 @@
     }
     .tp-node.is-active {
         background: #f1c40f;
-        border-color: #f1c40f;
+        border-color: #ffffff;
         transform: scale(1.08);
     }
     @media (max-width: 600px) {
@@ -4606,7 +4724,7 @@
             top: 16px;
             left: 16px;
             width: clamp(280px, 78vw, 380px);
-            padding: 12px 14px;
+            padding: 12px 14px 22px;
         }
         .home-wallet-row #home-balance {
             font-size: 15px;
@@ -4850,6 +4968,246 @@
     display: flex !important;
 }
 
+/* Warming Rack */
+#warming-rack-container .wr-layer {
+    position: relative;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+#warming-rack-container .wr-layer:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-1px);
+}
+#warming-rack-container .wr-layer.is-empty {
+    opacity: 0.28;
+}
+#warming-rack-container .wr-layer-img {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 4px;
+    bottom: 4px;
+    width: calc(100% - 16px);
+    height: calc(100% - 8px);
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+    pointer-events: none;
+}
+#warming-rack-container .wr-layer-name {
+    position: absolute;
+    left: 6px;
+    right: 40px;
+    bottom: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.50);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 120ms ease, transform 120ms ease;
+    pointer-events: none;
+}
+#warming-rack-container .wr-layer:hover .wr-layer-name {
+    opacity: 1;
+    transform: translateY(0);
+}
+#warming-rack-container .wr-layer-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 18px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.polaroid-develop-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 1;
+    z-index: 15;
+    pointer-events: none;
+    animation: polaroidDevelopMask 1400ms steps(10, end) forwards;
+}
+.polaroid-photo-img {
+    animation: polaroidDevelopPhoto 1800ms ease forwards;
+    filter: brightness(0) contrast(1.25) saturate(0) blur(1.5px);
+}
+@keyframes polaroidDevelopMask {
+    0% { opacity: 1; }
+    35% { opacity: 1; }
+    70% { opacity: 0.22; }
+    100% { opacity: 0; }
+}
+@keyframes polaroidDevelopPhoto {
+    0% { filter: brightness(0) contrast(1.25) saturate(0) blur(1.5px); }
+    38% { filter: brightness(0.25) contrast(1.25) saturate(0.2) blur(1px); }
+    70% { filter: brightness(0.7) contrast(1.15) saturate(0.65) blur(0.5px); }
+    100% { filter: none; }
+}
+
+#japan-intel-panel.japan-intel-thermal {
+    background: #f7f0dd;
+    border: 1px solid rgba(0, 0, 0, 0.22);
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    color: rgba(18, 18, 18, 0.92);
+    font-family: "Courier New", monospace;
+    background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+    background-size: 100% 4px, 18px 18px;
+    background-position: 0 0, 3px 7px;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.22);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-led-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-led {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.12);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-led.is-on {
+    background: rgba(46, 204, 113, 0.92);
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.18), 0 0 14px rgba(46, 204, 113, 0.28);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-head-label {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: rgba(18, 18, 18, 0.72);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-title {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-align: center;
+    text-shadow: 0 0 1px rgba(0,0,0,0.25);
+    margin-bottom: 6px;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-name {
+    font-size: 13px;
+    font-weight: 900;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed rgba(0,0,0,0.18);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-section {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: rgba(18, 18, 18, 0.7);
+    margin-bottom: 10px;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-list {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    overflow: visible;
+    max-height: none;
+    padding-right: 6px;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-item {
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.16);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-item-title {
+    font-weight: 900;
+    margin-bottom: 6px;
+    color: rgba(18, 18, 18, 0.92);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border: 1px dashed rgba(0,0,0,0.22);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(18, 18, 18, 0.75);
+    background: rgba(0,0,0,0.03);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-tag-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+    font-size: 13px;
+    line-height: 1;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-tag-text {
+    line-height: 1.2;
+}
+#japan-intel-panel.japan-intel-thermal .thermal-tag.is-hit {
+    color: rgba(18, 18, 18, 0.92);
+    border-style: solid;
+    background: rgba(0,0,0,0.06);
+}
+#japan-intel-panel.japan-intel-thermal .thermal-empty {
+    color: rgba(18, 18, 18, 0.6);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+}
+
+#japan-intel-panel.japan-intel-thermal .thermal-feature {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
+    margin: 8px 0 10px 0;
+    border: 1px dashed rgba(0,0,0,0.16);
+    border-radius: 8px;
+    background:
+        linear-gradient(0deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));
+    color: rgba(18,18,18,0.8);
+    font-size: 42px;
+    filter: contrast(1.05) saturate(0.7);
+}
+
 /* [系统新增] 食材初见高亮引导动画 */
 @keyframes firstTimeHighlight {
     0% { box-shadow: 0 0 5px rgba(241, 196, 15, 0.55), inset 0 0 5px rgba(241, 196, 15, 0.45); border-color: rgba(241, 196, 15, 0.75); }
@@ -5029,6 +5387,11 @@
                 <div class="kmes-title-text" style="font-family:'Courier New', monospace; font-size:12px; font-weight:bold; color:#2ecc71; text-shadow:0 0 2px #2ecc71;">KMES SYSTEM</div>
                 <div id="kmes-status-text" style="font-family:'Courier New', monospace; font-size:12px; font-weight:bold; color:#2ecc71; text-shadow:0 0 2px #2ecc71; opacity:0.8;">ONLINE</div>
             </div>
+        </div>
+
+        <div id="warming-rack-container" style="display:none; position:absolute; right:248px; top:210px; width:188px; height:252px; background: rgba(0,0,0,0.10); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 10px; box-shadow: 0 10px 24px rgba(0,0,0,0.18); backdrop-filter: blur(3px); z-index:100; overflow:hidden;">
+            <div style="color: rgba(255,255,255,0.88); font-size: 12px; font-weight: 900; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">恒温出餐台</div>
+            <div id="warming-rack-slots" style="display:flex; flex-direction:column; gap:8px; height:204px;"></div>
         </div>
 
         <div id="kitchen-area">
@@ -5409,7 +5772,7 @@
         <div class="modal" style="background:white; padding:30px; border-radius:15px; text-align:center; max-width:420px; width:80%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
             <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
                 <img src="assets/icons/icon_头衔.png" alt="头衔" style="width:34px; height:34px; display:block;">
-                <h2 style="margin:0; color:#2c3e50; font-size:22px;">恭喜！头衔晋升</h2>
+                <h2 style="margin:0; color:#2c3e50; font-size:22px;">晋升全新头衔</h2>
             </div>
             <p style="color:#555; font-size:16px; line-height:1.6; margin:12px 0 18px 0;">你的商业版图与影响力进一步扩大了！</p>
             <div id="new-title-display" style="font-size:22px; font-weight:900; color:#2c3e50; background:#f8f9fb; border:1px solid #eee; padding:14px 12px; border-radius:12px; margin: 0 0 18px 0;"></div>
@@ -5428,6 +5791,11 @@ const TITLE_CONFIG = {
     5: { name: "饮食大鳄", color: "#c0392b", border: "#e74c3c", icon: "", glow: "rgba(231,76,60,0.6)" }, // 绯红
     6: { name: "餐饮帝国", color: "#f39c12", border: "#f1c40f", icon: "", glow: "rgba(241,196,15,0.7)" }  // 耀金
 };
+
+function getBadgeImagePath(level) {
+    const lv = Math.max(1, Math.min(6, Math.floor(Number(level) || 1)));
+    return `assets/icons/badge_${lv}.png`;
+}
 
 function ensurePlayerProfile() {
     if (!game.playerProfile || typeof game.playerProfile !== 'object') {
@@ -5485,8 +5853,34 @@ window.showTitleUpgradeModal = function(newTitleLevel) {
     if (!modal || !nameDisplay || !btn) return;
 
     const config = TITLE_CONFIG ? TITLE_CONFIG[newTitleLevel] : { name: "未知头衔", color: "#fff" };
-    nameDisplay.innerText = `【 ${config.name} 】`;
-    nameDisplay.style.color = config.color;
+    const badgeSrc = getBadgeImagePath(newTitleLevel);
+    nameDisplay.style.background = 'transparent';
+    nameDisplay.style.border = 'none';
+    nameDisplay.style.padding = '0';
+    nameDisplay.style.borderRadius = '0';
+    nameDisplay.innerHTML = `
+        <div style="text-align: center; padding: 10px 0;">
+            <div id="title-upgrade-badge" style="position: relative; width: 120px; height: 120px; margin: 0 auto 20px auto; opacity: 0; transform: scale(0.6);">
+                <img src="${badgeSrc}" style="position: relative; width: 100%; height: 100%; object-fit: contain; z-index: 2; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.25));">
+            </div>
+            <div style="font-size: 24px; color: #fff; font-weight: bold; letter-spacing: 2px;">T${newTitleLevel} ${config.name}</div>
+            <div style="margin-top: 20px; font-size: 14px; color: #2ecc71; background: rgba(46, 204, 113, 0.1); padding: 10px; border-radius: 6px;">
+                解锁了更多的高级权限与食材渠道！
+            </div>
+        </div>
+        <style>
+            #title-upgrade-badge.enter {
+                animation: badgeBounce 0.95s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            }
+            @keyframes badgeBounce {
+                0% { transform: scale(0.6); opacity: 0; }
+                52% { transform: scale(1.18); opacity: 1; }
+                72% { transform: scale(0.92); }
+                88% { transform: scale(1.06); }
+                100% { transform: scale(1); opacity: 1; }
+            }
+        </style>
+    `;
 
     const panelsToHide = ['overlay', 'shop-overlay', 'pause-overlay', 'map-screen', 'loading', 'achievement-modal', 'settings-modal', 'end-game-modal', 'prep-modal'];
     panelsToHide.forEach(id => {
@@ -5496,6 +5890,13 @@ window.showTitleUpgradeModal = function(newTitleLevel) {
 
     if (game) game.isPaused = true;
     modal.style.display = 'flex';
+    setTimeout(() => {
+        const badgeWrap = nameDisplay.querySelector('#title-upgrade-badge');
+        if (badgeWrap) badgeWrap.classList.add('enter');
+        if (typeof playSfx === 'function') {
+            try { playSfx(660, 'triangle', 0.12); } catch (_) {}
+        }
+    }, 240);
 
     btn.onclick = function() {
         modal.style.display = 'none';
@@ -5545,6 +5946,15 @@ function updateHomeProfileCard() {
     if (daysEl) daysEl.innerText = `已营业 ${getActiveStoreDaysOperated()} 天`;
 
     const titleLv = (game && game.playerProfile && typeof game.playerProfile.titleLevel === 'number') ? Math.max(1, Math.min(6, Math.floor(game.playerProfile.titleLevel))) : 1;
+    const tierColors = {
+        1: '#9DA2A9',
+        2: '#92ACD4',
+        3: '#9671DE',
+        4: '#E58B39',
+        5: '#E19AB0',
+        6: '#C6944B'
+    };
+    const tierColor = tierColors[titleLv];
     const bar = document.querySelector('#home-profile-card .title-progress');
     if (bar) bar.setAttribute('aria-valuenow', String(titleLv));
 
@@ -5552,6 +5962,7 @@ function updateHomeProfileCard() {
     if (fill) {
         const pct = ((titleLv - 1) / 5) * 100;
         fill.style.width = `${pct}%`;
+        if (tierColor) fill.style.background = tierColor;
     }
 
     const nodesWrap = document.getElementById('title-progress-nodes');
@@ -5560,6 +5971,27 @@ function updateHomeProfileCard() {
             const lv = parseInt(node.getAttribute('data-lv') || '0', 10);
             if (Number.isFinite(lv) && lv > 0 && lv <= titleLv) node.classList.add('is-active');
             else node.classList.remove('is-active');
+
+            if (lv === titleLv) {
+                node.style.width = '40px';
+                node.style.height = '40px';
+                node.style.background = 'transparent';
+                node.style.border = 'none';
+                node.style.boxShadow = 'none';
+                node.style.transform = 'none';
+                node.innerHTML = `<img src="${getBadgeImagePath(titleLv)}" alt="T${titleLv}" style="width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.22));">`;
+            } else {
+                node.style.width = '';
+                node.style.height = '';
+                node.style.background = '';
+                node.style.border = '';
+                node.style.boxShadow = '';
+                node.style.transform = '';
+                node.innerHTML = '';
+                if (tierColor && Number.isFinite(lv) && lv > 0 && lv < titleLv) {
+                    node.style.background = tierColor;
+                }
+            }
         });
     }
     if (nodesWrap) {
@@ -6058,6 +6490,95 @@ window.claimPerfectBonus = function() {
     }
 };
 
+function renderWarmingRack() {
+    let rackContainer = document.getElementById('warming-rack-container');
+    if (!rackContainer) {
+        const kmesArea = document.getElementById('kmes-card') || document.getElementById('kmes-panel') || document.querySelector('.kmes-container');
+        if (kmesArea) {
+            kmesArea.insertAdjacentHTML('afterend', `
+                <div id="warming-rack-container" style="display:none; position:absolute; right:248px; top:210px; width:188px; height:252px; background: rgba(0,0,0,0.10); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 10px; box-shadow: 0 10px 24px rgba(0,0,0,0.18); backdrop-filter: blur(3px); overflow:hidden; z-index:100;">
+                    <div style="color: rgba(255,255,255,0.88); font-size: 12px; font-weight: 900; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">恒温出餐台</div>
+                    <div id="warming-rack-slots" style="display:flex; flex-direction:column; gap:8px; height:204px;"></div>
+                </div>
+            `);
+            rackContainer = document.getElementById('warming-rack-container');
+        } else {
+            return;
+        }
+    }
+
+    const slotsDOM = document.getElementById('warming-rack-slots');
+    if (!slotsDOM) return;
+    if (!Array.isArray(warmingRack)) warmingRack = [];
+
+    const kmesCard = document.getElementById('kmes-card');
+    if (kmesCard && kmesCard.offsetParent === null) {
+        rackContainer.style.display = 'none';
+        return;
+    }
+    rackContainer.style.display = 'block';
+
+    const recipePool = (typeof getActiveRecipes === 'function' ? getActiveRecipes() : []).concat((typeof RECIPES !== 'undefined' ? RECIPES : []));
+    const primaryRegion = (game && typeof game.activeStoreId === 'string' && game.activeStoreId.includes('jp')) ? 'jp' : 'cn';
+    const secondaryRegion = primaryRegion === 'jp' ? 'cn' : 'jp';
+
+    const capacity = Number.isFinite(WARMING_RACK_CAPACITY) ? WARMING_RACK_CAPACITY : 4;
+    const layers = [];
+    for (let i = 0; i < capacity; i++) {
+        layers.push(warmingRack[i] || null);
+    }
+
+    slotsDOM.innerHTML = layers.map((item, index) => {
+        const isEmpty = !item || !item.dishName;
+        const dishName = isEmpty ? '' : item.dishName;
+        const portions = isEmpty ? 0 : (Number.isFinite(item.portions) ? item.portions : 0);
+        const encodedName = encodeURIComponent(dishName);
+        const primarySrc = isEmpty ? '' : `assets/dishes/${primaryRegion}/${encodedName}.png`;
+        const secondarySrc = isEmpty ? '' : `assets/dishes/${secondaryRegion}/${encodedName}.png`;
+        const clickAttr = isEmpty ? '' : `onclick="deliverFromRack(${index})"`;
+        const cursor = isEmpty ? 'default' : 'pointer';
+        const opacity = isEmpty ? 0.35 : 1;
+
+        return `
+            <div ${clickAttr} class="wr-layer${isEmpty ? ' is-empty' : ''}" style="cursor:${cursor}; opacity:${opacity};">
+                ${isEmpty ? '' : `<img class="wr-layer-img" src="${primarySrc}" loading="lazy" onerror="this.onerror=null; this.src='${secondarySrc}';">`}
+                ${isEmpty ? '' : `<div class="wr-layer-name">${dishName}</div>`}
+                ${(!isEmpty && portions > 1) ? `<div class="wr-layer-badge">${portions}</div>` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+window.deliverFromRack = function(index) {
+    const item = Array.isArray(warmingRack) ? warmingRack[index] : null;
+    if (!item || !item.dishName || !item.portions) return;
+
+    const targetOrder = Array.isArray(game.activeOrders)
+        ? game.activeOrders.find(o => o && Array.isArray(o.dishes) && o.dishes.some(d => d && (d.name || d.n) === item.dishName))
+        : null;
+
+    if (!targetOrder) {
+        if (typeof showToast === 'function') showToast("暂无顾客需要此菜品");
+        return;
+    }
+
+    const recipePool = (typeof getActiveRecipes === 'function' ? getActiveRecipes() : []).concat((typeof RECIPES !== 'undefined' ? RECIPES : []));
+    const recipe = recipePool.find(r => r && r.name === item.dishName);
+    const dish = recipe ? { ...recipe } : { name: item.dishName, price: 10 };
+
+    const prevHolding = holdingThing;
+    holdingThing = { type: 'DISH', val: dish, sourceSid: null };
+    takeOrder(targetOrder);
+    const served = holdingThing === null;
+    holdingThing = prevHolding;
+
+    if (!served) return;
+
+    item.portions--;
+    if (item.portions <= 0) warmingRack.splice(index, 1);
+    if (typeof renderWarmingRack === 'function') renderWarmingRack();
+};
+
 // 1. 触发入口：订单生成时调用
 window.triggerRecipeHighlight = function(recipeId) {
     if (!recipeId) return;
@@ -6072,11 +6593,37 @@ window.triggerRecipeHighlight = function(recipeId) {
 
     if (game.seenRecipes[resolvedId]) return;
 
-    game.seenRecipes[resolvedId] = true;
-    if (typeof saveGameState === 'function') saveGameState();
+    if (window.currentGuidedRecipe === resolvedId) return;
+    if (Array.isArray(window.highlightQueue) && window.highlightQueue.includes(resolvedId)) return;
 
     window.highlightQueue.push(resolvedId);
     checkNextHighlight();
+};
+
+window.isRecipeInCurrentOrderSlots = function(recipeLike) {
+    const activeRecipes = (typeof getActiveRecipes === 'function') ? getActiveRecipes() : [];
+    const recipe = activeRecipes.find(r => r && (r.id === recipeLike || r.name === recipeLike))
+        || RECIPES.find(r => r && (r.id === recipeLike || r.name === recipeLike))
+        || (recipeLike && typeof recipeLike === 'object' ? recipeLike : null);
+    if (!recipe) return false;
+
+    const norm = (v) => String(v || '').replace(/\s+/g, '').trim();
+    const targetId = norm(recipe.id);
+    const targetName = norm(recipe.name);
+
+    const orders = Array.isArray(game && game.orderSlots) ? game.orderSlots
+        : (Array.isArray(game && game.activeOrders) ? game.activeOrders : []);
+
+    for (const order of orders) {
+        if (!order || !Array.isArray(order.dishes)) continue;
+        for (const d of order.dishes) {
+            if (!d) continue;
+            const dishId = norm(d.id || d.recipeId || d.rid);
+            const dishName = norm(d.name || d.n);
+            if ((targetId && dishId && dishId === targetId) || (targetName && dishName && dishName === targetName)) return true;
+        }
+    }
+    return false;
 };
 
 // 2. 调度器：启动下一道菜的引导
@@ -6090,8 +6637,12 @@ window.checkNextHighlight = function() {
         || activeRecipes.find(r => r && r.name === recipeId)
         || RECIPES.find(r => r && r.name === recipeId);
     if (!recipe || !Array.isArray(recipe.ingredients)) return checkNextHighlight();
+    if (typeof window.isRecipeInCurrentOrderSlots === 'function' && !window.isRecipeInCurrentOrderSlots(recipe)) return checkNextHighlight();
 
     window.currentGuidedRecipe = recipe.id || recipeId;
+    if (!game.seenRecipes) game.seenRecipes = {};
+    game.seenRecipes[window.currentGuidedRecipe] = true;
+    if (typeof saveGameState === 'function') saveGameState();
     const resolveIngIdForUI = (ingId) => {
         if (ingId === 'vegetable' && typeof INGREDIENTS !== 'undefined' && INGREDIENTS && INGREDIENTS['pepper']) return 'pepper';
         return ingId;
@@ -6110,6 +6661,14 @@ window.refreshCurrentHighlight = function() {
         || activeRecipes.find(r => r && r.name === window.currentGuidedRecipe)
         || RECIPES.find(r => r && r.name === window.currentGuidedRecipe);
     if (!recipe || !Array.isArray(recipe.ingredients)) return;
+
+    if (typeof window.isRecipeInCurrentOrderSlots === 'function' && !window.isRecipeInCurrentOrderSlots(recipe)) {
+        document.querySelectorAll('.ing-highlight-active').forEach(el => el.classList.remove('ing-highlight-active'));
+        window.currentGuidedRecipe = null;
+        window.pendingGuidedIngredients = [];
+        if (typeof checkNextHighlight === 'function') checkNextHighlight();
+        return;
+    }
 
     document.querySelectorAll('.ing-highlight-active').forEach(el => el.classList.remove('ing-highlight-active'));
 
@@ -7242,6 +7801,13 @@ function changeShopPage(delta) {
 
 function generateDailyGossip() {
     if (!MARKET_GOSSIP_CONFIG) return;
+    const activeStoreId = game.activeStoreId || 'cn:main';
+    const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : ((activeStoreId.split(':')[0] || 'cn'));
+    if (activeStoreId === 'japan' || region === 'jp' || (typeof activeStoreId === 'string' && activeStoreId.startsWith('jp'))) {
+        game.dailyTrend = 'balanced';
+        game.dailyGossip = null;
+        return;
+    }
     // 1. 随机决定今日趋势
     // 权重：各 20% (肉/菜/海鲜/辣/无事发生)
     const rand = Math.random();
@@ -7278,8 +7844,60 @@ function generateDailyGossip() {
     console.log(`[情报生成] 趋势锁定: ${game.dailyTrend} (文案: ${category})`);
 }
 
+function showJapanMarketPolaroidModal(todayEvent) {
+    const overlay = document.getElementById('overlay');
+    const title = document.getElementById('modal-title');
+    const desc = document.getElementById('modal-desc');
+    const actions = document.querySelector('#overlay .modal-actions');
+    if (!overlay || !title || !desc || !actions) return;
+
+    overlay.style.zIndex = '5000';
+    overlay.style.display = 'flex';
+
+    title.innerText = '🕵️ 今日情报';
+    title.style.color = '#2ecc71';
+
+    const safeBg = (todayEvent && typeof todayEvent.bg === 'string') ? todayEvent.bg : '';
+    const safeLabel = (todayEvent && typeof todayEvent.label === 'string') ? todayEvent.label : '';
+    const silhouettes = (todayEvent && Array.isArray(todayEvent.silhouettes)) ? todayEvent.silhouettes : [];
+
+    desc.innerHTML = `
+        <div style="text-align:center;">
+            <div class="polaroid-card">
+                <div class="polaroid-photo">
+                    <div class="polaroid-bg">${safeBg}</div>
+                    <div class="polaroid-silhouettes">
+                        ${silhouettes.map(s => `<div class="silhouette-emoji">${s}</div>`).join('')}
+                    </div>
+                </div>
+                <div class="polaroid-label">${safeLabel}</div>
+            </div>
+            <p style="text-align:center; color:#7f8c8d; font-size:13px; margin-top:18px;">观察场景与食材剪影，精准进货！</p>
+        </div>
+    `;
+
+    actions.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.innerText = '前往集市采购';
+    btn.style.background = '#2ecc71';
+    btn.style.border = 'none';
+    btn.style.color = '#fff';
+    btn.style.borderRadius = '12px';
+    btn.style.padding = '12px 34px';
+    btn.style.fontWeight = 'bold';
+    btn.style.cursor = 'pointer';
+    btn.onclick = () => {
+        overlay.style.display = 'none';
+        overlay.style.zIndex = '3000';
+        try { revealPrepUI(); } catch (_) {}
+    };
+    actions.appendChild(btn);
+}
+
 // 启动对话流程
 function startMarketChatterFlow() { 
+    const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : ((game.activeStoreId || 'cn:main').split(':')[0] || 'cn');
+    if (region === 'jp') return;
     const layer = document.getElementById('market-chatter-layer'); 
     if (!layer) {
         // 如果层不存在，这里可以是一个容错逻辑，或者直接创建它
@@ -7479,6 +8097,30 @@ window.advanceChatter = function() {
     gossip.currentLineIndex++; 
     appendNextChatMessage(); 
 }; 
+
+// [系统新增] 日本店拍立得推理事件库 
+const JAPAN_MARKET_EVENTS = [ 
+    { 
+        bg: "🏮 🍺", silhouettes: ["🦑", "🥩"], label: "新橋駅前・ほろ酔いの夜", 
+        boostedIngredientIds: ["squid", "wagyu_tendon"] 
+    }, 
+    { 
+        bg: "☀️ 💦", silhouettes: ["🥒", "🐟"], label: "那覇の海風・猛暑日", 
+        boostedIngredientIds: ["bitter_melon", "mentaiko"] 
+    }, 
+    { 
+        bg: "🎆 🎒", silhouettes: ["🥬", "🍜"], label: "夏祭り・青春の香り", 
+        boostedIngredientIds: ["cabbage", "thick_ramen"] 
+    }, 
+    { 
+        bg: "💴 ✨", silhouettes: ["🐍", "🥩"], label: "銀座・財閥の晩餐", 
+        boostedIngredientIds: ["eel_liver", "wagyu_tendon"] 
+    }, 
+    { 
+        bg: "🌧️ 👩‍🌾", silhouettes: ["🌱", "🍗"], label: "商店街·雨の特売", 
+        boostedIngredientIds: ["bean_sprout", "spinach", "chicken_leg"] 
+    } 
+]; 
 
 // [新增] 结束对话并开始采购
 window.finishChatterAndShop = function() { 
@@ -8051,6 +8693,14 @@ let game = {
     lastTime: 0
 };
 
+// [系统新增] 新手引导状态机 (0:未开始, 1:提示开柜, 2:提示放备菜盘, 3:提示烹饪, 4:提示交单, 5:已完成)
+let tutorialStep = 0;
+let tutorialBubbleEl = null;
+
+// [系统新增] 恒温出餐台缓存区 (格式: { dishName: '...', portions: 2 })
+let warmingRack = [];
+const WARMING_RACK_CAPACITY = 4;
+
 // [系统新增] 商业版图：店铺上下文管理
 // 将当前内存中的店面数据打包存入抽屉 
 function saveStoreContext() { 
@@ -8075,12 +8725,14 @@ function loadStoreContext(storeId) {
             inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0, kmes: 0 }, // 默认空装备
             dailyInventory: {},
             ingredientAge: {},
-            history: []
+            history: [],
+            pendingIncome: 0
         }; 
     } 
 
     if (!Number.isFinite(game.stores[storeId].sessionRevenue)) game.stores[storeId].sessionRevenue = 0;
     if (!Number.isFinite(game.stores[storeId].sessionCost)) game.stores[storeId].sessionCost = 0;
+    if (!Number.isFinite(game.stores[storeId].pendingIncome)) game.stores[storeId].pendingIncome = 0;
     
     game.activeStoreId = storeId; 
     const data = game.stores[storeId]; 
@@ -8094,6 +8746,7 @@ function loadStoreContext(storeId) {
         if (!Number.isFinite(data.sessionCost)) data.sessionCost = 0;
         data.isNew = false;
     }
+    if (!Number.isFinite(data.pendingIncome)) data.pendingIncome = 0;
     // 覆盖当前工作区内存 (注意：全局的 game.coins 绝对不要覆盖) 
     game.level = data.level || 1; 
     game.inventory = JSON.parse(JSON.stringify(data.inventory || {})); 
@@ -8165,8 +8818,15 @@ function computeGlobalTitleLevel() {
     const checkAutomation = (store) => {
         if (!store || !store.inventory) return false;
         const inv = store.inventory;
-        const hasOmni = (typeof inv.pot === 'number' && Number.isFinite(inv.pot) && inv.pot >= 3);
-        const hasKmesMax = (typeof inv.kmes === 'number' && Number.isFinite(inv.kmes) && inv.kmes >= 3);
+        const hasOmni = !!(
+            (typeof inv.pot === 'number' && Number.isFinite(inv.pot) && inv.pot >= 3) ||
+            !!inv['pot_omni3']
+        );
+        const hasKmesMax = !!(
+            (typeof inv.kmes === 'number' && Number.isFinite(inv.kmes) && inv.kmes >= 3) ||
+            !!inv['kmes_3'] ||
+            !!inv['kmes_system']
+        );
         return !!(hasOmni && hasKmesMax);
     };
 
@@ -8200,28 +8860,11 @@ function computeGlobalTitleLevel() {
 }
 
 function initAutoIncomeSystem() {
-    if (window.autoIncomeTimer) return;
-    window.autoIncomeTimer = setInterval(() => {
-        if (!game || !game.stores) return;
-        try { computeGlobalTitleLevel(); } catch (_) {}
-
-        let totalAutoIncome = 0;
-        Object.keys(game.stores).forEach(storeId => {
-            const store = game.stores[storeId];
-            if (store && store.isAutomated) {
-                const storeLevel = (typeof store.level === 'number' && Number.isFinite(store.level)) ? store.level : 1;
-                totalAutoIncome += 20 + (storeLevel * 5);
-            }
-        });
-
-        if (totalAutoIncome > 0) {
-            const coins = (typeof game.coins === 'number' && Number.isFinite(game.coins)) ? game.coins : 0;
-            game.coins = coins + totalAutoIncome;
-            if (typeof saveGameState === 'function') saveGameState();
-            if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
-            if (typeof updateHUD === 'function') updateHUD();
-        }
-    }, 10000);
+    if (window.autoIncomeTimer) {
+        try { clearInterval(window.autoIncomeTimer); } catch (_) {}
+        window.autoIncomeTimer = null;
+    }
+    // 实时定时器已废弃：收益改为按天累计到各店铺 pendingIncome，由玩家在地图手动收取
 }
 
 function getPlayerProfileCache() {
@@ -8497,7 +9140,8 @@ function loadGameState() {
                     level: game.level || 1,
                     inventory: JSON.parse(JSON.stringify(game.inventory || {})),
                     ingredientAge: JSON.parse(JSON.stringify(game.ingredientAge || {})),
-                    history: JSON.parse(JSON.stringify(Array.isArray(game.history) ? game.history : []))
+                    history: JSON.parse(JSON.stringify(Array.isArray(game.history) ? game.history : [])),
+                    pendingIncome: 0
                 };
                 game.activeStoreId = 'cn:main';
             }
@@ -8624,12 +9268,22 @@ window.enterTestMode = function(mode) {
             const startDay = (testGame && Number.isFinite(testGame.currentDay)) ? testGame.currentDay : ((testGame && Number.isFinite(testGame.level)) ? testGame.level : 1);
             testGame.currentDay = startDay;
 
-            const storeId = testGame.activeStoreId || Object.keys(testGame.stores || {})[0] || 'cn:main';
-            testGame.activeStoreId = storeId;
+            const storeIds = Object.keys(testGame.stores || {});
+            const activeId = testGame.activeStoreId || storeIds[0] || 'cn:main';
+            testGame.activeStoreId = activeId;
 
-            const store = (testGame.stores && testGame.stores[storeId]) ? testGame.stores[storeId] : null;
-            if (store && typeof store === 'object') {
-                if (!store.dailyInventory) store.dailyInventory = {};
+            storeIds.forEach(id => {
+                const store = (testGame.stores && testGame.stores[id]) ? testGame.stores[id] : null;
+                if (!store || typeof store !== 'object') return;
+
+                if (!store.dailyInventory || typeof store.dailyInventory !== 'object') {
+                    if (testGame.dailyInventory && typeof testGame.dailyInventory === 'object' && id === activeId) {
+                        store.dailyInventory = JSON.parse(JSON.stringify(testGame.dailyInventory));
+                    } else {
+                        store.dailyInventory = {};
+                    }
+                }
+
                 const storeInv = store.dailyInventory;
                 if (typeof INGREDIENTS !== 'undefined' && INGREDIENTS) {
                     Object.keys(INGREDIENTS).forEach(ingId => {
@@ -8638,12 +9292,15 @@ window.enterTestMode = function(mode) {
                         if (!Array.isArray(inv)) inv = [];
 
                         const totalQty = inv.reduce((sum, batch) => sum + (Number.isFinite(batch && batch.qty) ? batch.qty : 0), 0);
-                        if (totalQty < 50) {
-                            inv.push({ qty: 50 - totalQty, expiryDay: startDay + 3 });
-                        }
+                        if (totalQty < 50) inv.push({ qty: 50 - totalQty, expiryDay: startDay + 3 });
                         storeInv[ingId] = inv;
                     });
                 }
+            });
+
+            const activeStore = (testGame.stores && testGame.stores[activeId]) ? testGame.stores[activeId] : null;
+            if (activeStore && typeof activeStore === 'object' && activeStore.dailyInventory) {
+                testGame.dailyInventory = activeStore.dailyInventory;
             }
         }
 
@@ -8702,6 +9359,23 @@ function generateDailyOrders(level) {
         // 2. 读取集市获取的今日趋势 
         const todayTrend = game.dailyTrend || 'balanced'; 
         console.log(`[订单生成] 当前关卡: ${level}, 今日趋势: ${todayTrend}`); 
+        const activeStoreId = game.activeStoreId || 'cn:main';
+        const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : ((activeStoreId.split(':')[0] || 'cn'));
+        const isJapanStore = (activeStoreId === 'japan') || (region === 'jp') || (typeof activeStoreId === 'string' && activeStoreId.startsWith('jp'));
+        let boostedIds = null;
+        if (isJapanStore && game.todayBoostEvent) {
+            if (Array.isArray(game.todayBoostEvent.boostedIngredientIds)) {
+                boostedIds = game.todayBoostEvent.boostedIngredientIds.slice();
+            } else if (Array.isArray(game.todayBoostEvent.boostedIngredients) && typeof INGREDIENTS !== 'undefined' && INGREDIENTS) {
+                boostedIds = game.todayBoostEvent.boostedIngredients
+                    .map(name => {
+                        const entry = Object.values(INGREDIENTS).find(v => v && v.name === name);
+                        return entry ? entry.id : null;
+                    })
+                    .filter(Boolean);
+            }
+        }
+        const boostedSet = (Array.isArray(boostedIds) && boostedIds.length > 0) ? new Set(boostedIds) : null;
         // 3. [核心机制] 构建“今日活跃菜单池” (控制在 5~7 道菜) 
         let dailyActivePool = []; 
         // [类别A] 基础保底菜：永远有番茄炒蛋/洋葱炒蛋，给玩家垫底的安全感 
@@ -8749,6 +9423,7 @@ function generateDailyOrders(level) {
         dailyActivePool.forEach(recipe => { 
             let weight = 1; 
             if (selectedTrend.includes(recipe)) weight = 3; 
+            if (boostedSet && Array.isArray(recipe.ingredients) && recipe.ingredients.some(i => boostedSet.has(i))) weight = Math.max(weight, 4);
             for (let w = 0; w < weight; w++) { 
                 finalWeightedPool.push(recipe); 
             } 
@@ -9040,6 +9715,9 @@ function takeOrder(order) {
     let price = Math.ceil((basePrice * premiumMultiplier) * quality);
     let color = "#f1c40f";
     const tags = [];
+    const qualitySuffix = ((!targetRecipe || targetRecipe.perfectEquip !== 'Omni') && quality < 1)
+        ? ` <span style="font-size:12px; color:#ff4757; font-weight:bold;">(${Math.floor(quality * 100)}%)</span>`
+        : '';
 
     let isTierPenalized = false;
     if (recipeTier > potTier) {
@@ -9048,11 +9726,8 @@ function takeOrder(order) {
         color = "#e74c3c";
         tags.push('厨具受限');
     }
-
-    // [新增] 动态判断图标资源 
-    const iconPath = price >= 100 ? 'assets/icons/icon_多硬币.png' : 'assets/icons/icon_少硬币.png'; 
-    const coinHtml = `<img src="${iconPath}" class="revenue-icon">`; 
-    let label = `${coinHtml} ¥${price}`; 
+    let labelPrefix = '';
+    let label = '';
 
     let isSoulPenalized = false;
     if (targetRecipe && targetRecipe.perfectEquip === 'Omni') { 
@@ -9061,9 +9736,7 @@ function takeOrder(order) {
         if (!hasOmni) { 
             if (!isTierPenalized) price = Math.ceil(price * 0.5); 
             isSoulPenalized = true;
-            // 重新生成降级后的金额和依然保持的少硬币图标 
-            const downgradedIcon = price >= 100 ? 'assets/icons/icon_多硬币.png' : 'assets/icons/icon_少硬币.png'; 
-            label = `没有灵魂！退钱！ <img src="${downgradedIcon}" class="revenue-icon"> ¥${price}`; 
+            labelPrefix = '没有灵魂！退钱！';
             color = "#e74c3c";
             if (typeof playSfx === 'function') playSfx(200, 'sawtooth', 0.1); 
 
@@ -9086,21 +9759,28 @@ function takeOrder(order) {
                 }, 500); 
             }
         } else { 
-            label = `就是这个老味道！ ${coinHtml} ¥${price}`; 
             color = "#f1c40f"; 
         } 
-    } else { 
-        if (quality < 1) label += ` <span style="font-size:12px; color:#ff4757; font-weight:bold;">(${Math.floor(quality * 100)}%)</span>`; // [修改] 保持括号内红色
     } 
+
+    const currentDay = (game && Number.isFinite(game.currentDay)) ? game.currentDay : ((game && Number.isFinite(game.level)) ? game.level : 1);
+    if (game) game.currentDay = currentDay;
+    const isHoneymoon = currentDay <= 3;
+    const honeymoonMultiplier = isHoneymoon ? 2.0 : 1.0;
+    price = Math.floor(price * honeymoonMultiplier);
+
+    const iconPath = price >= 100 ? 'assets/icons/icon_多硬币.png' : 'assets/icons/icon_少硬币.png'; 
+    const coinHtml = `<img src="${iconPath}" class="revenue-icon">`; 
+    label = labelPrefix ? `${labelPrefix} ${coinHtml} ¥${price}` : `${coinHtml} ¥${price}`;
 
     if (!isSoulPenalized) {
         if (tags.length > 0) {
             const tagColor = isTierPenalized ? '#e74c3c' : '#f1c40f';
             label = `${coinHtml} ¥${price} <span style="font-size:12px; color:${tagColor}; font-weight:900;">(${tags.join(' · ')})</span>`;
-            if (quality < 1) label += ` <span style="font-size:12px; color:#ff4757; font-weight:bold;">(${Math.floor(quality * 100)}%)</span>`;
+            if (qualitySuffix) label += qualitySuffix;
         } else {
             label = `${coinHtml} ¥${price}`;
-            if (quality < 1) label += ` <span style="font-size:12px; color:#ff4757; font-weight:bold;">(${Math.floor(quality * 100)}%)</span>`;
+            if (qualitySuffix) label += qualitySuffix;
         }
     }
 
@@ -9152,11 +9832,95 @@ function takeOrder(order) {
         // [核心修改] 刷新订单显示（剩余菜品），带配方提示
         order.dom.innerHTML = renderOrderHTML(order);
     }
+    if (typeof refreshCurrentHighlight === 'function' && window.currentGuidedRecipe) refreshCurrentHighlight();
     updateHUD();
 }
 
 // Removed legacy functions: startStage, handleStation, trashOrder, confirmPrep, finishDishOrOrder, finishOrderFinal
 
+
+// [系统新增] 新手引导气泡管理器
+function updateTutorial() {
+    if (!game || game.currentDay !== 1 || tutorialStep >= 5) {
+        if (tutorialBubbleEl) {
+            tutorialBubbleEl.style.opacity = '0';
+            setTimeout(() => {
+                if (tutorialBubbleEl && tutorialBubbleEl.parentNode) tutorialBubbleEl.parentNode.removeChild(tutorialBubbleEl);
+                tutorialBubbleEl = null;
+            }, 300);
+        }
+        return;
+    }
+
+    const container = document.getElementById('game-container');
+    if (!container) return;
+
+    if (!tutorialBubbleEl) {
+        tutorialBubbleEl = document.createElement('div');
+        tutorialBubbleEl.className = 'tutorial-bubble';
+        container.appendChild(tutorialBubbleEl);
+    }
+
+    // [系统重构] 精细化目标跟踪与排版方向
+    let targetEl = null;
+    let text = '';
+    let positionType = '';
+
+    if (tutorialStep === 1) {
+        targetEl = document.getElementById('pantry-handle') || document.getElementById('drawer-handle');
+        text = '👈 点此拉开食材柜';
+        positionType = 'right';
+    } else if (tutorialStep === 2) {
+        const pantryDrawer = document.getElementById('pantry-drawer');
+        targetEl = (pantryDrawer && pantryDrawer.classList.contains('open'))
+            ? pantryDrawer.querySelector('.ingredient-item.ing-highlight-active') || pantryDrawer.querySelector('.ingredient-item')
+            : document.querySelector('.ingredient-item.ing-highlight-active') || document.querySelector('.ingredient-item');
+        text = '👆 点击拿取食材';
+        positionType = 'bottom';
+    } else if (tutorialStep === 3) {
+        targetEl = document.querySelector('.prep-action-container .move-btn:not([disabled])')
+            || document.querySelector('.prep-action-container .move-btn')
+            || document.querySelector('.btn-cook')
+            || document.querySelector('.move-btn');
+        text = '👉 配齐后，点此烹饪！';
+        positionType = 'left';
+    } else if (tutorialStep === 4) {
+        targetEl = document.querySelector('.station-card.cook-card.status-cooking')
+            || document.querySelector('.station-card.cook-card.status-finished')
+            || document.querySelector('.station-card.cook-card');
+        text = '👉 点击菜品，送到订单上赚取金币！';
+        positionType = 'left';
+    }
+
+    if (targetEl && text) {
+        tutorialBubbleEl.innerHTML = text;
+        tutorialBubbleEl.className = 'tutorial-bubble pos-' + positionType;
+
+        const rect = targetEl.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const designW = 1920;
+        const scale = containerRect.width / designW;
+
+        let left = 0, top = 0;
+
+        if (positionType === 'right') {
+            left = (rect.right - containerRect.left) / scale + 15;
+            top = (rect.top - containerRect.top + rect.height / 2) / scale;
+        } else if (positionType === 'left') {
+            left = (rect.left - containerRect.left) / scale - 15;
+            top = (rect.top - containerRect.top + rect.height / 2) / scale;
+        } else if (positionType === 'bottom') {
+            left = (rect.left - containerRect.left + rect.width / 2) / scale;
+            top = (rect.bottom - containerRect.top) / scale + 15;
+        }
+
+        tutorialBubbleEl.style.left = left + 'px';
+        tutorialBubbleEl.style.top = top + 'px';
+        tutorialBubbleEl.style.opacity = '1';
+    } else {
+        tutorialBubbleEl.style.opacity = '0';
+    }
+}
 
 function update() {
     if (!game.isLive) return;
@@ -9245,10 +10009,12 @@ function update() {
             
             // [核心修改] 替换为随机生气音效
             playRandomAngrySound();
+            if (typeof refreshCurrentHighlight === 'function' && window.currentGuidedRecipe) refreshCurrentHighlight();
             updateHUD();
         }
     });
 
+    updateTutorial();
     requestAnimationFrame(update);
 }
 
@@ -9831,9 +10597,16 @@ function updateHUD() {
         progBar.style.background = progress >= 80 ? '#2ecc71' : '#f1c40f';
     }
 
-    // [核心修改] 动态更新天数文案
     const dayLabel = document.getElementById('hud-day-label');
-    if(dayLabel) dayLabel.innerText = `DAY ${game.level} 营收`;
+    if (dayLabel) {
+        const currentDay = (game && Number.isFinite(game.currentDay)) ? game.currentDay : ((game && Number.isFinite(game.level)) ? game.level : 1);
+        if (game) game.currentDay = currentDay;
+        let dayText = `第 ${currentDay} 天`;
+        if (currentDay <= 3) {
+            dayText += ` <span style="display:inline-block; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: #d32f2f; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #ff5252; margin-left: 8px; vertical-align: middle; animation: pulseGlow 1.5s infinite; text-shadow: none;">🎊开业红利(收益x2)</span>`;
+        }
+        dayLabel.innerHTML = dayText;
+    }
 
     // 更新今日营收数值
     document.getElementById('revenue').innerText = `¥${game.dailyRevenue}`;
@@ -9858,6 +10631,7 @@ function updateHUD() {
         trendEl.style.display = 'none';
     }
 
+    if (typeof renderWarmingRack === 'function') renderWarmingRack();
     updateBalanceDisplay();
 }
 
@@ -10370,6 +11144,11 @@ window.togglePantry = function() {
         // 打开 
         drawer.classList.remove('closed'); 
         drawer.classList.add('open'); 
+
+        if (tutorialStep === 1) {
+            tutorialStep = 2;
+            updateTutorial();
+        }
         
         // [KMES] 触发自动化
         if (!game.hasOpenedPantry) {
@@ -10495,11 +11274,10 @@ function updateInventoryDisplay() {
             }
             const isDayOne = currentLevel === 1;
             const storeId = (game && game.activeStoreId) ? game.activeStoreId : 'cn:main';
-            const stock = (!isDayOne && typeof window.getIngredientCount === 'function') ? window.getIngredientCount(storeId, ing.id) : 0;
+            const stock = (typeof window.getIngredientCount === 'function') ? window.getIngredientCount(storeId, ing.id) : 0;
             let stockDisplay = stock;
             let stockColor = stock > 0 ? '#fff' : '#e74c3c'; // 白色文字在深色标签上
             if (isDayOne) {
-                stockDisplay = '∞';
                 stockColor = '#2ecc71';
             }
             
@@ -10871,20 +11649,16 @@ function handleStationClick(sid, event, zone) {
             // [修改] 实时扣除库存 
             const ingId = holdingThing.val.id; 
             if (game.dailyInventory) { 
-                // Day 1 特权：无限库存，不检查也不扣除 
-                if (game.level !== 1) { 
-                    const storeId = (game && game.activeStoreId) ? game.activeStoreId : 'cn:main';
-                    if (typeof window.getIngredientCount === 'function' && window.getIngredientCount(storeId, ingId) <= 0) { 
-                         triggerFeedback(event.clientX, event.clientY, "库存不足!", "red"); 
-                         return; 
-                    } 
-                    if (typeof window.consumeIngredient === 'function' && !window.consumeIngredient(storeId, ingId, 1)) { 
-                         triggerFeedback(event.clientX, event.clientY, "库存不足!", "red"); 
-                         return; 
-                    } 
-                    // 如果有顶栏显示库存的UI，这里需要刷新 
-                    if(typeof initIngredients === 'function') initIngredients(); 
+                const storeId = (game && game.activeStoreId) ? game.activeStoreId : 'cn:main';
+                if (typeof window.getIngredientCount === 'function' && window.getIngredientCount(storeId, ingId) <= 0) { 
+                     triggerFeedback(event.clientX, event.clientY, "库存不足!", "red"); 
+                     return; 
                 } 
+                if (typeof window.consumeIngredient === 'function' && !window.consumeIngredient(storeId, ingId, 1)) { 
+                     triggerFeedback(event.clientX, event.clientY, "库存不足!", "red"); 
+                     return; 
+                } 
+                if(typeof initIngredients === 'function') initIngredients(); 
             }
 
             s.currentIngredients.push(ingId);
@@ -10899,6 +11673,14 @@ function handleStationClick(sid, event, zone) {
             
             // [核心修复] 投放完成后，立即清空鼠标手持状态
             resetHand();
+
+            if (tutorialStep === 2) {
+                const analysis = analyzeDish(s.currentIngredients);
+                if (analysis && analysis.hasStock) {
+                    tutorialStep = 3;
+                }
+                updateTutorial();
+            }
             return;
         }
     }
@@ -10937,42 +11719,63 @@ function handleStationClick(sid, event, zone) {
 
             // 拿起当前工位的新菜
             holdingThing = { type: 'DISH', val: s.dishResult || s.recipe, sourceSid: sid };
-            
-            // [核心修改] 批量出餐逻辑
-            if (s.servingsLeft > 1) {
-                // 还有库存：扣减一份，保留 FINISHED 状态
-                s.servingsLeft--;
-                playSfx(1000, 'sine', 0.2); // 取餐音效
-                
-                // 视觉反馈：飘字提示剩余
-                const rect = event.target.getBoundingClientRect();
-                triggerFeedback(rect.left + rect.width/2, rect.top, `剩余 ${s.servingsLeft} 份`, "#2ecc71");
-                
-                // 仅刷新显示，不重置
-                renderStation(sid);
-            } else {
-                // --- [核心修复] 取走最后一份菜 --- 
-                
-                // 1. 判断备菜区是否有食材 
-                if (s.currentIngredients.length > 0) { 
-                    s.stage = 'PREP_ING'; // 如果有备菜，转为备菜状态 
-                } else { 
-                    s.stage = 'IDLE'; // 如果没备菜，转为空闲 
-                } 
-                
-                // 2. [关键] 绝对不要清空 s.currentIngredients !!! 
-                // s.currentIngredients = []; // <--- 已删除此行 
-                
-                // 3. 重置烹饪相关数据 
-                s.dishResult = null; 
-                s.recipe = null; 
-                s.progress = 0; 
-                s.servingsLeft = 0; 
-                
-                if (s.timer) clearInterval(s.timer);
-                playSfx(1000, 'sine', 0.2);
-                renderStation(sid);
+
+            if (tutorialStep === 4) {
+                tutorialStep = 5;
+                updateTutorial();
             }
+            
+            const dishObj = s.dishResult || s.recipe;
+            const dishName = dishObj && dishObj.name ? dishObj.name : null;
+            const totalNeeded = Array.isArray(game.activeOrders)
+                ? game.activeOrders.reduce((sum, o) => {
+                    if (!o || !Array.isArray(o.dishes)) return sum;
+                    return sum + o.dishes.filter(d => d && (d.name || d.n) === dishName).length;
+                }, 0)
+                : 0;
+
+            if (typeof s.servingsLeft !== 'number' || !Number.isFinite(s.servingsLeft) || s.servingsLeft <= 0) {
+                s.servingsLeft = 1;
+            }
+
+            s.servingsLeft = Math.max(0, s.servingsLeft - 1);
+            playSfx(1000, 'sine', 0.2);
+
+            const remainingNeeded = Math.max(0, totalNeeded - 1);
+            const extra = Math.max(0, s.servingsLeft - remainingNeeded);
+
+            if (dishName && extra > 0) {
+                const existingItem = warmingRack.find(i => i && i.dishName === dishName);
+                if (existingItem) {
+                    existingItem.portions += extra;
+                    s.servingsLeft -= extra;
+                    if (typeof showToast === 'function') showToast(`♨️ 剩余菜品已转入恒温台`);
+                } else if (warmingRack.length < WARMING_RACK_CAPACITY) {
+                    warmingRack.push({ dishName, portions: extra });
+                    s.servingsLeft -= extra;
+                    if (typeof showToast === 'function') showToast(`♨️ 剩余菜品已转入恒温台`);
+                } else {
+                    if (typeof showToast === 'function') showToast(`⚠️ 恒温台已满！请先清理缓存`);
+                }
+            }
+
+            if (s.servingsLeft <= 0) {
+                if (s.currentIngredients.length > 0) {
+                    s.stage = 'PREP_ING';
+                } else {
+                    s.stage = 'IDLE';
+                }
+                s.dishResult = null;
+                s.recipe = null;
+                s.progress = 0;
+                s.servingsLeft = 0;
+                if (s.timer) clearInterval(s.timer);
+            }
+
+            // 已移除“剩余 X 份”飘字提示
+
+            renderStation(sid);
+            if (typeof renderWarmingRack === 'function') renderWarmingRack();
             
             updateCursor();
             return;
@@ -10986,6 +11789,11 @@ function startCooking(sid) {
 
     const s = stations[sid];
     if (s.stage === 'COOKING') return; // Prevent double trigger
+
+    if (tutorialStep === 3) {
+        tutorialStep = 4;
+        updateTutorial();
+    }
     
     // Finalize Dish Analysis
     const analysis = analyzeDish(s.currentIngredients);
@@ -11369,7 +12177,7 @@ window.onload = () => {
 
     ensureGameLoadedOnce();
     try { updateLoadingBackground(); } catch (_) {}
-    initAutoIncomeSystem();
+    // initAutoIncomeSystem(); // 已废弃：收益按天结算并在地图手动收取
     updateBalanceDisplay();
     updateGaoshengTestEntryVisibility();
     window.addEventListener('resize', () => {
@@ -11454,7 +12262,16 @@ window.onload = () => {
 function setPaused(paused) {
     if (!game.isLive) return;
     game.isPaused = paused;
-    document.getElementById('pause-overlay').style.display = paused ? 'flex' : 'none';
+    const pauseOverlay = document.getElementById('pause-overlay');
+    if (pauseOverlay) pauseOverlay.style.display = paused ? 'flex' : 'none';
+    if (paused) {
+        const modal = document.querySelector('#pause-overlay .modal');
+        if (modal) {
+            modal.style.animation = 'none';
+            void modal.offsetHeight;
+            modal.style.animation = '';
+        }
+    }
     const pauseBtn = document.getElementById('btn-pause');
     if (pauseBtn) {
         pauseBtn.src = paused ? "assets/ui/继续.png" : "assets/ui/暂停.png";
@@ -11983,6 +12800,37 @@ function hideSettingsModal() {
     document.getElementById('settings-modal').style.display = 'none';
 }
 
+// [系统新增] 收取分店待收收益
+window.claimStoreIncome = function(storeId, event) {
+    try { if (event && event.stopPropagation) event.stopPropagation(); } catch (_) {}
+    if (!game || !game.stores || !storeId) return;
+    const store = game.stores[storeId];
+    if (store && Number.isFinite(store.pendingIncome) && store.pendingIncome > 0) {
+        const amount = store.pendingIncome;
+        game.coins = (Number.isFinite(game.coins) ? game.coins : 0) + amount;
+        store.pendingIncome = 0;
+        if (typeof playCoin === 'function') playCoin();
+        else if (typeof playSfx === 'function') playSfx(400, 'square', 0.1);
+        let displayName = store && store.name ? store.name : null;
+        if (!displayName) {
+            const parts = String(storeId).split(':');
+            const rId = parts[0];
+            const dId = parts[1] || 'main';
+            const regionInfo = (typeof getRegionById === 'function') ? getRegionById(rId) : null;
+            let districtName = '商业街';
+            if (regionInfo && regionInfo.districts) {
+                const dist = regionInfo.districts.find(d => d.id === dId);
+                if (dist) districtName = dist.name;
+            }
+            displayName = (regionInfo ? regionInfo.country : rId) + '·' + districtName;
+        }
+        if (typeof showToast === 'function') showToast(`成功收取 [${displayName}] 累计收益: ¥${amount}`);
+        if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
+        if (typeof renderLocationStep1 === 'function') renderLocationStep1();
+        if (typeof saveGameState === 'function') saveGameState();
+    }
+};
+
 // --- New Location Selection Logic ---
 
 function showLocationSelection() {
@@ -12042,9 +12890,10 @@ function unlockJapanPreview() {
         if (!game.stores[jpStoreId]) {
             game.stores[jpStoreId] = {
                 level: 1,
-                inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0 },
+                inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0, kmes: 0 },
                 ingredientAge: {},
-                isNew: true
+                isNew: true,
+                pendingIncome: 0
             };
         }
         game.activeStoreId = jpStoreId;
@@ -12145,7 +12994,8 @@ function renderLocationStep1() {
             game.stores[game.activeStoreId] = {
                 level: game.level,
                 inventory: JSON.parse(JSON.stringify(game.inventory)),
-                ingredientAge: JSON.parse(JSON.stringify(game.ingredientAge))
+                ingredientAge: JSON.parse(JSON.stringify(game.ingredientAge)),
+                pendingIncome: 0
             };
         }
     }
@@ -12185,8 +13035,21 @@ function renderLocationStep1() {
         if (isLive) badgeHtml = `<div class="card-badge badge-live">营业中</div>`; 
         else badgeHtml = `<div class="card-badge" style="background:#34495e;">托管中</div>`; 
         
+        // 收租气泡
+        let incomeBubble = '';
+        const pendingRaw = Number(storeData.pendingIncome);
+        const pending = Number.isFinite(pendingRaw) ? pendingRaw : 0;
+        if (pending > 0) {
+            incomeBubble = `
+                <div onclick="claimStoreIncome('${storeId}', event)" style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); background: #f1c40f; color: #8e4b10; font-weight: bold; font-size: 13px; padding: 4px 10px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; animation: incomeBounce 1s infinite; border: 2px solid #fff; white-space: nowrap; z-index: 50;">
+                    💰 待收: ¥${pending}
+                </div>
+            `;
+        }
+        
         card.innerHTML = ` 
             ${badgeHtml} 
+            ${incomeBubble}
             <img class="empire-thumb" src="${imgSrc}" alt="${displayName}" loading="lazy" decoding="async" onerror="this.style.display='none'">
             <div class="empire-card-body">
                 <div class="empire-card-title">${districtName}</div>
@@ -12300,7 +13163,7 @@ const INTRO_STORY = [
         speaker: "高叔", 
         text: "我帮你张罗了一批新鲜食材已经入库了，先练练手，把咱那灶台热起来再说！", 
         image: "assets/characters/高叔.png", 
-        reward: { coins: 500, items: { 'tomato': 5, 'egg': 5, 'rice': 5, 'onion': 5 } }, 
+        reward: { coins: 800, items: { 'tomato': 5, 'egg': 5, 'rice': 5, 'onion': 5 } }, 
         audio: "assets/voice/intro_gao_3.mp3" 
     } 
 ]; 
@@ -12358,7 +13221,7 @@ const STORY_EVENTS = {
 let currentVoiceAudio = null;
 let currentDialogueBgm = null; // [新增] 全局剧情 BGM 对象
 
-window.checkAndTriggerStory = function(storyId, storyData) {
+window.checkAndTriggerStory = function(storyId, storyData, onComplete) {
     try {
         const storageKey = 'story_' + storyId;
         const signature = Array.isArray(storyData)
@@ -12381,13 +13244,19 @@ window.checkAndTriggerStory = function(storyId, storyData) {
                 if (typeof renderStoryModal === 'function') {
                     renderStoryModal(storyData, () => {
                         if (game) game.isPaused = false;
+                        if (typeof onComplete === 'function') onComplete(true);
                     });
                 } else if (game) {
                     game.isPaused = false;
+                    if (typeof onComplete === 'function') onComplete(true);
                 }
             }, 800);
+            return true;
         }
+        if (typeof onComplete === 'function') onComplete(false);
     } catch (_) {}
+    if (typeof onComplete === 'function') onComplete(false);
+    return false;
 };
 
 function renderStoryModal(storyData, onComplete) { 
@@ -12823,6 +13692,7 @@ function confirmNewJourney() {
             inventory: { pot: 0, belt: 0, fridge: 0, expansion: 0, kmes: 0 },
             ingredientAge: {},
             history: [],
+            pendingIncome: 0,
             // 可以添加一些新店特有的初始标记
             isNew: true
         };
@@ -12931,6 +13801,32 @@ function settleDay(reason = "营业结束") {
         activeStore.sessionCost = (activeStore.sessionCost || 0) + spoiledCost;
     }
 
+    // [系统新增] 每日结束时，为所有非当前游玩且已托管的店铺累加挂机收益
+    try {
+        const stores = game && game.stores ? game.stores : {};
+        Object.keys(stores).forEach(id => {
+            if (id === activeStoreId) return;
+            const st = stores[id];
+            if (!st || typeof st !== 'object') return;
+            const inv2 = st.inventory;
+            const hasOmni = !!(
+                inv2 &&
+                ((typeof inv2.pot === 'number' && Number.isFinite(inv2.pot) && inv2.pot >= 3) || !!inv2['pot_omni3'])
+            );
+            const hasKmesMax = !!(
+                inv2 &&
+                ((typeof inv2.kmes === 'number' && Number.isFinite(inv2.kmes) && inv2.kmes >= 3) || !!inv2['kmes_3'] || !!inv2['kmes_system'])
+            );
+            st.isAutomated = !!(hasOmni && hasKmesMax);
+            if (!st.isAutomated) return;
+            const existingPending = Number(st.pendingIncome);
+            st.pendingIncome = Number.isFinite(existingPending) ? existingPending : 0;
+            const lv = Number.isFinite(st.level) ? st.level : 1;
+            const dailyProfit = 500 + (lv * 100);
+            st.pendingIncome += dailyProfit;
+        });
+    } catch (_) {}
+
     saveGameState();
 
     const upgradedTitle = (typeof updatePlayerTitle === 'function') ? updatePlayerTitle() : false;
@@ -12983,12 +13879,16 @@ function settleDay(reason = "营业结束") {
     // 不再跳转到 showAchievementDetails，避免逻辑断层 
     const currentStore = (game && game.stores) ? game.stores[game.activeStoreId || 'cn:main'] : null;
     const storeDay = currentStore && typeof currentStore.level === 'number' && Number.isFinite(currentStore.level) ? currentStore.level : game.level;
+    const showSettlement = () => showResult(msg);
     if (storeDay === 1) {
         if (typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
-            checkAndTriggerStory('day1_end', STORY_EVENTS.DAY1_END);
+            const triggered = checkAndTriggerStory('day1_end', STORY_EVENTS.DAY1_END, () => {
+                showSettlement();
+            });
+            if (triggered) return;
         }
     }
-    showResult(msg);
+    showSettlement();
 }
 
 function resetHand() {
@@ -13017,7 +13917,25 @@ function resetStations() {
 
 function cancelAction() {
     if (holdingThing) {
-        // Drop item effect
+        if (holdingThing.type === 'DISH') {
+            const dish = holdingThing.val;
+            const sid = holdingThing.sourceSid;
+            const s = sid ? stations[sid] : null;
+            if (s && s.stage === 'IDLE') {
+                s.stage = 'FINISHED';
+                s.dishResult = dish;
+                s.recipe = dish;
+                try { renderStation(sid); } catch(_) {}
+                holdingThing = null;
+                updateCursor();
+                if (typeof playSfx === 'function') playSfx(180, 'triangle', 0.12);
+                triggerFeedback(window.innerWidth/2, window.innerHeight/2, "已退回工位", "orange");
+                return;
+            } else {
+                triggerFeedback(window.innerWidth/2, window.innerHeight/2, "原工位已满，无法退回", "#999");
+                return;
+            }
+        }
         triggerFeedback(window.innerWidth/2, window.innerHeight/2, "取消操作", "#ccc");
         resetHand();
     }
@@ -13109,7 +14027,14 @@ function initLevel(regenerateOrders = true) {
     updatePantryStyle();
 
     // Reset Timer
-    game.timeRemaining = 120;
+    const dayForTimer = (game && Number.isFinite(game.currentDay)) ? game.currentDay : ((game && Number.isFinite(game.level)) ? game.level : 1);
+    if (game) game.currentDay = dayForTimer;
+    const baseTime = 60;
+    const extraTime = (dayForTimer - 1) * 10;
+    const totalTime = Math.min(baseTime + extraTime, 150);
+    game.timeLeft = totalTime;
+    game.totalTime = totalTime;
+    game.timeRemaining = totalTime;
     game.lastTime = Date.now();
     
     // [KMES] 设计决策（请勿移除）：
@@ -13126,6 +14051,8 @@ function initLevel(regenerateOrders = true) {
     }
     if (typeof updateKMESCard === 'function') updateKMESCard();
 
+    warmingRack = [];
+
     // 1. Clear Stations & Hand
     resetStations();
     resetHand();
@@ -13141,6 +14068,11 @@ function initLevel(regenerateOrders = true) {
     // 4. Update UI
     updateHUD();
     updateBalanceDisplay();
+
+    if (game.currentDay === 1 && tutorialStep === 0) {
+        tutorialStep = 1;
+        updateTutorial();
+    }
     
     // [新增] 启动 KMES 系统
     startKMES();
@@ -13467,6 +14399,18 @@ function initDailyInventory() {
             });
         }
         console.log("❄️ [Fridge] Level 1+: Inventory retained.");
+    }
+
+    if (sessionStorage.getItem('ingredientAutoFill') === 'true') {
+        if (typeof INGREDIENTS !== 'undefined' && INGREDIENTS) {
+            Object.keys(INGREDIENTS).forEach(ingId => {
+                let inv = game.dailyInventory[ingId] || [];
+                inv = normalizeIngredientBatches(inv, currentDay);
+                const totalQty = inv.reduce((sum, batch) => sum + batch.qty, 0);
+                if (totalQty < 50) inv.push({ qty: 50 - totalQty, expiryDay: currentDay + 3 });
+                game.dailyInventory[ingId] = inv;
+            });
+        }
     }
 }
 
@@ -13840,7 +14784,16 @@ function showPrepModal() {
     modal.style.cssText = 'display: flex !important; pointer-events: auto !important; opacity: 1 !important; visibility: visible !important;';
 
     // 4. 生成情报数据
-    generateDailyGossip();
+    const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : ((activeStoreId.split(':')[0] || 'cn'));
+    const isJapanStore = (activeStoreId === 'japan') || (region === 'jp') || (typeof activeStoreId === 'string' && activeStoreId.startsWith('jp'));
+    if (isJapanStore) {
+        game.dailyTrend = 'balanced';
+        game.dailyGossip = null;
+        game.todayBoostEvent = null;
+    } else {
+        game.todayBoostEvent = null;
+        generateDailyGossip();
+    }
 
     // 5. 渲染基本结构 (注意：Grid 和 Footer 加上了 prep-ui-hidden 类，初始不可见)
     // Day 1 特殊文案处理
@@ -13874,11 +14827,21 @@ function showPrepModal() {
                 localStorage.setItem('hasSeenPrepGift', 'true');
             } else {
                 // 如果已领取过，显示默认文案
-                introText = "晨光熹微，市集喧嚣...<br><span style='display:inline-block; transform: translateY(10px);'><span style='font-size:0.68em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span><br><span style='font-size:0.68em; opacity:0.8; font-weight:400'>听听街坊们都在聊什么</span></span>";
+                // [系统判断] 仅日本店采用大亨风，中国店保留烟火气
+                if (isJapanStore) {
+                    introText = "商战的序幕，总在清晨拉开...<br><span style='display:inline-block; transform: translateY(10px);'><span style='font-size:0.68em; opacity:0.8; font-weight:400'>洞悉今日潜藏的市场风向</span><br><span style='font-size:0.68em; opacity:0.8; font-weight:400'>抢占核心食材，主导东京的味蕾</span></span>";
+                } else {
+                    introText = "晨光熹微，市集喧嚣...<br><span style='display:inline-block; transform: translateY(10px);'><span style='font-size:0.68em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span><br><span style='font-size:0.68em; opacity:0.8; font-weight:400'>听听街坊们都在聊什么</span></span>";
+                }
             }
         }
     } else {
-        introText = "晨光熹微，市集喧嚣...<br><span style='display:inline-block; transform: translateY(10px);'><span style='font-size:0.68em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span><br><span style='font-size:0.68em; opacity:0.8; font-weight:400'>听听街坊们都在聊什么</span></span>";
+        // [系统判断] 仅日本店采用大亨风，中国店保留烟火气
+        if (isJapanStore) {
+            introText = "商战的序幕，总在清晨拉开...<br><span style='display:inline-block; transform: translateY(10px);'><span style='font-size:0.68em; opacity:0.8; font-weight:400'>洞悉今日潜藏的市场风向</span><br><span style='font-size:0.68em; opacity:0.8; font-weight:400'>抢占核心食材，主导东京的味蕾</span></span>";
+        } else {
+            introText = "晨光熹微，市集喧嚣...<br><span style='display:inline-block; transform: translateY(10px);'><span style='font-size:0.68em; opacity:0.8; font-weight:400'>甄选今日最新鲜的食材</span><br><span style='font-size:0.68em; opacity:0.8; font-weight:400'>听听街坊们都在聊什么</span></span>";
+        }
     }
 
     modal.innerHTML = `
@@ -13995,7 +14958,6 @@ function showPrepModal() {
     const bgEl = modal.querySelector('.prep-bg');
     if (bgEl) {
         // 使用版本号 v1.0 (如果更新了图片文件，请修改此处)
-        const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : 'cn';
         const bgUrl = region === 'jp' ? 'assets/bg/日本·白天菜市场.png' : 'assets/bg/白天菜市场.png';
         loadBackgroundImageWithRetry(bgEl, bgUrl, '1.0');
     }
@@ -14007,47 +14969,58 @@ function showPrepModal() {
         const meatCrateCost = Math.floor(500 * crateDiscountRate);
         const vegeCrateCost = Math.floor(313 * crateDiscountRate);
         const seafoodCrateCost = Math.floor(563 * crateDiscountRate);
+        const isJapan = isJapanStore;
+        const crateConfig = {
+            title: isJapan ? "商社机密货源" : "供应商批发箱",
+            meat: {
+                title: isJapan ? "黑毛与内脏统货" : "鲜肉全包箱",
+                desc: isJapan ? "极道肉商特供。高阶牛筋、大肠及各类鲜肉" : "巨量肉类 + 葱/薯/椒等辅料",
+                cost: meatCrateCost
+            },
+            vege: {
+                title: isJapan ? "农协直发契约箱" : "农场全素筐",
+                desc: isJapan ? "JA农协直送。冲绳苦瓜、卷心菜及全类时蔬" : "全品类蔬菜 + 鸡蛋/米饭",
+                cost: vegeCrateCost
+            },
+            seafood: {
+                title: isJapan ? "丰洲暗拍盲盒" : "码头海鲜桶",
+                desc: isJapan ? "凌晨暗拍截获。极品小乌贼、鳗鱼肝等水产" : "虾/鱼 + 葱姜/鸡蛋/猪肉",
+                cost: seafoodCrateCost
+            }
+        };
+
         topControls.innerHTML = `
             <div style="margin-bottom: 20px;">
                 <div style="font-size: 14px; color: #95a5a6; margin-bottom: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
                     <svg style="width:16px;height:16px;fill:#95a5a6;" viewBox="0 0 24 24"><path d="M20,6h-4V4c0-1.1-0.9-2-2-2h-4C8.9,2,8,2.9,8,4v2H4C2.9,6,2,6.9,2,8v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M10,4h4v2h-4V4z M20,20H4V8h16V20z"/></svg>
-                    供应商批发箱 <span style="font-weight:400; font-size:12px; background:rgba(231,76,60,0.1); color:#e74c3c; padding:2px 6px; border-radius:4px; margin-left:8px;">5折优惠</span>
+                    ${crateConfig.title} <span style="font-weight:400; font-size:12px; background:rgba(231,76,60,0.1); color:#e74c3c; padding:2px 6px; border-radius:4px; margin-left:8px;">5折优惠</span>
                 </div>
                 <div style="display: flex; gap: 12px; overflow-x: auto; padding: 4px; scroll-behavior: smooth;">
-                    <!-- Meat Crate -->
                     <div class="supplier-crate meat" onclick="buyCrate('meat')">
                         <div class="crate-header">
-                            <svg class="crate-icon-svg" viewBox="0 0 24 24">
-                                <path d="M19.33 10.22l-4.55-4.55a2.53 2.53 0 0 0-3.58 0L9.41 7.46a2.53 2.53 0 0 0 0 3.58l.74.74-5.94 5.94A2.5 2.5 0 0 0 2.44 21.25l.31.31a2.5 2.5 0 0 0 3.53 0l5.94-5.94.74.74a2.53 2.53 0 0 0 3.58 0l1.79-1.79a2.53 2.53 0 0 0 0-3.58z"/>
-                            </svg>
-                            <div class="crate-title">鲜肉全包箱</div>
+                            <svg class="crate-icon-svg" viewBox="0 0 24 24"><path d="M19.33 10.22l-4.55-4.55a2.53 2.53 0 0 0-3.58 0L9.41 7.46a2.53 2.53 0 0 0 0 3.58l.74.74-5.94 5.94A2.5 2.5 0 0 0 2.44 21.25l.31.31a2.5 2.5 0 0 0 3.53 0l5.94-5.94.74.74a2.53 2.53 0 0 0 3.58 0l1.79-1.79a2.53 2.53 0 0 0 0-3.58z"/></svg>
+                            <div class="crate-title">${crateConfig.meat.title}</div>
                         </div>
-                        <div class="crate-desc">巨量肉类 + 葱/薯/椒等辅料</div>
-                        <div class="crate-price-tag">¥${meatCrateCost}</div>
+                        <div class="crate-desc">${crateConfig.meat.desc}</div>
+                        <div class="crate-price-tag">¥${crateConfig.meat.cost}</div>
                     </div>
 
-                    <!-- Vege Crate -->
                     <div class="supplier-crate vege" onclick="buyCrate('vege')">
                         <div class="crate-header">
-                            <svg class="crate-icon-svg" viewBox="0 0 24 24">
-                                <path d="M17,8C8,10,5.9,16.17,3.82,21.34l1.89.66L9.5,22l4.2,4.2c.3.3.7.3,1,0l.7-.7c.3-.3.3-.7,0-1l-4.2-4.2l-2-3.8l.66-1.89C15.17,12.9,21,11,23,2c-7,0-10,3-13,6"/>
-                            </svg>
-                            <div class="crate-title">农场全素筐</div>
+                            <svg class="crate-icon-svg" viewBox="0 0 24 24"><path d="M17,8C8,10,5.9,16.17,3.82,21.34l1.89.66L9.5,22l4.2,4.2c.3.3.7.3,1,0l.7-.7c.3-.3.3-.7,0-1l-4.2-4.2l-2-3.8l.66-1.89C15.17,12.9,21,11,23,2c-7,0-10,3-13,6"/></svg>
+                            <div class="crate-title">${crateConfig.vege.title}</div>
                         </div>
-                        <div class="crate-desc">全品类蔬菜 + 鸡蛋/米饭</div>
-                        <div class="crate-price-tag">¥${vegeCrateCost}</div>
+                        <div class="crate-desc">${crateConfig.vege.desc}</div>
+                        <div class="crate-price-tag">¥${crateConfig.vege.cost}</div>
                     </div>
 
-                    <!-- Seafood Crate -->
                     <div class="supplier-crate seafood" onclick="buyCrate('seafood')">
                         <div class="crate-header">
-                            <svg class="crate-icon-svg" viewBox="0 0 24 24">
-                                <path d="M21.5,10.5l-1.9-1.9c-0.4-0.4-0.9-0.5-1.4-0.3c-1.4,0.5-2.9,0.8-4.5,0.8c-1.6,0-3.1-0.3-4.5-0.8c-0.5-0.2-1-0.1-1.4,0.3L4,12.5l-2.6-2.6c-0.4-0.4-1-0.4-1.4,0l0,0c-0.4,0.4-0.4,1,0,1.4l3,3c0.4,0.4,1,0.4,1.4,0l3.8-3.8c0.4,0.4,0.9,0.5,1.4,0.3c1.4-0.5,2.9-0.8,4.5-0.8c1.6,0,3.1,0.3,4.5,0.8c0.5,0.2,1,0.1,1.4-0.3l1.9-1.9C21.9,11.5,21.9,10.9,21.5,10.5z"/>
-                            </svg>
-                            <div class="crate-title">码头海鲜桶</div>
+                            <svg class="crate-icon-svg" viewBox="0 0 24 24"><path d="M21.5,10.5l-1.9-1.9c-0.4-0.4-0.9-0.5-1.4-0.3c-1.4,0.5-2.9,0.8-4.5,0.8c-1.6,0-3.1-0.3-4.5-0.8c-0.5-0.2-1-0.1-1.4,0.3L4,12.5l-2.6-2.6c-0.4-0.4-1-0.4-1.4,0l0,0c-0.4,0.4-0.4,1,0,1.4l3,3c0.4,0.4,1,0.4,1.4,0l3.8-3.8c0.4,0.4,0.9,0.5,1.4,0.3"/></svg>
+                            <div class="crate-title">${crateConfig.seafood.title}</div>
                         </div>
-                        <div class="crate-desc">虾/鱼 + 葱姜/鸡蛋/猪肉</div>
-                        <div class="crate-price-tag">¥${seafoodCrateCost}</div>
+                        <div class="crate-desc">${crateConfig.seafood.desc}</div>
+                        <div class="crate-price-tag">¥${crateConfig.seafood.cost}</div>
                     </div>
                 </div>
             </div>
@@ -14062,10 +15035,298 @@ function showPrepModal() {
     // 7. 播放音乐 (与集市共享)
     AudioController.playShop();
 
-    // 8. [关键] 启动对话流程
+    // 8. [关键] 启动集市情报流程
     // 延时从 500ms 改为 2200ms，等待 Intro Text (2.5s) 播放大半后再出现
     setTimeout(() => {
-        startMarketChatterFlow();
+        const currentActiveStoreId = game.activeStoreId || 'cn:main';
+        const isJapanStoreNow =
+            currentActiveStoreId === 'japan' ||
+            region === 'jp' ||
+            (typeof currentActiveStoreId === 'string' && (currentActiveStoreId.startsWith('jp') || currentActiveStoreId.startsWith('jp:')));
+
+        if (isJapanStoreNow) {
+            // 2. 带有图片资产与食材池的场景库 
+            const JAPAN_MARKET_SCENES = [ 
+                { 
+                    // 场景一：居酒屋
+                    bgImg: "assets/bg/场景一.png", 
+                    label: "新橋駅前・ほろ酔いの夜", 
+                    pool: ["极品小乌贼", "和牛牛筋", "猪肝", "牛大肠", "鳗鱼肝", "鸡腿"] 
+                }, 
+                { 
+                    // 场景二：冲绳猛暑
+                    bgImg: "assets/bg/场景二.png", 
+                    label: "那覇の海風・猛暑日", 
+                    pool: ["苦瓜", "明太子鱼", "细金枪鱼", "豆芽", "鸡腿"] 
+                }, 
+                { 
+                    // 场景三：夏日祭典
+                    bgImg: "assets/bg/场景三.png", 
+                    label: "夏祭り・青春の香り", 
+                    pool: ["卷心菜", "明太子鱼", "和牛牛筋", "鸡腿", "豆芽", "极品小乌贼"] 
+                }, 
+                { 
+                    // 场景四：财阀的晚宴
+                    bgImg: "assets/bg/场景四.png", 
+                    artDesc: "[美术资源预留: 银座繁华街头，高级黑色轿车与闪烁的奢华霓虹灯]", 
+                    label: "銀座・財閥の晩餐", 
+                    pool: ["极品小乌贼", "鳗鱼肝", "细金枪鱼", "和牛牛筋"] 
+                }, 
+                { 
+                    // 场景五：商店街
+                    bgImg: "assets/bg/场景五.png", 
+                    artDesc: "[美术资源预留: 阴雨绵绵的下町商店街，打着透明雨伞的家庭主妇]", 
+                    label: "商店街·雨の特売", 
+                    pool: ["卷心菜", "菠菜", "豆芽", "蒜苔", "猪肝", "鸡腿"] 
+                } 
+            ]; 
+
+            const jpRecipeIngredientIds = new Set();
+            try {
+                (RECIPES || []).filter(r => (r && (r.region || 'cn') === 'jp')).forEach(r => {
+                    (r.ingredients || []).forEach(id => jpRecipeIngredientIds.add(id));
+                });
+            } catch (_) {}
+
+            JAPAN_MARKET_SCENES.forEach(scene => {
+                if (!scene || !Array.isArray(scene.pool)) return;
+                scene.pool = scene.pool.filter(ingName => {
+                    const match = (typeof INGREDIENTS !== 'undefined' && INGREDIENTS)
+                        ? Object.entries(INGREDIENTS).find(([, data]) => data && data.name === ingName)
+                        : null;
+                    if (!match) return false;
+                    const [ingId, ingDef] = match;
+                    if (ingDef && ingDef.store && ingDef.store !== 'japan' && ingDef.store !== 'all') return false;
+                    return jpRecipeIngredientIds.has(ingId);
+                });
+            });
+ 
+            // 3. 随机抽取场景 
+            const availableScenes = JAPAN_MARKET_SCENES.filter(s => s && Array.isArray(s.pool) && s.pool.length > 0);
+            const todayScene = availableScenes.length > 0
+                ? availableScenes[Math.floor(Math.random() * availableScenes.length)]
+                : JAPAN_MARKET_SCENES[Math.floor(Math.random() * JAPAN_MARKET_SCENES.length)]; 
+             
+            // 4. 核心：从该场景的池子中，随机打乱并抽取 3 到 4 个食材 
+            // [系统修复] 动态过滤：仅保留玩家当前已解锁、且集市货架会展示的食材（与 renderPrepUI 完全一致）
+            const currentLevel = game.level;
+            const allowedIngredients = new Set();
+            try {
+                const unlockedRecipes = getActiveRecipes().filter(r => (r.reqLevel || 1) <= currentLevel);
+                unlockedRecipes.forEach(r => r.ingredients.forEach(i => allowedIngredients.add(i)));
+            } catch (_) {}
+
+            const unlockedPool = todayScene.pool.filter(ingName => {
+                if (typeof INGREDIENTS === 'undefined' || !INGREDIENTS) return false;
+                const match = Object.entries(INGREDIENTS).find(([, data]) => data && data.name === ingName);
+                if (!match) return false;
+                const [ingId, ingDef] = match;
+                if (ingDef && ingDef.store && ingDef.store !== 'japan' && ingDef.store !== 'all') return false;
+                if (!jpRecipeIngredientIds.has(ingId)) return false;
+                return allowedIngredients.has(ingId);
+            });
+
+            const shuffledPool = [...unlockedPool].sort(() => 0.5 - Math.random()); 
+            
+            const maxToPick = Math.floor(Math.random() * 2) + 3; // 期望抽 3 或 4 个 
+            const pickCount = Math.min(shuffledPool.length, maxToPick); 
+            let todayBoosted = pickCount > 0 ? shuffledPool.slice(0, pickCount) : null;
+            if (!todayBoosted) {
+                const fallbackId = Array.from(allowedIngredients)[0];
+                const fallbackName = (fallbackId && INGREDIENTS && INGREDIENTS[fallbackId] && INGREDIENTS[fallbackId].name) ? INGREDIENTS[fallbackId].name : null;
+                todayBoosted = [fallbackName || "卷心菜"];
+            }
+             
+            // 存入全局供订单生成使用 
+            game.todayBoostEvent = { boostedIngredients: todayBoosted }; 
+            
+            const JAPAN_SILHOUETTE_MAP = {};
+            if (typeof INGREDIENTS !== 'undefined' && INGREDIENTS) {
+                Object.values(INGREDIENTS).forEach(def => {
+                    if (def && def.name && def.icon) JAPAN_SILHOUETTE_MAP[def.name] = def.icon;
+                });
+            }
+            const safeZones = [ 
+                { top: '15%', left: '15%' }, 
+                { top: '15%', left: '60%' }, 
+                { top: '55%', left: '20%' }, 
+                { top: '50%', left: '65%' }, 
+                { top: '35%', left: '40%' } 
+            ]; 
+            const shuffledZones = [...safeZones].sort(() => 0.5 - Math.random()); 
+            const silhouetteHtml = todayBoosted.map((ingName, index) => { 
+                const emoji = JAPAN_SILHOUETTE_MAP[ingName] || "❓"; 
+                const zone = shuffledZones[index % shuffledZones.length]; 
+                const rotation = Math.floor(Math.random() * 60) - 30; 
+                const scale = (Math.random() * 0.3 + 0.4).toFixed(2); 
+                return `<div class="intel-silhouette" data-name="${ingName}" data-emoji="${emoji}" style="position: absolute; top: ${zone.top}; left: ${zone.left}; transform: rotate(${rotation}deg) scale(${scale}); font-size: 42px; color: transparent; text-shadow: 0 0 0 rgba(15, 20, 25, 0.95), 0px 0px 3px rgba(255, 255, 255, 0.3); z-index: 10; cursor: crosshair; transition: all 0.3s ease;">${emoji}</div>`; 
+            }).join(''); 
+ 
+            const existing = document.getElementById('japan-polaroid-overlay'); 
+            if (existing && existing.parentNode) existing.parentNode.removeChild(existing); 
+ 
+            const overlay = document.createElement('div'); 
+            overlay.id = 'japan-polaroid-overlay'; 
+            overlay.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; backdrop-filter: blur(3px);'; 
+ 
+            overlay.innerHTML = ` 
+                <button id="btn-close-polaroid-top" class="icon-btn" style="position: absolute; top: 30px; left: 30px; padding: 0; z-index: 100000; pointer-events: auto;"> 
+                    <img src="assets/icons/icon_back.png" alt="返回" style="width: 55px; height: 55px; margin: 0;"> 
+                </button> 
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;"> 
+                    <h2 style="color:#fff; margin-bottom:14px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 32px; transform: translateY(-58px);">市场风向预判</h2> 
+                    <div style="color:#a4b0be; font-size:16px; margin-bottom:26px; line-height: 1.6; text-align: center; font-family: 'OPPOSans', sans-serif;"> 
+                        <p style="margin: 0 0 5px 0; transform: translateY(-40px);">“在竞争激烈的商圈，光靠埋头做菜是活不下去的。”</p> 
+                        <p style="margin: 0; transform: translateY(-40px);">“仔细搜寻照片上的蛛丝马迹，<span style="color:#fff; border-bottom:1px dashed #fff; cursor:pointer;">点击黑影以破解暗号</span>。”</p> 
+                    </div> 
+                    <div style="display: flex; flex-wrap: nowrap; gap: 40px; align-items: flex-start; justify-content: center; width: 720px;"> 
+                        <div style="width: 352px; height: 352px; background: #fff; padding: 16px 16px 48px 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: rotate(-2deg); text-align: center; position: relative; flex-shrink: 0; box-sizing: border-box;"> 
+                            <div style="background: #e0e6ed; height: 260px; width: 100%; border: 1px inset #b2bec3; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 10px; box-sizing: border-box;"> 
+                                ${silhouetteHtml} 
+                                ${todayScene.bgImg ? ` 
+                                    <img class="polaroid-photo-img" src="${todayScene.bgImg}" alt="${todayScene.label}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"> 
+                                    <div class="polaroid-develop-mask"></div>
+                                ` : ` 
+                                    <div style="font-size: 13px; color: #636e72; font-style: italic; line-height: 1.4; text-align: left; width: 100%; z-index: 1; pointer-events: none;"> 
+                                        ${todayScene.artDesc || ''} 
+                                    </div> 
+                                `} 
+                            </div> 
+                            <div style="font-family: 'Kaiti', 'STKaiti', serif; font-size: 18px; color: #2c3e50; position: absolute; bottom: 12px; left: 0; width: 100%; font-weight: bold;"> 
+                                ${todayScene.label} 
+                            </div> 
+                        </div> 
+                        <div id="japan-intel-panel" class="japan-intel-thermal" style="width: 330px; min-height: 352px; box-sizing: border-box; padding: 16px; opacity: 0; transform: translateX(-20px); transition: all 0.4s ease; display: flex; flex-direction: column; flex-shrink: 0; pointer-events: none;"> 
+                        </div> 
+                    </div> 
+                    <button id="btn-close-polaroid-bottom" class="btn-start-shopping" style="position: fixed; right: 36px; bottom: 28px; background:none; border:none; padding:0; box-shadow:none; width:auto; height:auto; display:flex; align-items:center; justify-content:center; z-index: 100000; pointer-events: auto;"> 
+                        <img src="assets/ui/开始买菜.png" alt="开始买菜" style="height:80px; width:auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); transition: transform 0.2s; cursor: pointer; transform: scale(1);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"> 
+                    </button> 
+                </div> 
+            `; 
+ 
+            const gameContainer = document.getElementById('game-container'); 
+            if (gameContainer) { 
+                gameContainer.appendChild(overlay); 
+            } else { 
+                document.body.appendChild(overlay); 
+            }
+ 
+            const panel = document.getElementById('japan-intel-panel'); 
+            (function(){ 
+                let sfx = document.getElementById('polaroid-sfx'); 
+                if (!sfx) { 
+                    sfx = document.createElement('audio'); 
+                    sfx.id = 'polaroid-sfx'; 
+                    sfx.src = 'audio/拍照音效.mp3'; 
+                    sfx.preload = 'auto'; 
+                    document.body.appendChild(sfx); 
+                } 
+                try { sfx.currentTime = 0; sfx.play().catch(()=>{}); } catch(_) {} 
+            })();
+            const silhouettes = overlay.querySelectorAll('.intel-silhouette'); 
+            const totalSilhouettes = silhouettes.length || 0;
+            let foundSilhouettes = 0;
+            const updateIntelSignal = function() {
+                if (!panel) return;
+                const row = panel.querySelector('.thermal-led-row');
+                if (!row) return;
+                row.innerHTML = Array.from({ length: totalSilhouettes }).map((_, i) => {
+                    return `<span class="thermal-led${i < foundSilhouettes ? ' is-on' : ''}"></span>`;
+                }).join('');
+            };
+            silhouettes.forEach(el => { 
+                el.onclick = function() { 
+                    const alreadyFound = this.getAttribute('data-found') === '1';
+                    if (typeof playSfx === 'function') {
+                        if (alreadyFound) playSfx(360, 'sine', 0.08);
+                        else playSfx(520, 'square', 0.12);
+                    }
+                    if (!alreadyFound) {
+                        this.setAttribute('data-found', '1');
+                        foundSilhouettes = Math.min(totalSilhouettes, foundSilhouettes + 1);
+                    }
+                    this.style.color = "initial"; 
+                    this.style.textShadow = "none"; 
+                    this.style.transform = this.style.transform.replace(/scale\\([0-9.]+\\)/, 'scale(1.1)'); 
+                    this.style.zIndex = "20"; 
+ 
+                    const ingName = this.getAttribute('data-name'); 
+                    const emoji = this.getAttribute('data-emoji'); 
+ 
+                    let ingId = null; 
+                    if (typeof INGREDIENTS !== 'undefined' && INGREDIENTS) { 
+                        const m = Object.entries(INGREDIENTS).find(([, d]) => d && d.name === ingName); 
+                        if (m) ingId = m[0]; 
+                    } 
+                    let related = Array.isArray(RECIPES) ? RECIPES.filter(r => r && Array.isArray(r.ingredients) && ( ingId ? r.ingredients.includes(ingId) : false ) && ((r.region || 'cn') === 'jp')) : []; 
+                    if (related.length === 0 && Array.isArray(RECIPES)) { 
+                        related = RECIPES.filter(r => r && Array.isArray(r.ingredients) && (ingId ? r.ingredients.includes(ingId) : false)); 
+                    } 
+                    let recipeHtml = related.length ? related.slice(0, 8).map(r => { 
+                        const ings = (r.ingredients || []).slice(0, 8).map(id => { 
+                            const def = INGREDIENTS && INGREDIENTS[id] ? INGREDIENTS[id] : null; 
+                            const e = def && def.icon ? def.icon : ''; 
+                            const n = def && def.name ? def.name : id; 
+                            const isHit = (def && def.name === ingName);
+                            const icon = e ? `<span class="thermal-tag-icon">${e}</span>` : '';
+                            return `<span class="thermal-tag${isHit ? ' is-hit' : ''}">${icon}<span class="thermal-tag-text">${n}</span></span>`; 
+                        }).join(''); 
+                        return `<li class="thermal-item"><div class="thermal-item-title">${r.name || '未知菜谱'}</div><div class="thermal-tags">${ings}</div></li>`; 
+                    }).join('') : `<li class="thermal-empty">当前进度暂无该食材的关联菜谱情报</li>`; 
+ 
+                    if (panel) { 
+                        panel.style.opacity = '1'; 
+                        panel.style.transform = 'translateX(0)'; 
+                        panel.style.pointerEvents = 'auto'; 
+                        const featureHtml = `<div class="thermal-feature">${emoji || ''}</div>`;
+                        panel.innerHTML = `
+                            <div class="thermal-head">
+                                <div class="thermal-led-row"></div>
+                                <div class="thermal-head-label">SIGNAL</div>
+                            </div>
+                            <div class="thermal-title">情报解密</div>
+                            <div class="thermal-name">${ingName}</div>
+                            <div class="thermal-section">可烹饪菜品</div> 
+                            <ul class="thermal-list custom-scrollbar"> 
+                                ${recipeHtml} 
+                            </ul> 
+                            ${featureHtml}
+                        `; 
+                        updateIntelSignal();
+                    } 
+                }; 
+            }); 
+ 
+            const closeOverlay = function() { 
+                if (overlay.parentNode) { 
+                    overlay.parentNode.removeChild(overlay); 
+                }
+                if (typeof revealPrepUI === 'function') {
+                    try { revealPrepUI(); } catch (_) {}
+                    return;
+                }
+                if (typeof showMarket === 'function') { showMarket(); return; }
+                if (typeof renderMarket === 'function') { renderMarket(); return; }
+                if (typeof showPrepModal === 'function') { showPrepModal(); return; }
+            }; 
+            const closeOverlayToHome = function() {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                if (typeof switchScreen === 'function') switchScreen('start-screen');
+            };
+            const btnTop = document.getElementById('btn-close-polaroid-top'); 
+            const btnBottom = document.getElementById('btn-close-polaroid-bottom'); 
+            if (btnTop) btnTop.onclick = () => { if (typeof playSfx==='function') playSfx(300, 'sine', 0.1); closeOverlayToHome(); }; 
+            if (btnBottom) { 
+                btnBottom.onclick = (event) => { 
+                    if (event && typeof event.stopPropagation === 'function') event.stopPropagation(); 
+                    if (typeof playButtonSound === 'function') playButtonSound(); 
+                    closeOverlay(); 
+                }; 
+            }
+        } else startMarketChatterFlow();
     }, 2200);
 }
 
@@ -14194,7 +15455,9 @@ function renderPrepUI() {
                             if (!badgeEl) {
                                 badgeEl = document.createElement('div');
                                 badgeEl.className = 'market-discount-badge';
-                                badgeEl.style.cssText = 'position:absolute; top:0; right:0; color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:0 8px 0 6px; box-shadow:-1px 1px 3px rgba(0,0,0,0.2);';
+                                badgeEl.style.cssText = 'position:absolute; top:0; right:0; color:white; font-size:11px; font-weight:bold; padding:2px 6px; box-shadow:-1px 1px 3px rgba(0,0,0,0.2);';
+                                const cardRadius = (window.getComputedStyle(card).borderRadius || '16px');
+                                badgeEl.style.borderRadius = `0 ${cardRadius} 0 ${cardRadius}`;
                                 card.appendChild(badgeEl);
                             }
                             badgeEl.style.background = (totalQty >= 20) ? '#c0392b' : '#e67e22';
@@ -14282,7 +15545,9 @@ function renderPrepUI() {
                     if (!badgeEl) {
                         badgeEl = document.createElement('div');
                         badgeEl.className = 'market-discount-badge';
-                        badgeEl.style.cssText = 'position:absolute; top:0; right:0; color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:0 8px 0 6px; box-shadow:-1px 1px 3px rgba(0,0,0,0.2);';
+                        badgeEl.style.cssText = 'position:absolute; top:0; right:0; color:white; font-size:11px; font-weight:bold; padding:2px 6px; box-shadow:-1px 1px 3px rgba(0,0,0,0.2);';
+                        const cardRadius = (window.getComputedStyle(card).borderRadius || '16px');
+                        badgeEl.style.borderRadius = `0 ${cardRadius} 0 ${cardRadius}`;
                         card.appendChild(badgeEl);
                     }
                     badgeEl.style.background = (initialQty >= 20) ? '#c0392b' : '#e67e22';
@@ -14512,9 +15777,9 @@ function showUncleGaoInterlude() {
     layer.id = 'intro-interlude-layer';
     layer.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;z-index:10002;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:15%;background:transparent;animation:fadeIn 0.3s;";
     const gifts = [
-        { id: 'egg', name: '鸡蛋', count: 5 },
-        { id: 'tomato', name: '番茄', count: 5 },
-        { id: 'onion', name: '洋葱', count: 5 }
+        { id: 'egg', name: '鸡蛋', count: 50 },
+        { id: 'tomato', name: '番茄', count: 50 },
+        { id: 'onion', name: '洋葱', count: 50 }
     ];
     const dialogueHtml = `
         <div id="gao-dialogue-box" style="width:95%; max-width:800px; margin:0 auto; padding:20px; position:relative; cursor:pointer; height:100%; display:flex; flex-direction:column; justify-content:flex-end;" onclick="switchToIntroShelf()">
@@ -14545,7 +15810,7 @@ function showUncleGaoInterlude() {
             <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(5px);width:100%;max-width:260px;box-sizing:border-box;overflow:hidden;">
                 <div style="font-size:48px;margin-bottom:10px;">${icon}</div>
                 <div style="color:#fff;font-weight:bold;margin-bottom:5px;">${name}</div>
-                <div style="color:#f1c40f;font-weight:900;font-size:18px;">x${item.count}</div>
+                <div style="color:#f1c40f;font-weight:900;font-size:18px;">✖${item.count}</div>
                 <div style="font-size:12px;color:#2ecc71;margin-top:5px;">赠送</div>
             </div>
         `;
@@ -14891,6 +16156,46 @@ function kmesAutoCook() {
 
 // Level 3: 自动出餐
 function kmesAutoServe() {
+    if (Array.isArray(warmingRack) && warmingRack.length > 0) {
+        for (let i = 0; i < warmingRack.length; i++) {
+            const item = warmingRack[i];
+            if (!item || !item.dishName) continue;
+            if (!Number.isFinite(item.portions) || item.portions <= 0) {
+                warmingRack.splice(i, 1);
+                i--;
+                continue;
+            }
+
+            while (item.portions > 0) {
+                const targetOrder = Array.isArray(game.activeOrders)
+                    ? game.activeOrders.find(o =>
+                        o && Array.isArray(o.dishes) && o.dishes.some(d => d && (d.name || d.n) === item.dishName)
+                    )
+                    : null;
+                if (!targetOrder) break;
+
+                const recipePool = (typeof getActiveRecipes === 'function' ? getActiveRecipes() : []).concat((typeof RECIPES !== 'undefined' ? RECIPES : []));
+                const recipe = recipePool.find(r => r && r.name === item.dishName);
+                const dish = recipe ? { ...recipe } : { name: item.dishName, price: 10 };
+
+                const prevHolding = holdingThing;
+                holdingThing = { type: 'DISH', val: dish, sourceSid: null };
+                takeOrder(targetOrder);
+                const served = holdingThing === null;
+                holdingThing = prevHolding;
+                if (!served) break;
+
+                item.portions--;
+            }
+
+            if (item.portions <= 0) {
+                warmingRack.splice(i, 1);
+                i--;
+            }
+        }
+        if (typeof renderWarmingRack === 'function') renderWarmingRack();
+    }
+
     // 1. 遍历所有 FINISHED 的工位
     Object.keys(stations).forEach(sid => {
         const s = stations[sid];
@@ -14898,10 +16203,26 @@ function kmesAutoServe() {
             const dish = s.dishResult;
 
             while (s.stage === 'FINISHED' && (s.servingsLeft || 0) > 0) {
-                const targetOrder = game.activeOrders.find(o =>
-                    o.dishes.some(d => (d.name || d.n) === dish.name)
-                );
-                if (!targetOrder) break;
+                const targetOrder = Array.isArray(game.activeOrders)
+                    ? game.activeOrders.find(o =>
+                        o && Array.isArray(o.dishes) && o.dishes.some(d => d && (d.name || d.n) === dish.name)
+                    )
+                    : null;
+                if (!targetOrder) {
+                    const dishName = dish && dish.name ? dish.name : null;
+                    if (dishName && (s.servingsLeft || 0) > 0) {
+                        const remaining = s.servingsLeft || 0;
+                        const existingItem = warmingRack.find(i => i && i.dishName === dishName);
+                        if (existingItem) {
+                            existingItem.portions += remaining;
+                            s.servingsLeft = 0;
+                        } else if (warmingRack.length < WARMING_RACK_CAPACITY) {
+                            warmingRack.push({ dishName, portions: remaining });
+                            s.servingsLeft = 0;
+                        }
+                    }
+                    break;
+                }
 
                 const prevHolding = holdingThing;
                 holdingThing = { type: 'DISH', val: dish, sourceSid: sid };
@@ -14913,11 +16234,7 @@ function kmesAutoServe() {
                 s.servingsLeft = Math.max(0, (s.servingsLeft || 1) - 1);
                 if (s.servingsLeft > 0) {
                     renderStation(sid);
-                    const stationEl = document.getElementById('s_' + sid);
-                    if (stationEl) {
-                        const rect = stationEl.getBoundingClientRect();
-                        triggerFeedback(rect.left + rect.width/2, rect.top, `剩余 ${s.servingsLeft} 份`, "#2ecc71");
-                    }
+                    // 已移除“剩余 X 份”飘字提示
                 } else {
                     if (s.currentIngredients.length > 0) {
                         s.stage = 'PREP_ING';
@@ -14931,8 +16248,22 @@ function kmesAutoServe() {
                     renderStation(sid);
                 }
             }
+
+            if ((s.servingsLeft || 0) <= 0) {
+                if (s.currentIngredients.length > 0) {
+                    s.stage = 'PREP_ING';
+                } else {
+                    s.stage = 'IDLE';
+                }
+                s.dishResult = null;
+                s.recipe = null;
+                s.progress = 0;
+                if (s.timer) clearInterval(s.timer);
+                renderStation(sid);
+            }
         }
     });
+    if (typeof renderWarmingRack === 'function') renderWarmingRack();
 }
 
 function startGame() {
