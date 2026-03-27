@@ -8,7 +8,7 @@
     <title>不停餐饮大亨 - 后厨模拟器</title>
     <link rel="preload" as="image" href="assets/bg/家庭厨房.jpeg">
     <link rel="preload" as="image" href="assets/bg/门店后厨.jpg">
-    <link rel="preload" as="image" href="assets/bg/日本主题.jpg">
+    <link rel="preload" as="image" href="assets/bg/日本大厅.jpg">
     <link rel="preload" as="image" href="assets/bg/餐厅解锁地图.jpg">
     <link rel="preload" as="image" href="assets/bg/商店背景.jpg">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -248,8 +248,8 @@
         
         .hud-item-target .hud-main .stat-val { min-width: auto; text-align: left; }
         .hud-item-target .target-current { color: #fff; font-weight: 700; }
-        .hud-item-target .target-goal { color: rgba(255,255,255,0.5); font-size: 14px; }
-        .hud-item-target .target-sep { color: rgba(255,255,255,0.3); font-size: 14px; margin: 0 2px; }
+        .hud-item-target .target-goal { display: none; }
+        .hud-item-target .target-sep { display: none; }
         
         
         /* Unified HUD Colors */
@@ -335,7 +335,7 @@
     user-select: none;
     top: auto;
     left: auto;
-    transform: none !important;
+    transform: none;
     border-top: 3px solid #d0d0d0;
     overflow: visible; /* 不产生内部滚动条，靠内容自然拉长 */
     z-index: 20; /* 确保在金属背景之上 */
@@ -382,25 +382,60 @@
 
 /* --- Order Highlight Animation --- */
 .order-ticket.match-highlight {
-    animation: pulse-green 0.5s infinite;
-    border: 4px solid #2ecc71 !important;
-    /* Use filter for glow */
-    box-shadow: none;
     z-index: 200;
+    animation: order-match-pop 1.2s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform;
 }
 
-@keyframes pulse-green {
-    0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.5)); }
-    50% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.9)); }
-    100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.5)); }
+.order-ticket.match-highlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    animation: order-match-breathe 1.2s ease-in-out infinite;
+    box-shadow:
+        0 0 0 2px rgba(46, 204, 113, 0.55),
+        0 0 10px rgba(46, 204, 113, 0.22),
+        0 0 18px rgba(46, 204, 113, 0.14);
+}
+
+@keyframes order-match-breathe {
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 2px rgba(46, 204, 113, 0.38),
+            0 0 8px rgba(46, 204, 113, 0.14),
+            0 0 14px rgba(46, 204, 113, 0.10);
+    }
+    50% {
+        box-shadow:
+            0 0 0 2px rgba(46, 204, 113, 0.78),
+            0 0 14px rgba(46, 204, 113, 0.28),
+            0 0 24px rgba(46, 204, 113, 0.18);
+    }
+}
+
+@keyframes order-match-pop {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.03);
+    }
+    60% {
+        transform: scale(1.02);
+    }
 }
 
 /* [UI新增] VIP/大菜订单专属特效 */
 .order-ticket.vip-order {
     /* 保持原背景色 (白色/浅灰渐变)，仅增加金色边框和光晕 */
-    border: 2px solid #f1c40f;
-    box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
-    animation: pulse-gold 2s infinite;
+    border: none;
+    border-top: 3px solid #d0d0d0;
+    box-shadow: none;
 }
 /* 移除文字颜色覆写，保持黑色 */
 .order-ticket.vip-order .patience-fill {
@@ -541,13 +576,39 @@
     object-fit: contain;
 }
 
-        .order-list { width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .order-list { width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: 0; }
         .order-item { display: flex; align-items: flex-start; gap: 6px; border-bottom: 1px dashed rgba(0, 0, 0, 0.2); padding-bottom: 3px; }
         .order-item:last-child { border-bottom: none; }
         .order-ticket b { font-size: clamp(10px, 1.4vw, 13px); font-weight: 500; align-self: flex-start; margin-left: 2px; }
         .item-icon { font-size: clamp(14px, 1.6vw, 16px); font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'OPPOSans', 'OPPO Sans', sans-serif; }
         .item-name { font-size: clamp(10px, 1.4vw, 12px); font-weight: 300; color: #222; line-height: 1.2; text-align: left; }
         .order-info-col { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+        /* 仅对匹配的菜品项应用图片展示/切换效果 */
+        .order-ticket.match-highlight .order-item.item-match {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 64px;
+            padding-bottom: 2px;
+        }
+        .order-ticket.match-highlight .order-item.item-match .order-info-col {
+            display: none;
+        }
+        .order-ticket.match-highlight .order-item.item-match img.item-icon {
+            display: block !important;
+            width: 100%;
+            height: 64px;
+            object-fit: contain;
+            object-position: center center;
+            margin: 0 auto;
+        }
+        /* 悬停在订单上时，匹配项显示菜名（隐藏图片），不影响其他项 */
+        .order-ticket.match-highlight:hover .order-item.item-match .order-info-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        .order-ticket.match-highlight:hover .order-item.item-match .order-info-col .recipe-tags { display: none !important; }
+        .order-ticket.match-highlight:hover .order-item.item-match .item-name { text-align: center; width: 100%; }
+        .order-ticket.match-highlight:hover .order-item.item-match img.item-icon {
+            display: none !important;
+        }
 
         @media (max-width: 900px) {
             #belt-container {
@@ -1218,14 +1279,14 @@
             .trend-box:hover .tooltip { visibility: visible; opacity: 1; }
         
         /* Loading Bar */
-        #loading-bar-container { width: 300px; height: 12px; background: #eee; border: 2px solid #2c3e50; border-radius: 6px; overflow: hidden; margin: 20px 0; position: relative; }
+        #loading-bar-container { width: 420px; height: 16px; background: #eee; border: 2px solid #2c3e50; border-radius: 6px; overflow: hidden; margin: 20px 0; position: relative; }
         #loading-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
-        #loading-text { font-size: 14px; font-weight: bold; color: #666; margin-bottom: 10px; }
+        #loading-text { font-size: 18px; font-weight: bold; color: #666; margin-bottom: 10px; }
 
         /* [新增] Loading 界面样式优化 */
         .loading-icon {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             margin-bottom: 25px;
             
             /* 纯净图片展示 */
@@ -1284,7 +1345,7 @@
         /* [优化] 小贴士文字：更宽、更大、更清晰 */
         .loading-tips-text {
             margin-top: 20px;
-            font-size: 16px;  /* [修改] 字号再加大 */
+            font-size: 20px;
             color: rgba(255, 255, 255, 0.75); /* [修改] 稍微提亮颜色，但不纯白 */
             text-align: center;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5); /* 增加一点文字阴影增加可读性 */
@@ -1319,9 +1380,12 @@
         .chart-label { font-size: 10px; fill: #999; text-anchor: middle; opacity: 0; animation: fadeIn 0.5s ease forwards 0.3s; }
 
         /* Loading Button Hover */
-        #btn-start:hover { transform: translateY(8px) scale(1.05) !important; filter: brightness(1.05); box-shadow: 0 10px 0 #c7a000 !important; }
-        #btn-start:active { transform: translateY(12px) !important; box-shadow: 0 4px 0 #c7a000 !important; }
-        #start-screen #btn-start {
+        #btn-start:hover,
+        #btn-boot-start:hover { transform: translateY(8px) scale(1.05) !important; filter: brightness(1.05); box-shadow: 0 10px 0 #c7a000 !important; }
+        #btn-start:active,
+        #btn-boot-start:active { transform: translateY(12px) !important; box-shadow: 0 4px 0 #c7a000 !important; }
+        #start-screen #btn-start,
+        #boot-screen #btn-boot-start {
             font-size: 24px;
         }
 
@@ -1335,13 +1399,14 @@
         }
         #loading .loading-bg-video {
             position: absolute;
-            inset: 0;
+            inset: -2px;
             width: 100%;
             height: 100%;
             object-fit: cover;
             z-index: 1;
             display: none;
             pointer-events: none;
+            transform: scale(1.02);
         }
         #loading.is-jp {
             background: #000 url('assets/bg/日本主题.jpg') no-repeat center center / cover !important;
@@ -1368,9 +1433,14 @@
             color: #FFFFFF;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
+        #start-screen .home-title,
+        #start-screen .home-main-actions {
+            position: relative;
+            z-index: 2;
+        }
         #start-screen .home-bg-video {
             position: absolute;
-            inset: 0;
+            inset: -2px;
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -1378,9 +1448,44 @@
             opacity: 0;
             transition: opacity 0.6s ease;
             pointer-events: none;
+            transform: scale(1.02);
         }
         #start-screen.is-jp-intro #home-jp-intro-video,
         #start-screen.is-cn-intro #home-cn-intro-video {
+            opacity: 1;
+        }
+        #boot-screen {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        #boot-screen .home-title,
+        #boot-screen .home-main-actions {
+            position: relative;
+            z-index: 2;
+        }
+        #boot-screen .home-bottom-left {
+            z-index: 2;
+        }
+        #boot-screen .home-bg-video {
+            position: absolute;
+            inset: -2px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+            transform: scale(1.02);
+        }
+        #boot-screen.is-jp-intro #boot-jp-intro-video,
+        #boot-screen.is-cn-intro #boot-cn-intro-video {
             opacity: 1;
         }
         #start-screen.active {
@@ -1419,6 +1524,24 @@
             flex-direction: column;
             align-items: center;
             gap: 16px;
+        }
+        .home-main-actions .home-inline-stats .wallet-icon {
+            width: 32px;
+            height: 32px;
+        }
+        .home-main-actions .home-inline-stats #home-balance {
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .home-main-actions .home-inline-stats .home-store-days {
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .home-main-actions .home-inline-stats .home-wallet-row {
+            transform: translateX(-6px);
+        }
+        .home-main-actions .home-inline-stats .home-days-row {
+            transform: translateX(6px);
         }
     /* [新增] 首页布局容器 */
     /* .home-top-left, .home-top-center 已移除，功能整合至 .home-top-right */
@@ -3092,6 +3215,7 @@
         flex: 0 0 auto; background: rgba(15, 15, 15, 0.95); 
         border-top: 1px solid rgba(255,255,255,0.1); 
         padding: 18px 32px; /* [优化] 左右Padding改为32px */
+        padding-bottom: 19px;
         display: flex; justify-content: space-between; align-items: center; /* [优化] 改回两端对齐 */
         border-radius: 10px 10px 0 0; /* [优化] 顶部圆角10px，与卡片一致 */
         margin-top: 0; 
@@ -3120,7 +3244,7 @@
         /* [Deleted conflicting media query for .category-items] */
     .prep-container { padding: 10px 10px 0 10px; width: 100%; max-width: 100%; }
     .pc-icon { font-size: 30px; }
-        .prep-footer { padding: 15px 20px; flex-direction: column; gap: 15px; align-items: stretch; border-radius: 0; }
+        .prep-footer { padding: 15px 20px; padding-bottom: 16px; flex-direction: column; gap: 15px; align-items: stretch; border-radius: 0; }
         .pf-info { flex-direction: row; justify-content: space-between; align-items: center; }
         .btn-start-day { width: 100%; justify-content: center; }
         .prep-title { font-size: 24px; }
@@ -3161,7 +3285,7 @@
     width: fit-content;
 }
 .micro-ing {
-    font-size: 11px;
+    font-size: 16px;
     line-height: 1;
     cursor: help;
     opacity: 0.85;
@@ -3758,7 +3882,7 @@
     /* [修改] 移除自动动画，初始状态设为 scaleY(0) */
     .prep-curtain {
         position: absolute;
-        inset: 0;
+        inset: -1px 0;
         background: rgba(0, 0, 0, 0.7);
         backdrop-filter: blur(4px);
         z-index: 0;
@@ -5327,7 +5451,7 @@
                         <span class="hud-main">
                             <span class="stat-val target-current" id="target-current">¥0</span>
                             <span class="target-sep">/</span>
-                            <span class="stat-val target-goal" id="target-goal">¥1000</span>
+                            <span class="stat-val target-goal" id="target-goal"></span>
                         </span>
                     </div>
                 </div>
@@ -5410,16 +5534,6 @@
             <source src="assets/bg/中国主题.mp4" type="video/mp4">
         </video>
         <div id="home-profile-card" class="home-profile-card" onclick="if(typeof showToast === 'function') showToast('提升厨房等级或扩张版图以晋升头衔！')">
-            <div class="home-profile-top">
-                <div class="home-wallet-row">
-                    <img src="assets/icons/icon_wallet.png" class="wallet-icon" alt="钱包">
-                    <span id="home-balance">¥0</span>
-                </div>
-                <div class="home-days-row">
-                    <img src="assets/icons/icon_日历.png" class="wallet-icon" alt="日历">
-                    <span id="home-store-days" class="home-store-days">已营业 0 天</span>
-                </div>
-            </div>
             <div class="home-title-progress">
                 <div class="home-title-progress-head">
                     <span class="home-title-progress-label home-title-level-label">
@@ -5464,25 +5578,22 @@
             </button>
         </div>
 
-        <!-- Bottom Left: Settings & Reset -->
-        <div class="home-bottom-left">
-            <button class="icon-btn" onclick="GameStateManager.resetAllDataPrompt()">
-                <img src="assets/icons/icon_reset.png" alt="重置存档">
-                <span>重置存档</span>
-            </button>
-            
-            <button class="icon-btn" onclick="showSettingsModal()">
-                <img src="assets/icons/icon_settings.png" alt="设置">
-                <span>设置</span>
-            </button>
-        </div>
-
         <div class="home-title">
             <img src="assets/ui/robotinkitchen.png" alt="不停餐饮大亨" class="home-title-logo">
         </div>
         <div class="home-main-actions">
-            <button id="btn-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开始</button>
+            <button id="btn-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开门营业</button>
             <!-- Icons moved to corners -->
+            <div class="home-inline-stats" style="display:flex; align-items:center; gap:16px; margin-top:20px;">
+                <div class="home-wallet-row">
+                    <img src="assets/icons/icon_wallet.png" class="wallet-icon" alt="钱包">
+                    <span id="home-balance">¥0</span>
+                </div>
+                <div class="home-days-row">
+                    <img src="assets/icons/icon_日历.png" class="wallet-icon" alt="日历">
+                    <span id="home-store-days" class="home-store-days">已营业 0 天</span>
+                </div>
+            </div>
         </div>
 
         <div id="debug-menu" style="position: absolute; bottom: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 100;">
@@ -5498,6 +5609,32 @@
         <button id="btn-exit-test" onclick="exitTestMode()" style="display: none; position: absolute; bottom: 10px; right: 10px; background: #e74c3c; color: #fff; border: 2px solid #fff; padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
             退出测试模式 (恢复存档)
         </button>
+    </div>
+
+    <div id="boot-screen" style="display:flex;">
+        <video id="boot-jp-intro-video" class="home-bg-video" muted playsinline preload="auto">
+            <source src="assets/bg/日本主题.mp4" type="video/mp4">
+        </video>
+        <video id="boot-cn-intro-video" class="home-bg-video" muted playsinline preload="auto">
+            <source src="assets/bg/中国主题.mp4" type="video/mp4">
+        </video>
+        <div class="home-bottom-left">
+            <button class="icon-btn" onclick="GameStateManager.resetAllDataPrompt()">
+                <img src="assets/icons/icon_reset.png" alt="重置存档">
+                <span>重置存档</span>
+            </button>
+            
+            <button class="icon-btn" onclick="showSettingsModal()">
+                <img src="assets/icons/icon_settings.png" alt="设置">
+                <span>设置</span>
+            </button>
+        </div>
+        <div class="home-title">
+            <img src="assets/ui/robotinkitchen.png" alt="不停餐饮大亨" class="home-title-logo">
+        </div>
+        <div class="home-main-actions">
+            <button id="btn-boot-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开始游戏</button>
+        </div>
     </div>
 
     <!-- 移入游戏容器的子界面 -->
@@ -5615,11 +5752,11 @@
 
 <div id="drag-cursor"></div>
 
-<div id="loading" style="position:fixed; inset:0; background:#000 url('assets/bg/门店后厨.jpg') no-repeat center center / cover; z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s ease;">
+<div id="loading" style="position:absolute; left:50%; top:50%; transform: translate(-50%, -50%); width:1920px; height:1080px; transform-origin: center center; background:#000 url('assets/bg/门店后厨.jpg') no-repeat center center / cover; z-index:9999; display:none; align-items:center; justify-content:center; transition:opacity 0.5s ease;">
     <video id="loading-bg-video" class="loading-bg-video" muted loop playsinline preload="auto">
         <source src="assets/bg/日本主题.mp4" type="video/mp4">
     </video>
-    <div id="loading-content" style="position:relative; z-index:2; font-size:24px; font-weight:bold; color:#FFFFFF; display:flex; flex-direction:column; align-items:center; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+    <div id="loading-content" style="position:relative; z-index:2; font-size:28px; font-weight:bold; color:#FFFFFF; display:flex; flex-direction:column; align-items:center; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
         <!-- [修改] 移除Emoji，使用动态素材轮播 -->
         <div id="loading-icon" class="loading-icon"></div>
         <div style="margin-bottom:10px; letter-spacing: 2px;">准备好成为餐饮大亨了吗？</div>
@@ -6154,27 +6291,27 @@ function resizeGameWindow() {
     
     // 计算缩放比例 (Contain 模式：保证全部内容可见)
     const scale = Math.min(winW / designW, winH / designH);
-    
-    // 应用缩放
-    const targetStyles = `
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%) scale(${scale});
-        width: ${designW}px;
-        height: ${designH}px;
-        transform-origin: center center;
-        display: flex; /* 确保容器始终可见 */
-    `;
-    
+
     if (container) {
-        container.style.cssText = targetStyles;
+        container.style.position = 'absolute';
+        container.style.left = '50%';
+        container.style.top = '50%';
+        container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        container.style.width = `${designW}px`;
+        container.style.height = `${designH}px`;
+        container.style.transformOrigin = 'center center';
     }
     
-    // 加载页特殊处理：全屏铺满
     if (loadingScreen) {
-        loadingScreen.style.width = '100vw';
-        loadingScreen.style.height = '100vh';
+        loadingScreen.style.position = 'absolute';
+        loadingScreen.style.left = '50%';
+        loadingScreen.style.top = '50%';
+        loadingScreen.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        loadingScreen.style.width = `${designW}px`;
+        loadingScreen.style.height = `${designH}px`;
+        loadingScreen.style.transformOrigin = 'center center';
+        loadingScreen.style.right = '';
+        loadingScreen.style.bottom = '';
     }
 }
 
@@ -6182,7 +6319,7 @@ function resizeGameWindow() {
 window.addEventListener('resize', resizeGameWindow);
 // 初始调用
 window.addEventListener('load', () => {
-    setTimeout(resizeGameWindow, 100); // 延时确保获取准确高度
+    resizeGameWindow();
 });
 
 window.tempInventory = {};
@@ -6891,6 +7028,8 @@ function initGameBackground() {
 
     preloadImage(GAME_BG_PLAY);
     preloadImage(GAME_BG_ALT);
+    preloadImage('assets/bg/日本大厅.jpg');
+    preloadImage('assets/bg/中国大厅.jpg');
 }
 
 function setGameBgVisual(filter, overlay) {
@@ -6918,15 +7057,33 @@ function getActiveRecipes() {
 
 function getHomeBgImage() {
     const region = getCurrentRegionId();
+    if (region === 'jp') return 'assets/bg/日本大厅.jpg';
+    return 'assets/bg/中国大厅.jpg';
+}
+
+function getBootBgImage() {
+    const region = getCurrentRegionId();
     if (region === 'jp') return 'assets/bg/日本主题.jpg';
     return GAME_BG_ALT;
 }
 
 function updateHomeBackground() {
     const homeBg = getHomeBgImage();
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        const hasIntro = startScreen.classList.contains('is-jp-intro') || startScreen.classList.contains('is-cn-intro');
+        startScreen.style.background = hasIntro ? '#000' : `#000 url('${homeBg}') no-repeat center center / cover`;
+    }
     setGameBgVisual('saturate(1) brightness(1) contrast(1)', 0.34);
     setGameBgImage(homeBg, GAME_BG_ALT);
     if (typeof updateHomeIntroVideo === 'function') updateHomeIntroVideo();
+}
+
+function updateBootBackground() {
+    const bootScreen = document.getElementById('boot-screen');
+    if (!bootScreen) return;
+    const bg = getBootBgImage();
+    bootScreen.style.background = `#000 url('${bg}') no-repeat center center / cover`;
 }
 
 function updateHomeIntroVideo() {
@@ -6946,9 +7103,79 @@ function updateHomeIntroVideo() {
         return;
     }
 
+    try { if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard(); } catch (_) {}
+
     if (region !== 'jp' && region !== 'cn') {
         startScreen.classList.remove('is-jp-intro');
         startScreen.classList.remove('is-cn-intro');
+        try { jpVideo.pause(); } catch (_) {}
+        try { cnVideo.pause(); } catch (_) {}
+        try { jpVideo.currentTime = 0; } catch (_) {}
+        try { cnVideo.currentTime = 0; } catch (_) {}
+        return;
+    }
+
+    const activeVideo = region === 'jp' ? jpVideo : cnVideo;
+    const otherVideo = region === 'jp' ? cnVideo : jpVideo;
+    startScreen.classList.remove(region === 'jp' ? 'is-cn-intro' : 'is-jp-intro');
+    startScreen.classList.add(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
+    startScreen.style.background = '#000';
+
+    if (!activeVideo.paused && activeVideo.readyState >= 2) return;
+
+    try { otherVideo.pause(); } catch (_) {}
+    try { otherVideo.currentTime = 0; } catch (_) {}
+    try { activeVideo.currentTime = 0; } catch (_) {}
+
+    const prev = activeVideo.__introEndedHandler;
+    if (prev) activeVideo.removeEventListener('ended', prev);
+    const onEnded = () => {
+        startScreen.classList.remove(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
+        activeVideo.__introEndedHandler = null;
+        const homeBg = getHomeBgImage();
+        startScreen.style.background = `#000 url('${homeBg}') no-repeat center center / cover`;
+        setTimeout(() => {
+            try { activeVideo.pause(); } catch (_) {}
+            try { activeVideo.currentTime = 0; } catch (_) {}
+            try { otherVideo.pause(); } catch (_) {}
+        }, 650);
+    };
+    activeVideo.__introEndedHandler = onEnded;
+    activeVideo.addEventListener('ended', onEnded, { once: true });
+
+    const p = activeVideo.play();
+    if (p && typeof p.then === 'function') {
+        p.catch(() => {
+            startScreen.classList.remove('is-jp-intro');
+            startScreen.classList.remove('is-cn-intro');
+            const homeBg = getHomeBgImage();
+            startScreen.style.background = `#000 url('${homeBg}') no-repeat center center / cover`;
+            try { jpVideo.pause(); } catch (_) {}
+            try { cnVideo.pause(); } catch (_) {}
+        });
+    }
+}
+
+function updateBootIntroVideo() {
+    const bootScreen = document.getElementById('boot-screen');
+    if (!bootScreen) return;
+    const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : 'cn';
+    const jpVideo = document.getElementById('boot-jp-intro-video');
+    const cnVideo = document.getElementById('boot-cn-intro-video');
+    if (!jpVideo || !cnVideo) return;
+    const isBootVisible = bootScreen.style.display !== 'none';
+
+    if (!isBootVisible) {
+        bootScreen.classList.remove('is-jp-intro');
+        bootScreen.classList.remove('is-cn-intro');
+        try { jpVideo.pause(); } catch (_) {}
+        try { cnVideo.pause(); } catch (_) {}
+        return;
+    }
+
+    if (region !== 'jp' && region !== 'cn') {
+        bootScreen.classList.remove('is-jp-intro');
+        bootScreen.classList.remove('is-cn-intro');
         try { jpVideo.pause(); } catch (_) {}
         try { cnVideo.pause(); } catch (_) {}
         try { jpVideo.currentTime = 0; } catch (_) {}
@@ -6961,13 +7188,13 @@ function updateHomeIntroVideo() {
     const startPlayback = () => {
         const activeVideo = region === 'jp' ? jpVideo : cnVideo;
         const otherVideo = region === 'jp' ? cnVideo : jpVideo;
-        startScreen.classList.remove(region === 'jp' ? 'is-cn-intro' : 'is-jp-intro');
-        startScreen.classList.add(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
+        bootScreen.classList.remove(region === 'jp' ? 'is-cn-intro' : 'is-jp-intro');
+        bootScreen.classList.add(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
 
         const prev = activeVideo.__introEndedHandler;
         if (prev) activeVideo.removeEventListener('ended', prev);
         const onEnded = () => {
-            startScreen.classList.remove(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
+            bootScreen.classList.remove(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
             activeVideo.__introEndedHandler = null;
             setTimeout(() => {
                 try { activeVideo.pause(); } catch (_) {}
@@ -6985,8 +7212,8 @@ function updateHomeIntroVideo() {
     const p = activeVideo.play();
     if (p && typeof p.then === 'function') {
         p.then(startPlayback).catch(() => {
-            startScreen.classList.remove('is-jp-intro');
-            startScreen.classList.remove('is-cn-intro');
+            bootScreen.classList.remove('is-jp-intro');
+            bootScreen.classList.remove('is-cn-intro');
             try { jpVideo.pause(); } catch (_) {}
             try { cnVideo.pause(); } catch (_) {}
         });
@@ -7190,12 +7417,35 @@ function updateGameBackground(stateStage = null) {
 
 function playSfx(f, t='sine', d=0.1, v=0.1) {
     if (!sfxEnabled) return;
-    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-    o.type = t; o.connect(g); g.connect(sfxGain);
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (t === 'noise') {
+        const duration = Math.max(0.02, d);
+        const frameCount = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
+        const buffer = audioCtx.createBuffer(1, frameCount, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < frameCount; i++) data[i] = Math.random() * 2 - 1;
+        const src = audioCtx.createBufferSource();
+        const g = audioCtx.createGain();
+        src.buffer = buffer;
+        src.connect(g);
+        g.connect(sfxGain);
+        const now = audioCtx.currentTime;
+        g.gain.setValueAtTime(v, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + duration);
+        src.start(now);
+        src.stop(now + duration);
+        return;
+    }
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = t;
+    o.connect(g);
+    g.connect(sfxGain);
     o.frequency.setValueAtTime(f, audioCtx.currentTime);
     g.gain.setValueAtTime(v, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-    o.start(); o.stop(audioCtx.currentTime + d);
+    o.start();
+    o.stop(audioCtx.currentTime + d);
 }
 
 // [新增] 通用按钮点击音效 (清脆的“咔哒”声)
@@ -7415,12 +7665,14 @@ function startMusic() {
     // 检查当前是否处于“非游戏状态”（即 Loading 或 Start 界面）
     const loadingEl = document.getElementById('loading');
     const startScreen = document.getElementById('start-screen');
+    const bootScreen = document.getElementById('boot-screen');
     const mapScreen = document.getElementById('map-screen');
     
     const isLoading = loadingEl && loadingEl.style.display !== 'none';
     const isStart = startScreen && startScreen.style.display !== 'none';
+    const isBoot = bootScreen && bootScreen.style.display !== 'none';
     const isMap = mapScreen && mapScreen.style.display !== 'none';
-    const isMenuState = isLoading || isStart || isMap;
+    const isMenuState = isLoading || isStart || isBoot || isMap;
     
     if (isMenuState) {
         if (themeMusicEnabled) {
@@ -9518,7 +9770,7 @@ function checkSpawn() {
          // [核心修改] 使用 img 标签，src 自动指向 "菜名.png" 
          // 增加了 onerror 处理：如果图片不存在，回退显示 Emoji (d.icon) 
          return ` 
-             <div class="order-item"> 
+            <div class="order-item" data-dish-name="${d.name}"> 
                  <img src="${getDishImageSrc(d)}" class="item-icon" alt="${d.name}"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"> 
                  <span class="item-icon" style="display:none; font-size:24px;">${d.icon || '🥘'}</span> 
@@ -9530,7 +9782,7 @@ function checkSpawn() {
              </div>`; 
      }).join(''); 
  const fillPct = (order.patience / order.maxPatience) * 100; 
- return `<b>#${game.spawned}</b> <div class="order-list">${dishListHtml}</div> <div class="patience-bar"><div class="patience-fill" style="height:${fillPct}%"></div></div>`; 
+ return `<div class="order-list">${dishListHtml}</div> <div class="patience-bar"><div class="patience-fill" style="height:${fillPct}%"></div></div>`; 
  
  
  }
@@ -9642,7 +9894,7 @@ function spawnOrder(slotIdx, requeuedOrder = null) {
  if (typeof renderOrderHTML === 'function') { 
      el.innerHTML = renderOrderHTML(order); 
  } else { 
-     el.innerHTML = `<b>#${game.spawned}</b><div class="order-list">...</div>`; 
+     el.innerHTML = `<div class="order-list">...</div>`; 
  } 
  el.onclick = () => takeOrder(order); 
  
@@ -10585,9 +10837,8 @@ function updateHUD() {
     const targetEl = document.getElementById('target-current');
     if(targetEl) targetEl.innerText = `¥${game.coins}`;
     
-    // [新增] 更新目标金额 (防止被重置)
     const goalEl = document.getElementById('target-goal');
-    if(goalEl) goalEl.innerText = `¥${game.targetRevenue}`;
+    if (goalEl) goalEl.innerText = '';
     
     // 进度条逻辑
     const progress = Math.min(100, (game.coins / game.targetRevenue) * 100);
@@ -10676,6 +10927,7 @@ function switchScreen(screenId) {
     // 1. 获取关键元素
     const container = document.getElementById('game-container');
     const startScreen = document.getElementById('start-screen');
+    const bootScreen = document.getElementById('boot-screen');
     const playArea = document.getElementById('play-area');
     const hud = document.getElementById('hud');
     const belt = document.getElementById('belt-container');
@@ -10693,9 +10945,31 @@ function switchScreen(screenId) {
     });
 
     // 5. 根据目标 ID 处理显示逻辑
-    if (screenId === 'start-screen') {
+    if (screenId === 'boot-screen') {
+        if (bootScreen) bootScreen.style.display = 'flex';
+        if (startScreen) startScreen.style.display = 'none';
+        if (playArea) playArea.style.display = 'none';
+        if (hud) hud.style.display = 'none';
+        if (belt) belt.style.display = 'none';
+
+        uiState = 'HOME';
+        startMusic();
+        updateHomeBackground();
+        if (typeof updateBootBackground === 'function') updateBootBackground();
+        if (typeof updateBootIntroVideo === 'function') updateBootIntroVideo();
+    } else if (screenId === 'start-screen') {
         // --- 首页模式 ---
-        if (startScreen) startScreen.style.display = 'flex';
+        if (bootScreen) bootScreen.style.display = 'none';
+        if (startScreen) {
+            const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : 'cn';
+            startScreen.classList.remove('is-jp-intro');
+            startScreen.classList.remove('is-cn-intro');
+            if (region === 'jp' || region === 'cn') {
+                startScreen.classList.add(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
+                startScreen.style.background = '#000';
+            }
+            startScreen.style.display = 'flex';
+        }
         if (playArea) playArea.style.display = 'none';
         if (hud) hud.style.display = 'none';
         if (belt) belt.style.display = 'none';
@@ -10703,9 +10977,11 @@ function switchScreen(screenId) {
         uiState = 'HOME';
         // stopMusic(); // [Fixed] Removed to allow seamless transition (AudioController handles mutex)
         startMusic();
+        if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard();
         updateHomeBackground();
     } else if (screenId === 'game-container') {
         // --- 游戏模式 ---
+        if (bootScreen) bootScreen.style.display = 'none';
         if (startScreen) startScreen.style.display = 'none';
         if (playArea) playArea.style.display = 'grid';
         if (hud) hud.style.display = 'flex';
@@ -10722,15 +10998,26 @@ function switchScreen(screenId) {
             
             // 地图页属于首页分支，隐藏游戏元素，保留背景
             if (screenId === 'map-screen') {
+                if (bootScreen) bootScreen.style.display = 'none';
                 if (startScreen) startScreen.style.display = 'none';
                 if (playArea) playArea.style.display = 'none';
                 if (hud) hud.style.display = 'none';
                 // [Fix] Ensure theme music continues playing
                 AudioController.playTheme();
             }
+            if (screenId === 'loading') {
+                if (bootScreen) bootScreen.style.display = 'none';
+                if (startScreen) startScreen.style.display = 'none';
+                if (playArea) playArea.style.display = 'none';
+                if (hud) hud.style.display = 'none';
+                if (belt) belt.style.display = 'none';
+                startMusic();
+                try { if (typeof resizeGameWindow === 'function') resizeGameWindow(); } catch (_) {}
+            }
         }
         if (typeof updateHomeIntroVideo === 'function') updateHomeIntroVideo();
     }
+    if (typeof updateBootIntroVideo === 'function') updateBootIntroVideo();
 }
 
 function analyzeDish(ingredients) {
@@ -11343,7 +11630,12 @@ function updateCursor() {
     if (!cursor) return;
     
     const tickets = document.querySelectorAll('.order-ticket');
-    tickets.forEach(t => t.classList.remove('match-highlight'));
+    tickets.forEach(t => {
+        t.classList.remove('match-highlight');
+        // 清理所有项目级匹配标记
+        const items = t.querySelectorAll('.order-item.item-match');
+        items.forEach(i => i.classList.remove('item-match'));
+    });
 
     if (holdingThing) {
         document.body.style.cursor = 'default'; // [新增] 恢复默认光标
@@ -11374,7 +11666,12 @@ function updateCursor() {
         if (holdingThing.type === 'DISH') {
             game.activeOrders.forEach(order => {
                 if (order.dishes.some(d => (d.name||d.n) === holdingThing.val.name)) {
-                    if (order.dom) order.dom.classList.add('match-highlight');
+                    if (order.dom) {
+                        order.dom.classList.add('match-highlight');
+                        // 仅标记匹配的菜品项
+                        const targetItem = order.dom.querySelector(`.order-item[data-dish-name="${holdingThing.val.name}"]`);
+                        if (targetItem) targetItem.classList.add('item-match');
+                    }
                 }
             });
         }
@@ -12136,7 +12433,7 @@ function startLoadingProgressOnce() {
     if (bar) bar.style.width = '0%';
 
     let progress = 0;
-    const duration = 10000; // 10s
+    const duration = 6500; // 6.5s
     const startTime = Date.now();
     
     function step() {
@@ -12154,6 +12451,7 @@ function startLoadingProgressOnce() {
                 const loadingEl = document.getElementById('loading');
                 if (loadingEl) loadingEl.style.display = 'none';
                 if (typeof window.stopLoadingScreenEffects === 'function') window.stopLoadingScreenEffects();
+                if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard();
                 switchScreen('start-screen');
             }, 50);
         }
@@ -12163,9 +12461,18 @@ function startLoadingProgressOnce() {
 
 document.addEventListener('DOMContentLoaded', () => {
     ensureGameLoadedOnce();
-    try { updateLoadingBackground(); } catch (e) { console.error('updateLoadingBackground failed:', e); }
-    try { initLoadingScreen(); } catch (e) { console.error('initLoadingScreen failed:', e); }
-    startLoadingProgressOnce();
+    try { if (typeof resizeGameWindow === 'function') resizeGameWindow(); } catch (_) {}
+    if (typeof switchScreen === 'function') switchScreen('boot-screen');
+    const bootBtn = document.getElementById('btn-boot-start');
+    if (bootBtn) {
+        bootBtn.onclick = function() {
+            if (typeof switchScreen === 'function') switchScreen('loading');
+            ensureGameLoadedOnce();
+            try { updateLoadingBackground(); } catch (e) { console.error('updateLoadingBackground failed:', e); }
+            try { initLoadingScreen(); } catch (e) { console.error('initLoadingScreen failed:', e); }
+            startLoadingProgressOnce();
+        };
+    }
 }, { once: true });
 
 window.onload = () => {
@@ -15158,8 +15465,9 @@ function showPrepModal() {
                 const emoji = JAPAN_SILHOUETTE_MAP[ingName] || "❓"; 
                 const zone = shuffledZones[index % shuffledZones.length]; 
                 const rotation = Math.floor(Math.random() * 60) - 30; 
-                const scale = (Math.random() * 0.3 + 0.4).toFixed(2); 
-                return `<div class="intel-silhouette" data-name="${ingName}" data-emoji="${emoji}" style="position: absolute; top: ${zone.top}; left: ${zone.left}; transform: rotate(${rotation}deg) scale(${scale}); font-size: 42px; color: transparent; text-shadow: 0 0 0 rgba(15, 20, 25, 0.95), 0px 0px 3px rgba(255, 255, 255, 0.3); z-index: 10; cursor: crosshair; transition: all 0.3s ease;">${emoji}</div>`; 
+                const scale = (Math.random() * 0.3 + 0.4); 
+                const finalScale = (scale * 0.5).toFixed(2);
+                return `<div class="intel-silhouette" data-name="${ingName}" data-emoji="${emoji}" style="position: absolute; top: ${zone.top}; left: ${zone.left}; transform: rotate(${rotation}deg) scale(${finalScale}); font-size: 42px; color: transparent; text-shadow: 0 0 0 rgba(15, 20, 25, 0.95), 0px 0px 3px rgba(255, 255, 255, 0.3); z-index: 10; cursor: inherit; transition: all 0.3s ease;">${emoji}</div>`; 
             }).join(''); 
  
             const existing = document.getElementById('japan-polaroid-overlay'); 
@@ -15167,9 +15475,68 @@ function showPrepModal() {
  
             const overlay = document.createElement('div'); 
             overlay.id = 'japan-polaroid-overlay'; 
-            overlay.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; backdrop-filter: blur(3px);'; 
+            overlay.style.cssText = 'position:fixed; inset:-1px 0; background:rgba(0,0,0,0.65); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top: 120px; box-sizing: border-box; overflow: visible; backdrop-filter: blur(3px);'; 
  
             overlay.innerHTML = ` 
+                <style> 
+                    /* 拍立得本体容器：初始居中放大，激活时缩小左移 */ 
+                    #polaroid-wrapper { 
+                        transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); 
+                        transform: scale(2.4) translateX(10%); /* 初始偏中放大 */ 
+                        position: relative;
+                        z-index: 10; 
+                    } 
+                    /* 激活状态的拍立得 */ 
+                    #polaroid-wrapper.active-mode { 
+                        transform: scale(2) translateX(-10%); 
+                        pointer-events: none;
+                    } 
+                     
+                    /* 情报面板：初始在右侧隐藏，激活时滑入 */ 
+                    #japan-intel-panel { 
+                        position: absolute; 
+                        right: 0; 
+                        top: 50%; 
+                        transform: translateY(-50%) translateX(120%); 
+                        opacity: 0; 
+                        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+                        z-index: 30; 
+                        pointer-events: none;
+                    } 
+                    #japan-intel-panel.active-mode { 
+                        transform: translateY(-50%) translateX(0); 
+                        opacity: 1; 
+                        pointer-events: auto;
+                    } 
+ 
+                    /* 照相机快门闪光特效 */ 
+                    #camera-flash { 
+                        position: fixed; top:0; left:0; width:100%; height:100%; 
+                        background: white; z-index: 999999; 
+                        pointer-events: none; opacity: 0; 
+                    } 
+                    @keyframes flashAnim { 
+                        0% { opacity: 1; } 
+                        100% { opacity: 0; } 
+                    } 
+
+                    .polaroid-search-area {
+                        cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ctext x='6' y='50' font-size='48'%3E%F0%9F%94%8D%3C/text%3E%3C/svg%3E") 16 16, crosshair;
+                    }
+
+                    .polaroid-disable-mask {
+                        position: absolute;
+                        inset: 0;
+                        background: rgba(0,0,0,0.22);
+                        opacity: 0;
+                        transition: opacity 0.25s ease;
+                        z-index: 40;
+                        pointer-events: none;
+                    }
+                    #polaroid-wrapper.active-mode .polaroid-disable-mask {
+                        opacity: 1;
+                    }
+                </style> 
                 <button id="btn-close-polaroid-top" class="icon-btn" style="position: absolute; top: 30px; left: 30px; padding: 0; z-index: 100000; pointer-events: auto;"> 
                     <img src="assets/icons/icon_back.png" alt="返回" style="width: 55px; height: 55px; margin: 0;"> 
                 </button> 
@@ -15179,26 +15546,27 @@ function showPrepModal() {
                         <p style="margin: 0 0 5px 0; transform: translateY(-40px);">“在竞争激烈的商圈，光靠埋头做菜是活不下去的。”</p> 
                         <p style="margin: 0; transform: translateY(-40px);">“仔细搜寻照片上的蛛丝马迹，<span style="color:#fff; border-bottom:1px dashed #fff; cursor:pointer;">点击黑影以破解暗号</span>。”</p> 
                     </div> 
-                    <div style="display: flex; flex-wrap: nowrap; gap: 40px; align-items: flex-start; justify-content: center; width: 720px;"> 
-                        <div style="width: 352px; height: 352px; background: #fff; padding: 16px 16px 48px 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: rotate(-2deg); text-align: center; position: relative; flex-shrink: 0; box-sizing: border-box;"> 
-                            <div style="background: #e0e6ed; height: 260px; width: 100%; border: 1px inset #b2bec3; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 10px; box-sizing: border-box;"> 
-                                ${silhouetteHtml} 
-                                ${todayScene.bgImg ? ` 
-                                    <img class="polaroid-photo-img" src="${todayScene.bgImg}" alt="${todayScene.label}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"> 
-                                    <div class="polaroid-develop-mask"></div>
-                                ` : ` 
-                                    <div style="font-size: 13px; color: #636e72; font-style: italic; line-height: 1.4; text-align: left; width: 100%; z-index: 1; pointer-events: none;"> 
-                                        ${todayScene.artDesc || ''} 
-                                    </div> 
-                                `} 
-                            </div> 
-                            <div style="font-family: 'Kaiti', 'STKaiti', serif; font-size: 18px; color: #2c3e50; position: absolute; bottom: 12px; left: 0; width: 100%; font-weight: bold;"> 
-                                ${todayScene.label} 
+                    <div style="position: relative; width: 800px; height: 400px; display: flex; align-items: center; justify-content: center; margin-top: 20px;"> 
+                        <div id="polaroid-wrapper"> 
+                            <div style="width: 266px; height: 266px; background: #fff; padding: 15px 15px 45px 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translate(-25px, 30px) rotate(-2deg); text-align: center; position: relative; box-sizing: border-box; cursor: crosshair;"> 
+                                <div class="polaroid-search-area" style="background: #e0e6ed; height: 201px; width: 100%; border: 1px inset #b2bec3; position: relative; overflow: hidden; padding: 10px; box-sizing: border-box;"> 
+                                    ${silhouetteHtml} 
+                                    ${todayScene.bgImg ? `<img src="${todayScene.bgImg}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;">` : ''} 
+                                    <div class="polaroid-disable-mask"></div>
+                                </div> 
+                                <div style="font-family: 'Kaiti', serif; font-size: 16px; color: #2c3e50; position: absolute; bottom: 12px; left: 0; width: 100%; font-weight: bold;"> 
+                                    ${todayScene.label} 
+                                </div> 
                             </div> 
                         </div> 
-                        <div id="japan-intel-panel" class="japan-intel-thermal" style="width: 330px; min-height: 352px; box-sizing: border-box; padding: 16px; opacity: 0; transform: translateX(-20px); transition: all 0.4s ease; display: flex; flex-direction: column; flex-shrink: 0; pointer-events: none;"> 
+ 
+                        <div id="japan-intel-panel" class="japan-intel-thermal" style="width: 330px; min-height: 352px; box-sizing: border-box; padding: 16px; display: flex; flex-direction: column;"> 
+                            <div id="intel-content"></div> 
+                            <button id="btn-back-search" style="margin-top: auto; padding: 8px; background: transparent; border: 1px dashed rgba(0,0,0,0.28); color: rgba(18, 18, 18, 0.78); border-radius: 8px; cursor: pointer; transition: all 0.2s; font-family: inherit; font-weight: 900;">返回放大拍立得</button> 
                         </div> 
                     </div> 
+                     
+                    <div id="camera-flash"></div> 
                     <button id="btn-close-polaroid-bottom" class="btn-start-shopping" style="position: fixed; right: 36px; bottom: 28px; background:none; border:none; padding:0; box-shadow:none; width:auto; height:auto; display:flex; align-items:center; justify-content:center; z-index: 100000; pointer-events: auto;"> 
                         <img src="assets/ui/开始买菜.png" alt="开始买菜" style="height:80px; width:auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); transition: transform 0.2s; cursor: pointer; transform: scale(1);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"> 
                     </button> 
@@ -15235,20 +15603,42 @@ function showPrepModal() {
                     return `<span class="thermal-led${i < foundSilhouettes ? ' is-on' : ''}"></span>`;
                 }).join('');
             };
+            const btnBackSearch = document.getElementById('btn-back-search');
+            if (btnBackSearch) {
+                btnBackSearch.onclick = function() {
+                    const wrap = document.getElementById('polaroid-wrapper');
+                    if (wrap) wrap.classList.remove('active-mode');
+                    const p = document.getElementById('japan-intel-panel');
+                    if (p) p.classList.remove('active-mode');
+                };
+            }
             silhouettes.forEach(el => { 
                 el.onclick = function() { 
+                    const panelIsActive = panel && panel.classList && panel.classList.contains('active-mode');
+                    if (panelIsActive) return;
                     const alreadyFound = this.getAttribute('data-found') === '1';
-                    if (typeof playSfx === 'function') {
-                        if (alreadyFound) playSfx(360, 'sine', 0.08);
-                        else playSfx(520, 'square', 0.12);
-                    }
-                    if (!alreadyFound) {
-                        this.setAttribute('data-found', '1');
+                    // 1. 触发快门特效与音效 
+                    const flash = document.getElementById('camera-flash'); 
+                    if (flash) { 
+                        flash.style.animation = 'none'; 
+                        void flash.offsetWidth; 
+                        flash.style.animation = 'flashAnim 0.4s ease-out'; 
+                    } 
+                    if (typeof playSfx === 'function') playSfx(500, 'noise', 0.1); 
+ 
+                    // 2. 切换 UI 状态为“解密模式” (照片左移，面板滑入) 
+                    const wrap = document.getElementById('polaroid-wrapper'); 
+                    if (wrap) wrap.classList.add('active-mode'); 
+                    const p = document.getElementById('japan-intel-panel'); 
+                    if (p) p.classList.add('active-mode'); 
+                    
+                    if (!alreadyFound) { 
+                        this.setAttribute('data-found', '1'); 
                         foundSilhouettes = Math.min(totalSilhouettes, foundSilhouettes + 1);
                     }
                     this.style.color = "initial"; 
                     this.style.textShadow = "none"; 
-                    this.style.transform = this.style.transform.replace(/scale\\([0-9.]+\\)/, 'scale(1.1)'); 
+                    this.style.transform = this.style.transform.replace(/scale\\([0-9.]+\\)/, 'scale(0.55)'); 
                     this.style.zIndex = "20"; 
  
                     const ingName = this.getAttribute('data-name'); 
@@ -15275,12 +15665,11 @@ function showPrepModal() {
                         return `<li class="thermal-item"><div class="thermal-item-title">${r.name || '未知菜谱'}</div><div class="thermal-tags">${ings}</div></li>`; 
                     }).join('') : `<li class="thermal-empty">当前进度暂无该食材的关联菜谱情报</li>`; 
  
-                    if (panel) { 
-                        panel.style.opacity = '1'; 
-                        panel.style.transform = 'translateX(0)'; 
-                        panel.style.pointerEvents = 'auto'; 
+                    // 3. 渲染面板内容 (指向 intel-content 容器) 
+                    const contentArea = document.getElementById('intel-content'); 
+                    if (contentArea) { 
                         const featureHtml = `<div class="thermal-feature">${emoji || ''}</div>`;
-                        panel.innerHTML = `
+                        contentArea.innerHTML = ` 
                             <div class="thermal-head">
                                 <div class="thermal-led-row"></div>
                                 <div class="thermal-head-label">SIGNAL</div>
