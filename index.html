@@ -588,7 +588,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 64px;
+            min-height: 56px;
             padding-bottom: 2px;
         }
         .order-ticket.match-highlight .order-item.item-match .order-info-col {
@@ -596,19 +596,18 @@
         }
         .order-ticket.match-highlight .order-item.item-match img.item-icon {
             display: block !important;
-            width: 100%;
-            height: 64px;
+            width: 92%;
+            height: 56px;
             object-fit: contain;
             object-position: center center;
             margin: 0 auto;
         }
-        /* 悬停在订单上时，匹配项显示菜名（隐藏图片），不影响其他项 */
-        .order-ticket.match-highlight:hover .order-item.item-match .order-info-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        /* 悬停在订单上时，匹配项显示：左图 + 右菜名（各占一半），不影响其他项 */
+        .order-ticket.match-highlight:hover .order-item.item-match { justify-content: space-between; gap: 6px; }
+        .order-ticket.match-highlight:hover .order-item.item-match img.item-icon { display: block !important; width: 50%; height: 44px; }
+        .order-ticket.match-highlight:hover .order-item.item-match .order-info-col { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; width: 50%; }
         .order-ticket.match-highlight:hover .order-item.item-match .order-info-col .recipe-tags { display: none !important; }
-        .order-ticket.match-highlight:hover .order-item.item-match .item-name { text-align: center; width: 100%; }
-        .order-ticket.match-highlight:hover .order-item.item-match img.item-icon {
-            display: none !important;
-        }
+        .order-ticket.match-highlight:hover .order-item.item-match .item-name { text-align: left; width: 100%; }
 
         @media (max-width: 900px) {
             #belt-container {
@@ -1192,6 +1191,19 @@
             align-items: center; 
             justify-content: center; 
             white-space: nowrap; 
+        }
+        .prep-stock-toast { position: fixed; left: 0; top: 0; transform: translate(-50%, -50%); pointer-events: none; z-index: 9999; opacity: 1; }
+        .prep-stock-toast img { height: 72px; width: auto; display: block; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35)); }
+        .prep-stock-toast.is-entering { animation: prepStockToastEnter 0.32s cubic-bezier(0.2, 1, 0.2, 1) forwards; }
+        .prep-stock-toast.is-fading { animation: prepStockToastFadeUp 0.6s ease-out forwards; }
+        @keyframes prepStockToastEnter {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            55% { transform: translate(-50%, calc(-50% - 12px)) scale(1.08); opacity: 1; }
+            100% { transform: translate(-50%, calc(-50% - 10px)) scale(1); opacity: 1; }
+        }
+        @keyframes prepStockToastFadeUp {
+            0% { transform: translate(-50%, calc(-50% - 10px)) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, calc(-50% - 36px)) scale(1); opacity: 0; }
         }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-80px); opacity: 0; } }
         /* [优化] 延长不透明时间：0-80% 保持完全不透明，仅在最后 20% 淡出 */
@@ -5193,6 +5205,10 @@
     70% { filter: brightness(0.7) contrast(1.15) saturate(0.65) blur(0.5px); }
     100% { filter: none; }
 }
+@keyframes polaroidLabelFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
 
 #japan-intel-panel.japan-intel-thermal {
     background: #f7f0dd;
@@ -5265,8 +5281,8 @@
     padding: 0;
     margin: 0;
     list-style-type: none;
-    overflow: visible;
-    max-height: none;
+    overflow: auto;
+    max-height: 210px;
     padding-right: 6px;
 }
 #japan-intel-panel.japan-intel-thermal .thermal-item {
@@ -5388,6 +5404,9 @@
     <!-- [New] Pantry SFX -->
     <audio id="sfx-pantry-open" src="audio/食材柜音效-打开.mp3" preload="auto"></audio>
     <audio id="sfx-pantry-close" src="audio/食材柜音效-关闭.mp3" preload="auto"></audio>
+    <audio id="sfx-ui-click-back" src="audio/点击返回音效.mp3" preload="auto"></audio>
+    <audio id="sfx-page-flip" src="audio/翻页音效.mp3" preload="auto"></audio>
+    <audio id="sfx-polaroid-camera" src="audio/拍照音效.mp3" preload="auto"></audio>
 </div>
 <div id="orientation-lock">
     <div style="font-size: 60px; margin-bottom: 20px;">📱🔄</div>
@@ -5595,20 +5614,6 @@
                 </div>
             </div>
         </div>
-
-        <div id="debug-menu" style="position: absolute; bottom: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 100;">
-            <div style="color: rgba(255,255,255,0.5); font-size: 12px; margin-bottom: 2px;">🛠️ 开发者测试通道</div>
-            <button onclick="enterTestMode('t3')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T3 食界新锐</button>
-            <button onclick="enterTestMode('t4')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T4 餐饮名流</button>
-            <button onclick="enterTestMode('t5')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T5 饮食大鳄</button>
-            <button onclick="enterTestMode('t6')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T6 餐饮帝国</button>
-            <button onclick="enterTestMode('day5')" style="background: rgba(0,0,0,0.6); color: #f1c40f; border: 1px solid #f1c40f; padding: 4px 8px; font-size: 12px; cursor: pointer;">Day 5 高升排骨</button>
-            <button onclick="enterTestMode('ingredients')" style="background: rgba(0,0,0,0.6); color: #2ecc71; border: 1px solid #2ecc71; padding: 4px 8px; font-size: 12px; cursor: pointer;">🥦 全食材满仓测试 (真实损耗)</button>
-        </div>
-
-        <button id="btn-exit-test" onclick="exitTestMode()" style="display: none; position: absolute; bottom: 10px; right: 10px; background: #e74c3c; color: #fff; border: 2px solid #fff; padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-            退出测试模式 (恢复存档)
-        </button>
     </div>
 
     <div id="boot-screen" style="display:flex;">
@@ -5635,6 +5640,20 @@
         <div class="home-main-actions">
             <button id="btn-boot-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开始游戏</button>
         </div>
+
+        <div id="debug-menu" style="position: absolute; bottom: 10px; right: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 100;">
+            <div style="color: rgba(255,255,255,0.5); font-size: 12px; margin-bottom: 2px;">🛠️ 开发者测试通道</div>
+            <button onclick="enterTestMode('t3')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T3 食界新锐</button>
+            <button onclick="enterTestMode('t4')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T4 餐饮名流</button>
+            <button onclick="enterTestMode('t5')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T5 饮食大鳄</button>
+            <button onclick="enterTestMode('t6')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T6 餐饮帝国</button>
+            <button onclick="enterTestMode('day5')" style="background: rgba(0,0,0,0.6); color: #f1c40f; border: 1px solid #f1c40f; padding: 4px 8px; font-size: 12px; cursor: pointer;">Day 5 高升排骨</button>
+            <button onclick="enterTestMode('ingredients')" style="background: rgba(0,0,0,0.6); color: #2ecc71; border: 1px solid #2ecc71; padding: 4px 8px; font-size: 12px; cursor: pointer;">🥦 全食材满仓测试 (真实损耗)</button>
+        </div>
+
+        <button id="btn-exit-test" onclick="exitTestMode()" style="display: none; position: absolute; bottom: 10px; right: 10px; background: #e74c3c; color: #fff; border: 2px solid #fff; padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            退出测试模式 (恢复存档)
+        </button>
     </div>
 
     <!-- 移入游戏容器的子界面 -->
@@ -7451,27 +7470,51 @@ function playSfx(f, t='sine', d=0.1, v=0.1) {
 // [新增] 通用按钮点击音效 (清脆的“咔哒”声)
 function playButtonSound() {
     if (!sfxEnabled) return;
+    const sound = document.getElementById('sfx-ui-click-back');
+    if (sound) {
+        sound.volume = 0.9;
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+        return;
+    }
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    
     const t = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    
     osc.connect(gain);
     gain.connect(sfxGain);
-    
-    // 模拟机械按键：短促的频率下潜
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(600, t);
     osc.frequency.exponentialRampToValueAtTime(200, t + 0.1);
-    
-    // 包络：快速起音，迅速衰减
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(0.4, t + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
-    
     osc.start(t);
     osc.stop(t + 0.1);
+}
+
+function playPageFlipSound() {
+    if (typeof sfxEnabled !== 'undefined' && !sfxEnabled) return;
+    const sound = document.getElementById('sfx-page-flip');
+    if (sound) {
+        sound.volume = 0.9;
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+        return;
+    }
+    if (typeof playSfx === 'function') playSfx(520, 'triangle', 0.12, 0.14);
+}
+
+function playPolaroidCameraSound() {
+    if (typeof sfxEnabled !== 'undefined' && !sfxEnabled) return;
+    const sound = document.getElementById('sfx-polaroid-camera');
+    if (sound) {
+        sound.volume = 0.95;
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+        return;
+    }
+    if (typeof playSfx === 'function') playSfx(760, 'triangle', 0.12, 0.18);
 }
 
 // [新增] IM 气泡音效 (模拟清脆的水滴/气泡声)
@@ -9923,8 +9966,6 @@ function takeOrder(order) {
     if (game.isPaused) return;
     // 1. 检查手里是否有菜
     if (!holdingThing || holdingThing.type !== 'DISH') {
-        const rect = order.dom.getBoundingClientRect();
-        triggerFeedback(rect.left + rect.width / 2, rect.top - 20, "请先做好菜!", "red");
         return;
     }
     const heldDish = holdingThing.val;
@@ -11920,6 +11961,32 @@ function toggleTrashMode() {
     updateCursor(); 
 }
 
+function triggerPrepStockInsufficientToast(sid) {
+    const stationEl = document.getElementById('s_' + sid);
+    const prepCard = stationEl?.querySelector('.station-card.prep-card');
+    const rect = prepCard ? prepCard.getBoundingClientRect() : null;
+    const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const y = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+
+    const id = `prep-stock-toast-${sid}`;
+    const existing = document.getElementById(id);
+    if (existing) existing.remove();
+
+    const div = document.createElement('div');
+    div.id = id;
+    div.className = 'prep-stock-toast';
+    div.classList.add('is-entering');
+    div.innerHTML = `<img src="assets/ui/库存不足.png" alt="库存不足">`;
+    document.body.appendChild(div);
+
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.style.transform = 'translate(-50%, calc(-50% - 10px)) scale(1)';
+
+    setTimeout(() => div.classList.add('is-fading'), 920);
+    setTimeout(() => div.remove(), 1600);
+}
+
 function handleStationClick(sid, event, zone) {
     // === 新增：清洁模式拦截 ===
     if (game.isTrashMode) {
@@ -11948,11 +12015,11 @@ function handleStationClick(sid, event, zone) {
             if (game.dailyInventory) { 
                 const storeId = (game && game.activeStoreId) ? game.activeStoreId : 'cn:main';
                 if (typeof window.getIngredientCount === 'function' && window.getIngredientCount(storeId, ingId) <= 0) { 
-                     triggerFeedback(event.clientX, event.clientY, "库存不足!", "red"); 
+                     triggerPrepStockInsufficientToast(sid);
                      return; 
                 } 
                 if (typeof window.consumeIngredient === 'function' && !window.consumeIngredient(storeId, ingId, 1)) { 
-                     triggerFeedback(event.clientX, event.clientY, "库存不足!", "red"); 
+                     triggerPrepStockInsufficientToast(sid);
                      return; 
                 } 
                 if(typeof initIngredients === 'function') initIngredients(); 
@@ -12466,6 +12533,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bootBtn = document.getElementById('btn-boot-start');
     if (bootBtn) {
         bootBtn.onclick = function() {
+            if (typeof playButtonSound === 'function') playButtonSound();
             if (typeof switchScreen === 'function') switchScreen('loading');
             ensureGameLoadedOnce();
             try { updateLoadingBackground(); } catch (e) { console.error('updateLoadingBackground failed:', e); }
@@ -12535,7 +12603,7 @@ window.onload = () => {
     if (btn) {
         btn.onclick = function() {
             // [新增] 音效与 AudioContext 激活
-            const playStartSound = () => { if(typeof playSfx === 'function') playSfx(400, 'triangle', 0.3); };
+            const playStartSound = () => { if (typeof playButtonSound === 'function') playButtonSound(); };
 
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume().then(() => {
@@ -13150,12 +13218,14 @@ function showLocationSelection() {
 }
 
 function returnToHome() {
+    if (typeof playButtonSound === 'function') playButtonSound();
     const ach = document.getElementById('achievement-modal');
     if (ach) ach.style.display = 'none';
     switchScreen('start-screen');
 }
 
 function closeLocationSelection() {
+    if (typeof playButtonSound === 'function') playButtonSound();
     // [核心修复] 退出时清理底部栏
     const oldBar = document.getElementById('map-bottom-bar');
     if (oldBar) oldBar.remove();
@@ -15496,7 +15566,7 @@ function showPrepModal() {
                     #japan-intel-panel { 
                         position: absolute; 
                         right: 0; 
-                        top: 50%; 
+                        top: calc(50% + 44px); 
                         transform: translateY(-50%) translateX(120%); 
                         opacity: 0; 
                         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
@@ -15508,6 +15578,24 @@ function showPrepModal() {
                         opacity: 1; 
                         pointer-events: auto;
                     } 
+
+                    #intel-scroll-hint {
+                        position: absolute;
+                        display: none;
+                        padding: 8px 10px;
+                        border-radius: 10px;
+                        background: rgba(0,0,0,0.6);
+                        border: 1px solid rgba(255,255,255,0.18);
+                        color: rgba(255,255,255,0.95);
+                        font-size: 14px;
+                        font-weight: 900;
+                        letter-spacing: 0.5px;
+                        text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+                        pointer-events: none;
+                        z-index: 100001;
+                        backdrop-filter: blur(2px);
+                        white-space: nowrap;
+                    }
  
                     /* 照相机快门闪光特效 */ 
                     #camera-flash { 
@@ -15551,10 +15639,11 @@ function showPrepModal() {
                             <div style="width: 266px; height: 266px; background: #fff; padding: 15px 15px 45px 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translate(-25px, 30px) rotate(-2deg); text-align: center; position: relative; box-sizing: border-box; cursor: crosshair;"> 
                                 <div class="polaroid-search-area" style="background: #e0e6ed; height: 201px; width: 100%; border: 1px inset #b2bec3; position: relative; overflow: hidden; padding: 10px; box-sizing: border-box;"> 
                                     ${silhouetteHtml} 
-                                    ${todayScene.bgImg ? `<img src="${todayScene.bgImg}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;">` : ''} 
+                                    ${todayScene.bgImg ? `<img src="${todayScene.bgImg}" class="polaroid-photo-img" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;">` : ''} 
+                                    ${todayScene.bgImg ? `<div class="polaroid-develop-mask"></div>` : ''} 
                                     <div class="polaroid-disable-mask"></div>
                                 </div> 
-                                <div style="font-family: 'Kaiti', serif; font-size: 16px; color: #2c3e50; position: absolute; bottom: 12px; left: 0; width: 100%; font-weight: bold;"> 
+                                <div style="font-family: 'Kaiti', serif; font-size: 14px; color: #2c3e50; position: absolute; bottom: 12px; left: 0; width: 100%; font-weight: bold; opacity: 0; animation: polaroidLabelFadeIn 360ms ease forwards; animation-delay: 1800ms;"> 
                                     ${todayScene.label} 
                                 </div> 
                             </div> 
@@ -15580,18 +15669,8 @@ function showPrepModal() {
                 document.body.appendChild(overlay); 
             }
  
+            if (typeof playPolaroidCameraSound === 'function') playPolaroidCameraSound();
             const panel = document.getElementById('japan-intel-panel'); 
-            (function(){ 
-                let sfx = document.getElementById('polaroid-sfx'); 
-                if (!sfx) { 
-                    sfx = document.createElement('audio'); 
-                    sfx.id = 'polaroid-sfx'; 
-                    sfx.src = 'audio/拍照音效.mp3'; 
-                    sfx.preload = 'auto'; 
-                    document.body.appendChild(sfx); 
-                } 
-                try { sfx.currentTime = 0; sfx.play().catch(()=>{}); } catch(_) {} 
-            })();
             const silhouettes = overlay.querySelectorAll('.intel-silhouette'); 
             const totalSilhouettes = silhouettes.length || 0;
             let foundSilhouettes = 0;
@@ -15606,6 +15685,7 @@ function showPrepModal() {
             const btnBackSearch = document.getElementById('btn-back-search');
             if (btnBackSearch) {
                 btnBackSearch.onclick = function() {
+                    if (typeof playButtonSound === 'function') playButtonSound();
                     const wrap = document.getElementById('polaroid-wrapper');
                     if (wrap) wrap.classList.remove('active-mode');
                     const p = document.getElementById('japan-intel-panel');
@@ -15631,6 +15711,7 @@ function showPrepModal() {
                     if (wrap) wrap.classList.add('active-mode'); 
                     const p = document.getElementById('japan-intel-panel'); 
                     if (p) p.classList.add('active-mode'); 
+                    if (typeof playPageFlipSound === 'function') playPageFlipSound();
                     
                     if (!alreadyFound) { 
                         this.setAttribute('data-found', '1'); 
@@ -15683,6 +15764,42 @@ function showPrepModal() {
                             ${featureHtml}
                         `; 
                         updateIntelSignal();
+
+                        const listEl = contentArea.querySelector('.thermal-list');
+                        if (listEl) {
+                            const ensureHint = () => {
+                                let hint = overlay.querySelector('#intel-scroll-hint');
+                                if (!hint) {
+                                    hint = document.createElement('div');
+                                    hint.id = 'intel-scroll-hint';
+                                    hint.textContent = '← 滚动查看更多';
+                                    overlay.appendChild(hint);
+                                }
+                                return hint;
+                            };
+                            const updateHint = () => {
+                                const scrollable = listEl.scrollHeight > listEl.clientHeight + 2;
+                                const hint = ensureHint();
+                                if (!scrollable) {
+                                    hint.style.display = 'none';
+                                    return;
+                                }
+                                const r = listEl.getBoundingClientRect();
+                                const pr = (panel && typeof panel.getBoundingClientRect === 'function') ? panel.getBoundingClientRect() : r;
+                                const hintWidth = 140;
+                                const x = Math.min(pr.right + 18, window.innerWidth - hintWidth - 12);
+                                const y = r.top + r.height / 2;
+                                hint.style.left = x + 'px';
+                                hint.style.top = y + 'px';
+                                hint.style.transform = 'translate(0, -50%)';
+                                hint.style.display = 'block';
+                            };
+                            requestAnimationFrame(updateHint);
+                            listEl.addEventListener('scroll', () => {
+                                const hint = overlay.querySelector('#intel-scroll-hint');
+                                if (hint && listEl.scrollTop > 4) hint.style.display = 'none';
+                            }, { passive: true });
+                        }
                     } 
                 }; 
             }); 
@@ -15707,7 +15824,7 @@ function showPrepModal() {
             };
             const btnTop = document.getElementById('btn-close-polaroid-top'); 
             const btnBottom = document.getElementById('btn-close-polaroid-bottom'); 
-            if (btnTop) btnTop.onclick = () => { if (typeof playSfx==='function') playSfx(300, 'sine', 0.1); closeOverlayToHome(); }; 
+            if (btnTop) btnTop.onclick = () => { if (typeof playButtonSound === 'function') playButtonSound(); closeOverlayToHome(); }; 
             if (btnBottom) { 
                 btnBottom.onclick = (event) => { 
                     if (event && typeof event.stopPropagation === 'function') event.stopPropagation(); 
