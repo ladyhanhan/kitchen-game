@@ -38,6 +38,7 @@
             --bg: #fdfcfb; --panel: #ffffff; --primary: #e60012; --accent: #FCC307;
             --prep: #3498db; --cook: #e74c3c; --plate: #2ecc71; --burnt: #2c3e50;
             --danger: #ff4757; --text-main: #2c3e50; --outline: #101010; --shadow: rgba(0,0,0,0.2);
+            --money-font: 'Courier New', monospace;
             
             /* Button Shadow Standards */
             --btn-sh-y: 2px;
@@ -180,10 +181,12 @@
             align-items: center;
             margin-bottom: 0; /* 确保没有额外的 margin 干扰 gap */
         }
+        .hud-stats .hud-line:first-child {
+            margin-top: 96px;
+        }
 
         .hud-item { 
-            /* [微调] 更通透、更紧凑 */
-            background: rgba(44, 62, 80, 0.55); 
+            background: rgba(62, 39, 35, 0.75); 
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 10px; 
             padding: 6px 14px; 
@@ -205,16 +208,138 @@
         .hud-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-            background: rgba(44, 62, 80, 0.85); /* hover时加深 */
+            background: rgba(62, 39, 35, 0.92);
             border-color: rgba(255, 255, 255, 0.3);
         }
         
         /* 特定模块调整 */
         #game-timer-container {
-            align-items: flex-start; /* [修复] 左对齐 */
+            flex-direction: row;
+            align-items: center;
             flex: 0 0 auto; /* 不拉伸 */
-            min-width: 80px;
-            border-color: rgba(231, 76, 60, 0.4); /* 红色微调 */
+            height: 44px;
+            padding: 0;
+            gap: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 25;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        #game-timer-container .hud-time-icon {
+            height: 100%;
+            width: auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+            transform: scale(1.5);
+            transform-origin: left center;
+            margin-left: -10px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+            pointer-events: none;
+        }
+        #game-timer-container .hud-time-pill {
+            --time-pill-shift: 18px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            margin-left: calc(-18px + var(--time-pill-shift));
+            background: rgba(62, 39, 35, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        #game-timer {
+            text-align: right;
+            display: inline-block;
+            transform: translateX(-2px);
+        }
+        #pass-rate-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 24;
+            flex-direction: row;
+            align-items: center;
+            flex: 0 0 auto;
+            height: 44px;
+            padding: 0;
+            gap: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        #pass-rate-container .hud-pass-icon {
+            height: 100%;
+            width: auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+            transform: scale(1.5);
+            transform-origin: left center;
+            margin-left: -10px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+            pointer-events: none;
+        }
+        #pass-rate-container .hud-pass-pill {
+            --pass-pill-shift: 18px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 10px;
+            margin-left: calc(-18px + var(--pass-pill-shift));
+            background: rgba(62, 39, 35, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        #revenue-container {
+            flex-direction: row;
+            align-items: center;
+            height: 44px;
+            padding: 0;
+            gap: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        #revenue-container .hud-coin-icon {
+            height: 100%;
+            width: auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+            transform: scale(1.5);
+            transform-origin: left center;
+            margin-left: -10px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+            pointer-events: none;
+        }
+        #revenue-container .hud-revenue-pill {
+            --revenue-pill-shift: 18px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            margin-left: calc(-18px + var(--revenue-pill-shift));
+            background: rgba(62, 39, 35, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        #revenue {
+            display: inline-block;
+            text-align: right;
         }
         
         /* 暂停按钮样式重置，使其融入 HUD 风格 */
@@ -339,6 +464,24 @@
     border-top: 3px solid #d0d0d0;
     overflow: visible; /* 不产生内部滚动条，靠内容自然拉长 */
     z-index: 20; /* 确保在金属背景之上 */
+}
+
+.order-ticket.wrong-dish-tint::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 64, 64, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    animation: orderWrongDishTint 1600ms ease-out forwards;
+}
+
+@keyframes orderWrongDishTint {
+    0% { opacity: 0; }
+    8% { opacity: 1; }
+    58% { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* Receipt Jagged Edge Effect */
@@ -574,6 +717,12 @@
     width: auto;
     display: block;
     object-fit: contain;
+    position: relative;
+    z-index: 2;
+}
+#btn-claim-bonus .bonus-claim-text {
+    position: relative;
+    z-index: 2;
 }
 
         .order-list { width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: 0; }
@@ -1176,6 +1325,7 @@
         .float-text-earnings { position: fixed; font-weight: 900; font-size: 24px; pointer-events: none; animation: floatUpEarnings 3.5s forwards; z-index: 15; text-shadow: 1px 1px 2px rgba(139, 69, 19, 0.3); text-align: center; color: #f1c40f; 
             /* [新增] Flex 布局以完美居中图标 */
             display: flex; align-items: center; justify-content: center;
+            font-family: var(--money-font) !important;
         }
 
         /* [新增] 飘字金币图标排版 */ 
@@ -1219,8 +1369,26 @@
         /* 弹窗 */
         #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 3000; padding: 18px; box-sizing: border-box; }
         .modal { background: white; color: #333; padding: 34px 32px; border-radius: 24px; text-align: center; width: 380px; border: 4px solid var(--outline); box-shadow: 0 10px 0 rgba(0,0,0,0.25), 0 0 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; max-height: min(82vh, 720px); overflow: hidden; }
+        #overlay .modal {
+            background-color: #5d4037;
+            background-image:
+                linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 15%),
+                repeating-linear-gradient(90deg,
+                    transparent 0, transparent 2px,
+                    rgba(0,0,0,0.05) 3px, rgba(255,255,255,0.02) 4px,
+                    transparent 6px
+                ),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+            border: 3px solid #3e2723;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.6);
+            color: #fff;
+        }
+        #overlay .modal h2 {
+            color: #fff;
+        }
         .modal h2 { color: var(--primary); margin: 0 0 10px; font-size: 26px; letter-spacing: 1px; line-height: 1.15; }
-        .modal-content { margin: 0; font-size: 16px; line-height: 1.65; white-space: pre-line; text-align: left; width: 100%; flex: 1 1 auto; overflow: auto; padding-bottom: 16px; box-sizing: border-box; }
+        .modal-content { margin: 0; font-size: 16px; line-height: 1.65; white-space: pre-line; text-align: left; width: 100%; flex: 1 1 auto; overflow: hidden; padding-bottom: 16px; box-sizing: border-box; }
         .modal button { margin-top: 22px; padding: 12px 44px; border-radius: 14px; border: 3px solid var(--outline); background: var(--plate); color: white; font-weight: 900; cursor: pointer; font-size: 18px; box-shadow: 0 6px 0 rgba(0,0,0,0.25); transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease; flex-shrink: 0; }
         .modal button:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.05); }
         .modal button:active { transform: translateY(2px) scale(0.98); box-shadow: 0 3px 0 rgba(0,0,0,0.25); }
@@ -1542,7 +1710,7 @@
             height: 32px;
         }
         .home-main-actions .home-inline-stats #home-balance {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 800;
         }
         .home-main-actions .home-inline-stats .home-store-days {
@@ -1569,6 +1737,71 @@
     }
 
     /* Update existing .home-top-right to be strictly right-aligned */
+    .home-top-left {
+        position: absolute;
+        top: 24px;
+        left: 30px;
+        z-index: 200000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+        pointer-events: auto;
+        color: #FFFFFF;
+        padding: 0;
+    }
+    .home-top-left.is-game-board {
+        top: 0;
+        padding: 12px 19px;
+        background-color: #5d4037;
+        background-image:
+            linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 15%),
+            repeating-linear-gradient(90deg,
+                transparent 0, transparent 2px,
+                rgba(0,0,0,0.05) 3px, rgba(255,255,255,0.02) 4px,
+                transparent 6px
+            ),
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+        border: 3px solid #3e2723;
+        border-radius: 8px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.6);
+    }
+    .home-top-left.entering {
+        animation: homeTopLeftSlideIn 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
+    }
+    @keyframes homeTopLeftSlideIn {
+        0% { transform: translateY(-120px); opacity: 0; }
+        65% { transform: translateY(10px); opacity: 1; }
+        82% { transform: translateY(-4px); opacity: 1; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
+    .home-top-left .wallet-icon {
+        width: 32px;
+        height: 32px;
+    }
+    .home-top-left #home-balance {
+        font-size: 22px;
+        font-weight: 800;
+        color: #FFFFFF;
+    }
+    .home-top-left #revenue {
+        font-size: 20px;
+        font-weight: 900;
+        color: #FFFFFF;
+    }
+    .home-top-left .home-store-days {
+        font-size: 18px;
+        font-weight: 800;
+    }
+    .home-top-left .home-revenue-row {
+        display: none;
+    }
+    .home-top-left.is-game-board .home-revenue-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
     .home-top-right {
         position: absolute;
         top: 24px;
@@ -1580,6 +1813,101 @@
         justify-content: flex-end;
         align-items: center;
         z-index: 100;
+    }
+    #start-screen.title-modal-open .home-top-right,
+    #start-screen.title-modal-open .home-main-actions,
+    #start-screen.title-modal-open .home-title,
+    #start-screen.title-modal-open #lobby-todo-note {
+        display: none !important;
+    }
+
+    #lobby-todo-note,
+    #lobby-todo-note * {
+        text-shadow: none !important;
+        filter: none !important;
+    }
+
+    #lobby-todo-note {
+        user-select: none;
+        overflow: hidden;
+        box-sizing: border-box;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    #lobby-todo-note:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(0,0,0,0.18) !important;
+    }
+    #lobby-todo-note:active {
+        transform: translateY(-1px) scale(0.995);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.16) !important;
+    }
+    #lobby-todo-note button {
+        transition: transform 110ms ease, filter 110ms ease, box-shadow 110ms ease;
+        box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+    }
+    #lobby-todo-note button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.03);
+        box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+    }
+    #lobby-todo-note button:active {
+        transform: translateY(0px);
+        filter: brightness(0.98);
+        box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+    }
+    #lobby-todo-note button:focus-visible {
+        outline: 2px solid rgba(17,17,17,0.5);
+        outline-offset: 2px;
+    }
+
+    #lobby-todo-note .lobby-task-row {
+        max-height: 120px;
+        transition: transform 180ms ease, opacity 180ms ease, max-height 220ms ease, margin 220ms ease, padding 220ms ease;
+        will-change: transform, opacity, max-height;
+        overflow: hidden;
+    }
+    #lobby-todo-note .lobby-task-row.is-claimed-out {
+        opacity: 0;
+        transform: translateY(-18px);
+    }
+    #lobby-todo-note .lobby-task-row.is-claimed-out,
+    #lobby-todo-note .lobby-task-row.is-claimed-out * {
+        background: transparent !important;
+        border-color: transparent !important;
+    }
+    #lobby-todo-note .lobby-task-row.is-collapsing {
+        opacity: 0;
+        transform: translateY(-18px);
+        max-height: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    #lobby-todo-note .lobby-confetti {
+        position: absolute;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+        z-index: 2;
+    }
+    #lobby-todo-note .lobby-confetti > i {
+        position: absolute;
+        top: 8px;
+        width: 7px;
+        height: 10px;
+        border-radius: 1px;
+        opacity: 0;
+        transform: translateY(0) rotate(0deg);
+        animation: lobbyConfettiBurst 4200ms cubic-bezier(0.22, 1.65, 0.36, 1) forwards;
+    }
+    @keyframes lobbyConfettiBurst {
+        0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+        6% { opacity: 1; transform: translate(calc(var(--dx, 0px) * 0.25), calc(var(--up, 16px) * -1.15)) rotate(calc(var(--spin, 180deg) * 0.32)); }
+        12% { opacity: 1; transform: translate(calc(var(--dx, 0px) * 0.6), calc(var(--up, 16px) * -0.85)) rotate(calc(var(--spin, 180deg) * 0.40)); }
+        18% { opacity: 1; transform: translate(calc(var(--dx, 0px) * 0.7), calc(var(--up, 16px) * -0.55)) rotate(calc(var(--spin, 180deg) * 0.45)); }
+        72% { opacity: 1; transform: translate(calc(var(--dx, 0px) * 0.95), var(--fall, 34px)) rotate(calc(var(--spin, 180deg) * 0.9)); }
+        100% { opacity: 0; transform: translate(calc(var(--dx, 0px) * 1.05), calc(var(--fall, 34px) + 10px)) rotate(var(--spin, 180deg)); }
     }
         .home-balance {
             min-width: 140px;
@@ -1605,12 +1933,23 @@
         .balance-shake {
             animation: balanceShake 0.4s ease;
         }
+        .balance-pop {
+            animation: balancePop 720ms cubic-bezier(0.22, 1.2, 0.36, 1);
+            transform-origin: 50% 50%;
+        }
         @keyframes balanceShake {
             0% { transform: translateX(0); }
             25% { transform: translateX(-3px); }
             50% { transform: translateX(3px); }
             75% { transform: translateX(-2px); }
             100% { transform: translateX(0); }
+        }
+        @keyframes balancePop {
+            0% { transform: scale(1); }
+            22% { transform: scale(1.22); }
+            44% { transform: scale(0.96); }
+            66% { transform: scale(1.08); }
+            100% { transform: scale(1); }
         }
         .home-btn-secondary {
             min-width: 140px;
@@ -1656,7 +1995,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(44, 62, 80, 0.9);
+            background: rgba(0, 0, 0, 0.85);
             color: white;
             padding: 18px 40px;
             border-radius: 50px;
@@ -1816,7 +2155,7 @@
             .dish-info { font-size: 18px; height: 24px; margin-top: 2px; }
             .dish-status { font-size: 14px; height: 20px; }
             
-            #hud { height: 60px; font-size: 14px; }
+            #hud { height: auto; font-size: 14px; }
             .stat-val { font-size: 18px; }
             .modal { width: min(360px, calc(100vw - 36px)); padding: 26px 22px; max-height: 86vh; }
             .modal h2 { font-size: 22px; }
@@ -1977,7 +2316,8 @@
         .loc-back-btn {
             position: absolute;
             top: 40px;
-            left: 40px;
+            right: 40px;
+            left: auto;
             padding: 8px 16px;
             font-size: 14px;
             border-radius: 999px;
@@ -2000,7 +2340,8 @@
         @media (max-width: 600px) {
             .loc-back-btn {
                 top: 20px;
-                left: 20px;
+                right: 20px;
+                left: auto;
             }
             .loc-header-float {
                 top: 70px;
@@ -2342,11 +2683,12 @@
         .shop-header {
             flex: 0 0 auto;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px;
+            padding: 20px;
             background: rgba(255,255,255,0.05);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 0;
+            position: relative;
         }
         .shop-back-btn {
             background: transparent;
@@ -2375,6 +2717,9 @@
             font-size: 28px; font-weight: 900; 
             color: #ecf0f1;
             letter-spacing: 2px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .shop-tabs {
@@ -2382,6 +2727,7 @@
             display: flex;
             padding: 10px 20px 0;
             gap: 12px;
+            margin-top: 32px;
         }
         .shop-tab {
             padding: 10px 24px;
@@ -3136,9 +3482,9 @@
     } 
     .prep-header { 
         flex: 0 0 auto; margin-bottom: 15px; 
-        padding-left: 15px; border-left: 6px solid #f1c40f; 
+        padding-left: 0;
+        border-left: none; 
         display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start;
-        /* 动画：延迟淡入 */
     } 
     .prep-header-content { display: flex; flex-direction: column; }
     
@@ -3237,8 +3583,29 @@
     } 
     .pf-info { display: flex; flex-direction: column; } 
     .pf-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; } 
-    .pf-val { font-size: 20px; font-weight: 900; color: #fff; font-family: 'Courier New', monospace; } 
+    .pf-val { font-size: 20px; font-weight: 900; color: #fff; font-family: var(--money-font) !important; } 
     .pf-val.highlight { color: #f1c40f; } 
+    .money-font { font-family: var(--money-font) !important; }
+    #target-current,
+    #target-goal,
+    #revenue,
+    #home-balance,
+    #shop-balance,
+    #ach-rev,
+    #ach-cost,
+    #ach-profit,
+    .bonus-claim-text,
+    .crate-price-tag,
+    .shop-item-price-row,
+    .ing-price,
+    .ach-stat-val.val-gold {
+        font-family: var(--money-font) !important;
+    }
+    #target-current,
+    #revenue {
+        display: inline-block;
+        transform-origin: 50% 50%;
+    }
     
     .btn-start-day { 
         background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; border: none; 
@@ -3542,6 +3909,20 @@
         color: rgba(255,255,255,0.98);
         line-height: 1.15;
         letter-spacing: 0.2px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+    .empire-title-badge {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        flex: 0 0 auto;
+        filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+    }
+    .empire-title-text {
+        min-width: 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3602,6 +3983,47 @@
         filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
         transition: all 0.2s ease;
     }
+    .icon-badge-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        transition: transform 0.2s ease;
+    }
+    .icon-badge-wrap > img {
+        margin-bottom: 0;
+    }
+    #lobby-rewards-attn.rewards-attn {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        width: 56px;
+        height: 56px;
+        background: url('assets/icons/感叹号.png') center / contain no-repeat;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+        pointer-events: none;
+        transform-origin: 60% 70%;
+        animation: rewardsAttnBreath 1.25s ease-in-out infinite;
+    }
+    #lobby-map-attn.rewards-attn {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        width: 56px;
+        height: 56px;
+        background: url('assets/icons/感叹号.png') center / contain no-repeat;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+        pointer-events: none;
+        transform-origin: 60% 70%;
+        animation: rewardsAttnBreath 1.25s ease-in-out infinite;
+    }
+    @keyframes rewardsAttnBreath {
+        0% { transform: translateY(0) scale(1); opacity: 0.92; }
+        35% { transform: translateY(-2px) scale(1.14); opacity: 1; }
+        60% { transform: translateY(0) scale(0.98); opacity: 0.94; }
+        100% { transform: translateY(0) scale(1); opacity: 0.92; }
+    }
 
     /* 图标下方文字 */
     .icon-btn span {
@@ -3616,11 +4038,50 @@
         transform: translateY(-4px) scale(1.08); /* 轻微浮起并放大 */
         filter: drop-shadow(0 8px 12px rgba(0,0,0,0.4)) brightness(1.1);
     }
+    #btn-lobby-rewards:hover .icon-badge-wrap {
+        transform: translateY(-4px) scale(1.08);
+    }
+    #btn-lobby-rewards:hover .icon-badge-wrap > img {
+        transform: none;
+    }
 
     /* 按下反馈 */
     .icon-btn:active img {
         transform: scale(0.9); /* 明显的按压陷落感 */
         filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+    }
+    #btn-lobby-rewards:active .icon-badge-wrap {
+        transform: scale(0.9);
+    }
+    #btn-lobby-rewards:active .icon-badge-wrap > img {
+        transform: none;
+    }
+    #lobby-todo-note {
+        transition: transform 0.22s ease;
+        transform-origin: bottom right;
+    }
+    #lobby-todo-note:hover {
+        transform: scale(1.02);
+    }
+    .coin-fx {
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        background: url('assets/icons/硬币.png') center / contain no-repeat;
+        pointer-events: none;
+        z-index: 9999;
+        will-change: transform, opacity;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
+        opacity: 0.98;
+        transform: translate(0,0) scale(2);
+    }
+    @keyframes coinFlight {
+        0% { transform: translate(0, 0) scale(2); opacity: 1; }
+        20% { transform: translate(calc(var(--dx) * 20 / 100), calc(var(--dy) * 20 / 100 - (var(--arc) * 64 / 100))) scale(1.8); opacity: 0.98; }
+        40% { transform: translate(calc(var(--dx) * 40 / 100), calc(var(--dy) * 40 / 100 - (var(--arc) * 96 / 100))) scale(1.55); opacity: 0.92; }
+        60% { transform: translate(calc(var(--dx) * 60 / 100), calc(var(--dy) * 60 / 100 - (var(--arc) * 96 / 100))) scale(1.3); opacity: 0.86; }
+        80% { transform: translate(calc(var(--dx) * 80 / 100), calc(var(--dy) * 80 / 100 - (var(--arc) * 64 / 100))) scale(1.05); opacity: 0.72; }
+        100% { transform: translate(var(--dx), var(--dy)) scale(0.85); opacity: 0; }
     }
 
     /* [UI 升级] 钱包图标微调 */
@@ -4049,7 +4510,7 @@
 }
 
 /* 3. 出餐状态：只让菜品容器放大+发光 (排除灶台) */
-.cook-machine.finished > div {
+.cook-machine.finished > div.dish-pop-layer {
     transform: scale(1.1);
     filter: drop-shadow(0 0 15px rgba(241, 196, 15, 0.9));
     transition: transform 0.2s;
@@ -4711,6 +5172,103 @@
         transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, background 0.25s ease-out;
         -webkit-tap-highlight-color: transparent;
     }
+    #title-level-modal #home-profile-card.home-profile-card {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: min(820px, calc(100vw - 80px), calc((100vh - 140px) * 1.834));
+        aspect-ratio: 1280 / 698;
+        padding: 92px 92px 78px;
+        border-radius: 0;
+        background: url('assets/ui/头衔等级弹窗.png') center / contain no-repeat;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        cursor: default;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+    #title-level-modal #home-profile-card.home-profile-card:hover,
+    #title-level-modal #home-profile-card.home-profile-card:active {
+        transform: none;
+    }
+    #title-level-modal #home-profile-card .title-progress {
+        margin-top: 0;
+        transform: translateY(140px);
+        height: 82px;
+    }
+    #title-level-modal #home-profile-card > button.icon-btn {
+        top: 162px !important;
+        right: 40px !important;
+    }
+    #title-level-modal #home-profile-card .title-progress-track {
+        top: 21px;
+        height: 10px;
+        overflow: visible;
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.22));
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: inset 0 3px 7px rgba(0,0,0,0.55), inset 0 -2px 4px rgba(255,255,255,0.10), 0 2px 10px rgba(0,0,0,0.25);
+    }
+    #title-level-modal #home-profile-card .title-progress-fill {
+        position: relative;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.35), inset 0 -1px 2px rgba(255,255,255,0.22);
+    }
+    #title-level-modal #home-profile-card .title-progress-fill::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.40), rgba(255,255,255,0.0) 55%, rgba(0,0,0,0.10));
+        pointer-events: none;
+        mix-blend-mode: screen;
+        opacity: 0.55;
+    }
+    #title-level-modal #home-profile-card .title-progress-grid {
+        grid-template-rows: 52px 30px;
+    }
+    #title-level-modal #home-profile-card .tp-node {
+        width: 16px;
+        height: 16px;
+        border-width: 3px;
+        position: relative;
+        background: linear-gradient(180deg, rgb(54, 56, 62), rgb(18, 19, 23));
+        border-color: rgb(205, 210, 220);
+        box-shadow: inset 0 3px 7px rgba(0,0,0,0.58), inset 0 -2px 4px rgba(255,255,255,0.10);
+    }
+    #title-level-modal #home-profile-card .tp-node.is-active {
+        transform: scale(1.15);
+    }
+    #title-level-modal #home-profile-card .tp-node.is-active {
+        border-color: rgb(255, 255, 255);
+        box-shadow: inset 0 3px 7px rgba(0,0,0,0.52), inset 0 -2px 3px rgba(255,255,255,0.18), 0 0 16px 4px var(--tp-tier-glow, rgba(241, 196, 15, 0.55));
+    }
+    #title-level-modal #home-profile-card .tp-node.tp-node-current::before {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.28));
+        box-shadow: inset 0 4px 10px rgba(0,0,0,0.55), inset 0 -2px 4px rgba(255,255,255,0.12);
+        pointer-events: none;
+    }
+    #title-level-modal #home-profile-card .tp-node.tp-node-current img {
+        transform: scale(1.28);
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.28)) !important;
+    }
+    #title-level-modal #home-profile-card .tp-node.tp-node-current:hover img {
+        transform: scale(1.38) rotate(-8deg);
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.32)) !important;
+    }
+    #title-level-modal #home-profile-card .title-node-label {
+        font-size: 15px;
+        width: 4.6em;
+        transform: translateY(7px);
+    }
+    #title-level-modal #home-profile-card .home-title-progress-head {
+        display: none;
+    }
     .home-profile-card .wallet-icon {
         width: 30px;
         height: 30px;
@@ -4744,7 +5302,7 @@
         min-width: 0;
     }
     .home-wallet-row #home-balance {
-        font-size: 16px;
+        font-size: 20px;
         font-weight: 900;
         letter-spacing: 0.2px;
         white-space: nowrap;
@@ -4855,6 +5413,14 @@
         border-color: #ffffff;
         transform: scale(1.08);
     }
+    .tp-node.tp-node-current img {
+        transition: transform 0.18s ease, filter 0.18s ease;
+        transform-origin: center;
+    }
+    .tp-node.tp-node-current:hover img {
+        transform: scale(1.22) rotate(-8deg);
+        filter: drop-shadow(0 3px 10px rgba(0,0,0,0.28));
+    }
     @media (max-width: 600px) {
         .home-profile-card {
             top: 16px;
@@ -4863,7 +5429,7 @@
             padding: 12px 14px 22px;
         }
         .home-wallet-row #home-balance {
-            font-size: 15px;
+            font-size: 19px;
         }
         .tp-node {
             width: 11px;
@@ -5443,46 +6009,30 @@
     </div>
 
     <div id="hud">
+        <div class="hud-item" id="game-timer-container">
+            <img class="hud-time-icon" src="assets/icons/icon_时间.png" alt="时间">
+            <div class="hud-time-pill">
+                <span class="stat-val" id="game-timer" style="font-variant-numeric: tabular-nums; width:50px;">120</span>
+            </div>
+        </div>
+        <div class="hud-item" id="pass-rate-container">
+            <img class="hud-pass-icon" src="assets/icons/及格率.png" alt="及格率">
+            <div class="hud-pass-pill">
+                <span class="hud-main">
+                    <span class="stat-val" id="pass-rate">0%</span>
+                    <span id="pass-trend" class="trend-box" style="display:none">
+                        <span class="trend-icon"></span>
+                        <span class="trend-val"></span>
+                        <span class="tooltip" id="trend-tooltip"></span>
+                    </span>
+                </span>
+            </div>
+        </div>
         <div id="hud-row">
             <div class="hud-stats">
                 <!-- Row 1: Time, Pass Rate -->
                 <div class="hud-line">
-                    <div class="hud-item" id="game-timer-container">
-                        <span class="hud-label-strong" style="color:#e74c3c">TIME</span>
-                        <span class="stat-val" id="game-timer" style="font-variant-numeric: tabular-nums; width:50px;">120</span>
-                    </div>
-                    <div class="hud-item">
-                        <span class="hud-label hud-label-strong">及格率</span>
-                        <span class="hud-main">
-                            <span class="stat-val" id="pass-rate">0%</span>
-                            <span id="pass-trend" class="trend-box" style="display:none">
-                                <span class="trend-icon"></span>
-                                <span class="trend-val"></span>
-                                <span class="tooltip" id="trend-tooltip"></span>
-                            </span>
-                        </span>
-                    </div>
                 </div>
-                <!-- Row 2: Target -->
-                <div class="hud-line">
-                    <div class="hud-item hud-item-target">
-                        <span class="hud-label hud-label-strong">目标</span>
-                        <span class="hud-main">
-                            <span class="stat-val target-current" id="target-current">¥0</span>
-                            <span class="target-sep">/</span>
-                            <span class="stat-val target-goal" id="target-goal"></span>
-                        </span>
-                    </div>
-                </div>
-                <!-- Row 3: Day Revenue -->
-      <div class="hud-line">
-        <div class="hud-item">
-          <span class="hud-label hud-label-strong" id="hud-day-label">DAY 1 营业额</span>
-          <span class="hud-main">
-            <span class="stat-val" id="revenue">¥0</span>
-          </span>
-        </div>
-      </div>
             </div>
             <!-- [修改] 替换为图片按钮 -->
             <img src="assets/ui/暂停.png" id="btn-pause" alt="暂停" style="cursor: pointer;">
@@ -5552,41 +6102,61 @@
         <video id="home-cn-intro-video" class="home-bg-video" muted playsinline preload="auto">
             <source src="assets/bg/中国主题.mp4" type="video/mp4">
         </video>
-        <div id="home-profile-card" class="home-profile-card" onclick="if(typeof showToast === 'function') showToast('提升厨房等级或扩张版图以晋升头衔！')">
-            <div class="home-title-progress">
-                <div class="home-title-progress-head">
-                    <span class="home-title-progress-label home-title-level-label">
-                        <img src="assets/icons/icon_头衔.png" class="wallet-icon" alt="头衔">
-                        <span>头衔等级</span>
-                    </span>
-                </div>
-                <div class="title-progress" role="progressbar" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1">
-                    <div class="title-progress-track">
-                        <div id="title-progress-fill" class="title-progress-fill"></div>
-                    </div>
-                    <div id="title-progress-nodes" class="title-progress-grid">
-                        <span class="tp-node" data-lv="1"></span>
-                        <span class="tp-node" data-lv="2"></span>
-                        <span class="tp-node" data-lv="3"></span>
-                        <span class="tp-node" data-lv="4"></span>
-                        <span class="tp-node" data-lv="5"></span>
-                        <span class="tp-node" data-lv="6"></span>
-                        <span class="title-node-label" data-lv="1"></span>
-                        <span class="title-node-label" data-lv="2"></span>
-                        <span class="title-node-label" data-lv="3"></span>
-                        <span class="title-node-label" data-lv="4"></span>
-                        <span class="title-node-label" data-lv="5"></span>
-                        <span class="title-node-label" data-lv="6"></span>
+        <div id="title-level-modal" style="display:none; position:absolute; inset:0; background: rgba(0,0,0,0.55); z-index: 120; align-items:center; justify-content:center; backdrop-filter: blur(6px);">
+            <div style="position: relative; width: 820px; max-width: calc(100vw - 80px); display:flex; align-items:center; justify-content:center;">
+                <div id="home-profile-card" class="home-profile-card" style="position: relative; top: 0; left: 0; margin: 0; width: 100%; cursor: default;">
+                    <button class="icon-btn" onclick="hideTitleLevelModal()" style="position:absolute; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 999px; padding:0; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.95); font-size: 22px; line-height: 1; font-weight: 900; z-index: 2;">
+                        ×
+                    </button>
+                    <div class="home-title-progress">
+                        <div class="home-title-progress-head">
+                            <span class="home-title-progress-label home-title-level-label">
+                                <img src="assets/icons/icon_头衔.png" class="wallet-icon" alt="头衔">
+                                <span>头衔等级</span>
+                            </span>
+                        </div>
+                        <div class="title-progress" role="progressbar" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1">
+                            <div class="title-progress-track">
+                                <div id="title-progress-fill" class="title-progress-fill"></div>
+                            </div>
+                            <div id="title-progress-nodes" class="title-progress-grid">
+                                <span class="tp-node" data-lv="1"></span>
+                                <span class="tp-node" data-lv="2"></span>
+                                <span class="tp-node" data-lv="3"></span>
+                                <span class="tp-node" data-lv="4"></span>
+                                <span class="tp-node" data-lv="5"></span>
+                                <span class="tp-node" data-lv="6"></span>
+                                <span class="title-node-label" data-lv="1"></span>
+                                <span class="title-node-label" data-lv="2"></span>
+                                <span class="title-node-label" data-lv="3"></span>
+                                <span class="title-node-label" data-lv="4"></span>
+                                <span class="title-node-label" data-lv="5"></span>
+                                <span class="title-node-label" data-lv="6"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Top Right: Balance, Business Map, Shop (Consolidated) -->
         <div class="home-top-right">
+            <button id="btn-lobby-rewards" class="icon-btn" onclick="playButtonSound(); openLobbyRewardsNote()">
+                <span class="icon-badge-wrap">
+                    <img src="assets/icons/icon_日历.png" alt="奖励">
+                    <span id="lobby-rewards-attn" class="rewards-attn" aria-hidden="true" style="display:none;"></span>
+                </span>
+                <span>奖励</span>
+            </button>
+            <button class="icon-btn" onclick="showTitleLevelModal()">
+                <img src="assets/icons/icon_头衔.png" alt="头衔等级">
+                <span>头衔等级</span>
+            </button>
             <!-- 2. Business Map -->
             <button class="icon-btn" onclick="playCoin(); showLocationSelection()">
-                <img src="assets/icons/icon_map.png" alt="商业版图">
+                <span class="icon-badge-wrap">
+                    <img src="assets/icons/icon_map.png" alt="商业版图">
+                    <span id="lobby-map-attn" class="rewards-attn" aria-hidden="true" style="display:none;"></span>
+                </span>
                 <span>商业版图</span>
             </button>
 
@@ -5602,17 +6172,27 @@
         </div>
         <div class="home-main-actions">
             <button id="btn-start" style="padding:15px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px;">开门营业</button>
-            <!-- Icons moved to corners -->
-            <div class="home-inline-stats" style="display:flex; align-items:center; gap:16px; margin-top:20px;">
-                <div class="home-wallet-row">
-                    <img src="assets/icons/icon_wallet.png" class="wallet-icon" alt="钱包">
-                    <span id="home-balance">¥0</span>
-                </div>
-                <div class="home-days-row">
-                    <img src="assets/icons/icon_日历.png" class="wallet-icon" alt="日历">
-                    <span id="home-store-days" class="home-store-days">已营业 0 天</span>
-                </div>
-            </div>
+        </div>
+        <div id="lobby-todo-note" style="position: absolute; top: 96px; left: 30px; width: 300px; background: #f7f0dd; border: 1px solid rgba(0, 0, 0, 0.22); border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,0.45); padding: 14px 14px 12px 14px; font-family: 'Courier New', monospace; color: rgba(18, 18, 18, 0.92); z-index: 10; background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 100% 4px, 18px 18px; background-position: 0 0, 3px 7px;">
+            <div style="font-weight: 900; font-size: 14px; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 1px dashed rgba(0, 0, 0, 0.22); padding-bottom: 8px; text-align: center; color:#2c3e50; text-shadow:none;">当前待办</div>
+            <div id="todo-target" style="font-size: 13px; font-weight: 900; margin-bottom: 6px; color:#c0392b; text-shadow:none;">目标：晋升 T2 星级店长</div>
+            <div id="todo-condition" style="font-size: 12px; line-height: 1.35; margin-bottom: 10px; border-bottom: 1px dashed rgba(0, 0, 0, 0.18); padding-bottom: 10px; color:#2c3e50; text-shadow:none;">条件：首店营业达 3 天</div>
+            <div id="todo-spoiler" style="font-size: 12px; line-height: 1.35; color:#b9770e; text-shadow:none;">特权：单量增加，解锁进阶硬菜</div>
+        </div>
+    </div>
+
+    <div class="home-top-left" style="display:none;">
+        <div class="home-wallet-row">
+            <img src="assets/icons/icon_wallet.png" class="wallet-icon" alt="钱包">
+            <span id="home-balance">¥ 0</span>
+        </div>
+        <div class="home-days-row">
+            <img src="assets/icons/icon_日历.png" class="wallet-icon" alt="日历">
+            <span id="home-store-days" class="home-store-days">已营业 0 天</span>
+        </div>
+        <div class="home-revenue-row">
+            <img src="assets/icons/硬币.png" class="wallet-icon" alt="营业额">
+            <span id="revenue" class="stat-val">¥0</span>
         </div>
     </div>
 
@@ -5708,7 +6288,7 @@
     </div>
 
     <div id="map-screen" role="dialog" aria-modal="true" aria-labelledby="location-title">
-        <button class="icon-btn" onclick="closeLocationSelection()" style="position: absolute; top: 20px; left: 20px; padding: 0; z-index: 10;">
+        <button class="icon-btn" onclick="closeLocationSelection()" style="position: absolute; top: 20px; right: 20px; left: auto; padding: 0; z-index: 10;">
             <img src="assets/icons/icon_back.png" alt="返回" style="width: 45px; height: 45px; margin: 0;">
         </button>
         <div class="loc-header-float">
@@ -5948,6 +6528,15 @@ const TITLE_CONFIG = {
     6: { name: "餐饮帝国", color: "#f39c12", border: "#f1c40f", icon: "", glow: "rgba(241,196,15,0.7)" }  // 耀金
 };
 
+const TIER_GOALS = [
+    { level: 1, name: "初创店长", condition: "初始状态", spoiler: "踏入餐饮界的第一步" },
+    { level: 2, name: "星级店长", condition: "首家店铺营业达 3 天", spoiler: "单量增加，解锁进阶硬菜" },
+    { level: 3, name: "食界新锐", condition: "配置 Omni 智能锅与 KMES 3.0", spoiler: "首店开启全自动托管，解锁挂机收益" },
+    { level: 4, name: "餐饮名流", condition: "斥资 ¥5000 解锁第一家海外分店", spoiler: "解锁分店切换功能，开启两店并行管理" },
+    { level: 5, name: "饮食大鳄", condition: "第一家分店实现全自动托管", spoiler: "解锁第二家分店，扩张商业版图" },
+    { level: 6, name: "餐饮帝国", condition: "已有版图全解锁且全托管", spoiler: "制霸全球味蕾，建立不可撼动的餐饮帝国" }
+];
+
 function getBadgeImagePath(level) {
     const lv = Math.max(1, Math.min(6, Math.floor(Number(level) || 1)));
     return `assets/icons/badge_${lv}.png`;
@@ -6094,9 +6683,58 @@ function getActiveStoreDaysOperated() {
     return Math.max(0, Math.floor(lvl) - 1);
 }
 
+function animateMoneyRollEl(el, fromValue, toValue) {
+    if (!el) return;
+    const from = Math.max(0, Math.floor(Number(fromValue) || 0));
+    const to = Math.max(0, Math.floor(Number(toValue) || 0));
+    const fmt = (n) => (el && (el.id === 'home-balance' || el.id === 'revenue') ? `¥ ${n}` : `¥${n}`);
+    if (from === to) {
+        el.innerText = fmt(to);
+        return;
+    }
+    const nowToken = String(Date.now()) + ':' + String(Math.random()).slice(2);
+    el.dataset.animating = nowToken;
+    try { el.classList.remove('balance-pop'); } catch (_) {}
+    try { void el.offsetWidth; } catch (_) {}
+    try { el.classList.add('balance-pop'); } catch (_) {}
+    const duration = 720;
+    const start = performance.now();
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+    const step = (ts) => {
+        if (el.dataset.animating !== nowToken) return;
+        const t = Math.min(1, Math.max(0, (ts - start) / duration));
+        const v = Math.round(from + (to - from) * easeOutCubic(t));
+        el.innerText = fmt(v);
+        if (t < 1) {
+            requestAnimationFrame(step);
+        } else {
+            if (el.dataset.animating === nowToken) delete el.dataset.animating;
+            el.innerText = fmt(to);
+            setTimeout(() => {
+                try { el.classList.remove('balance-pop'); } catch (_) {}
+            }, 740);
+        }
+    };
+    requestAnimationFrame(step);
+}
+
+function animateHomeBalanceRoll(fromValue, toValue) {
+    const el = document.getElementById('home-balance');
+    animateMoneyRollEl(el, fromValue, toValue);
+}
+
 function updateHomeProfileCard() {
     const balanceEl = document.getElementById('home-balance');
-    if (balanceEl) balanceEl.innerText = `¥${game.coins}`;
+    if (balanceEl) {
+        const next = Math.max(0, Math.floor(Number(game && game.coins) || 0));
+        const prev = Math.floor(Number(balanceEl.dataset.lastValue) || 0);
+        if (balanceEl.dataset.lastValue && next > prev && !(balanceEl.dataset && balanceEl.dataset.animating)) {
+            animateMoneyRollEl(balanceEl, prev, next);
+        } else if (!(balanceEl.dataset && balanceEl.dataset.animating)) {
+            balanceEl.innerText = `¥ ${next}`;
+        }
+        balanceEl.dataset.lastValue = String(next);
+    }
 
     const daysEl = document.getElementById('home-store-days');
     if (daysEl) daysEl.innerText = `已营业 ${getActiveStoreDaysOperated()} 天`;
@@ -6111,39 +6749,69 @@ function updateHomeProfileCard() {
         6: '#C6944B'
     };
     const tierColor = tierColors[titleLv];
+    const toRgba = (hex, alpha) => {
+        if (!hex || typeof hex !== 'string') return '';
+        const h = hex.replace('#', '').trim();
+        if (h.length !== 6) return '';
+        const r = parseInt(h.slice(0, 2), 16);
+        const g = parseInt(h.slice(2, 4), 16);
+        const b = parseInt(h.slice(4, 6), 16);
+        if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b)) return '';
+        const a = Math.max(0, Math.min(1, Number(alpha)));
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+    };
     const bar = document.querySelector('#home-profile-card .title-progress');
-    if (bar) bar.setAttribute('aria-valuenow', String(titleLv));
+    if (bar) {
+        bar.setAttribute('aria-valuenow', String(titleLv));
+        if (tierColor) bar.style.setProperty('--tp-tier-glow', toRgba(tierColor, 0.6));
+        else bar.style.removeProperty('--tp-tier-glow');
+    }
 
     const fill = document.getElementById('title-progress-fill');
     if (fill) {
         const pct = ((titleLv - 1) / 5) * 100;
         fill.style.width = `${pct}%`;
-        if (tierColor) fill.style.background = tierColor;
+        if (tierColor) {
+            fill.style.background = tierColor;
+        }
     }
 
     const nodesWrap = document.getElementById('title-progress-nodes');
     if (nodesWrap) {
+        nodesWrap.style.pointerEvents = 'auto';
         nodesWrap.querySelectorAll('.tp-node').forEach(node => {
             const lv = parseInt(node.getAttribute('data-lv') || '0', 10);
             if (Number.isFinite(lv) && lv > 0 && lv <= titleLv) node.classList.add('is-active');
             else node.classList.remove('is-active');
 
             if (lv === titleLv) {
+                node.classList.add('tp-node-current');
                 node.style.width = '40px';
                 node.style.height = '40px';
                 node.style.background = 'transparent';
                 node.style.border = 'none';
                 node.style.boxShadow = 'none';
                 node.style.transform = 'none';
+                node.style.cursor = 'pointer';
+                node.style.pointerEvents = 'auto';
                 node.innerHTML = `<img src="${getBadgeImagePath(titleLv)}" alt="T${titleLv}" style="width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.22));">`;
+                node.onclick = (e) => {
+                    try { if (e && typeof e.stopPropagation === 'function') e.stopPropagation(); } catch (_) {}
+                    try { hideTitleLevelModal(); } catch (_) {}
+                    try { if (typeof showEmpireBlueprint === 'function') showEmpireBlueprint(); } catch (_) {}
+                };
             } else {
+                node.classList.remove('tp-node-current');
                 node.style.width = '';
                 node.style.height = '';
                 node.style.background = '';
                 node.style.border = '';
                 node.style.boxShadow = '';
                 node.style.transform = '';
+                node.style.cursor = '';
+                node.style.pointerEvents = 'none';
                 node.innerHTML = '';
+                node.onclick = null;
                 if (tierColor && Number.isFinite(lv) && lv > 0 && lv < titleLv) {
                     node.style.background = tierColor;
                 }
@@ -6158,8 +6826,32 @@ function updateHomeProfileCard() {
             if (label.textContent !== name) label.textContent = name;
             if (lv === titleLv) label.classList.add('is-active');
             else label.classList.remove('is-active');
+            label.style.pointerEvents = 'none';
         });
     }
+
+    if (typeof renderLobbyDailyChecklist === 'function') renderLobbyDailyChecklist();
+    try { if (typeof window.updateLobbyMapAttention === 'function') window.updateLobbyMapAttention(); } catch (_) {}
+}
+
+function showTitleLevelModal() {
+    const startScreen = document.getElementById('start-screen');
+    const modal = document.getElementById('title-level-modal');
+    if (!startScreen || !modal) return;
+    startScreen.classList.add('title-modal-open');
+    modal.style.display = 'flex';
+    if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard();
+    if (typeof playButtonSound === 'function') playButtonSound();
+    else if (typeof playSfx === 'function') playSfx(300, 'sine', 0.1);
+}
+
+function hideTitleLevelModal() {
+    const startScreen = document.getElementById('start-screen');
+    const modal = document.getElementById('title-level-modal');
+    if (modal) modal.style.display = 'none';
+    if (startScreen) startScreen.classList.remove('title-modal-open');
+    if (typeof playButtonSound === 'function') playButtonSound();
+    else if (typeof playSfx === 'function') playSfx(260, 'sine', 0.08);
 }
 
 function getThemeBgmSrcByActiveStore() {
@@ -6610,10 +7302,63 @@ window.getCurrentPotTier = function(sid) {
 
 window.pendingDailyBonus = 0;
 
+function flyCoins(fromEl, toEl, gained, opts) {
+    if (!fromEl || !toEl) return;
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+    const startX = fromRect.left + fromRect.width / 2;
+    const startY = fromRect.top + fromRect.height / 2;
+    const endX = toRect.left + toRect.width / 2;
+    const endY = toRect.top + toRect.height / 2;
+
+    const baseCount = 8;
+    const extra = Math.max(0, Math.min(10, Math.floor(Math.log10(Math.max(1, Number(gained) || 1))) * 2));
+    const count = Math.max(6, Math.min(14, baseCount + extra));
+    const onArrive = (opts && typeof opts.onArrive === 'function') ? opts.onArrive : null;
+
+    for (let i = 0; i < count; i++) {
+        const coin = document.createElement('img');
+        coin.src = 'assets/icons/硬币.png';
+        coin.alt = '';
+        coin.style.position = 'fixed';
+        coin.style.left = `${startX}px`;
+        coin.style.top = `${startY}px`;
+        coin.style.width = '36px';
+        coin.style.height = '36px';
+        coin.style.transform = 'translate(-50%, -50%) scale(0.9)';
+        coin.style.pointerEvents = 'none';
+        coin.style.zIndex = '2147483646';
+        coin.style.filter = 'drop-shadow(0 6px 10px rgba(0,0,0,0.55))';
+        document.body.appendChild(coin);
+
+        const midX = startX + (endX - startX) * 0.55 + (Math.random() - 0.5) * 120;
+        const midY = startY + (endY - startY) * 0.35 - (80 + Math.random() * 70);
+        const delay = i * 85;
+        const duration = 1600 + Math.floor(Math.random() * 520);
+        coin.animate([
+            { transform: 'translate(-50%, -50%) scale(0.9)', opacity: 0.0, offset: 0, easing: 'cubic-bezier(0.55, 0.085, 0.68, 0.53)' },
+            { transform: 'translate(-50%, -50%) scale(1.15)', opacity: 1.0, offset: 0.14, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+            { transform: `translate(calc(-50% + ${midX - startX}px), calc(-50% + ${midY - startY}px)) scale(1.1)`, opacity: 1.0, offset: 0.62, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+            { transform: `translate(calc(-50% + ${endX - startX}px), calc(-50% + ${endY - startY}px)) scale(0.95)`, opacity: 0.0, offset: 1 }
+        ], {
+            duration,
+            delay,
+            fill: 'forwards'
+        }).onfinish = () => {
+            if (onArrive) {
+                try { onArrive(i, count); } catch (_) {}
+            }
+            try { coin.remove(); } catch (_) {}
+        };
+    }
+    return count;
+}
+
 window.claimPerfectBonus = function() {
     if (!window.pendingDailyBonus || window.pendingDailyBonus <= 0) return;
     const gained = window.pendingDailyBonus;
-    game.coins += gained;
+    const beforeCoins = Math.max(0, Math.floor(Number(game && game.coins) || 0));
+    game.coins = beforeCoins + gained;
     window.pendingDailyBonus = 0;
 
     if (typeof playRevenueSound === 'function') {
@@ -6622,13 +7367,14 @@ window.claimPerfectBonus = function() {
         playCoin();
     }
 
-    if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
-    if (typeof updateHUD === 'function') updateHUD();
     if (typeof saveGameState === 'function') saveGameState();
 
-    const descEl = document.getElementById('modal-desc');
-    if (descEl && typeof descEl.innerHTML === 'string') {
-        descEl.innerHTML = descEl.innerHTML.replace(/钱包余额:\s*<b[^>]*>¥\s*\d+<\/b>/, `钱包余额: <b style="color:#f1c40f">¥${game.coins}</b>`);
+    const settleWallet = document.getElementById('settlement-wallet-balance');
+    if (!settleWallet) {
+        const descEl = document.getElementById('modal-desc');
+        if (descEl && typeof descEl.innerHTML === 'string') {
+            descEl.innerHTML = descEl.innerHTML.replace(/钱包余额:\s*<b[^>]*>¥\s*\d+<\/b>/, `钱包余额: <b style="color:#f1c40f; font-family: var(--money-font);">¥${game.coins}</b>`);
+        }
     }
 
     const btn = document.getElementById('btn-claim-bonus');
@@ -6639,11 +7385,92 @@ window.claimPerfectBonus = function() {
         </span>`;
         btn.style.animation = "none";
         btn.disabled = true;
+        const fromEl = btn.querySelector('.bonus-claim-icon');
+        const homeIcon = document.querySelector('.home-wallet-row .wallet-icon');
+        const homeBalance = document.getElementById('home-balance');
+        const toEl = homeIcon || homeBalance || document.getElementById('settlement-wallet-balance');
+        let chunks = null;
+        let shownHome = beforeCoins;
+        let shownSettle = beforeCoins;
+        if (homeBalance) {
+            homeBalance.innerText = `¥ ${beforeCoins}`;
+            homeBalance.dataset.lastValue = String(beforeCoins);
+        }
+        if (settleWallet) {
+            settleWallet.innerText = `¥${beforeCoins}`;
+        }
+        const bounceIcon = () => {
+            if (!homeIcon) return;
+            homeIcon.animate([
+                { transform: 'scale(1)' },
+                { transform: 'scale(1.22)', offset: 0.22 },
+                { transform: 'scale(0.96)', offset: 0.44 },
+                { transform: 'scale(1.08)', offset: 0.66 },
+                { transform: 'scale(1)' }
+            ], { duration: 520, easing: 'cubic-bezier(0.22, 1.2, 0.36, 1)' });
+        };
+        const bounceSettle = () => {
+            if (!settleWallet) return;
+            settleWallet.animate([
+                { transform: 'scale(1)' },
+                { transform: 'scale(1.22)', offset: 0.22 },
+                { transform: 'scale(0.96)', offset: 0.44 },
+                { transform: 'scale(1.08)', offset: 0.66 },
+                { transform: 'scale(1)' }
+            ], { duration: 520, easing: 'cubic-bezier(0.22, 1.2, 0.36, 1)' });
+        };
+        let cashboxTopEl = null;
+        if (fromEl) {
+            const r = fromEl.getBoundingClientRect();
+            cashboxTopEl = document.createElement('img');
+            cashboxTopEl.src = fromEl.getAttribute('src') || fromEl.src;
+            cashboxTopEl.alt = '';
+            cashboxTopEl.style.position = 'fixed';
+            cashboxTopEl.style.left = `${r.left}px`;
+            cashboxTopEl.style.top = `${r.top}px`;
+            cashboxTopEl.style.width = `${r.width}px`;
+            cashboxTopEl.style.height = `${r.height}px`;
+            cashboxTopEl.style.objectFit = 'contain';
+            cashboxTopEl.style.pointerEvents = 'none';
+            cashboxTopEl.style.zIndex = '2147483647';
+            document.body.appendChild(cashboxTopEl);
+        }
+        const coinCount = flyCoins(fromEl, toEl, gained, {
+            onArrive: (i, count) => {
+                if (!chunks) {
+                    const base = Math.floor(gained / count);
+                    const rem = gained - base * count;
+                    chunks = Array.from({ length: count }, (_, idx) => base + (idx < rem ? 1 : 0));
+                }
+                const inc = chunks[i] || 0;
+                const nextHome = Math.min(beforeCoins + gained, shownHome + inc);
+                const nextSettle = Math.min(beforeCoins + gained, shownSettle + inc);
+                if (homeBalance) {
+                    animateMoneyRollEl(homeBalance, shownHome, nextHome);
+                    shownHome = nextHome;
+                }
+                if (settleWallet) {
+                    animateMoneyRollEl(settleWallet, shownSettle, nextSettle);
+                    shownSettle = nextSettle;
+                }
+                bounceIcon();
+                bounceSettle();
+                if (i === count - 1) {
+                    if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
+                    if (typeof updateHUD === 'function') updateHUD();
+                    if (cashboxTopEl) {
+                        try { cashboxTopEl.remove(); } catch (_) {}
+                    }
+                }
+            }
+        });
+        if (!coinCount) {
+            if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
+            if (typeof updateHUD === 'function') updateHUD();
+        }
     }
 
-    if (typeof triggerFeedback === 'function') {
-        triggerFeedback(window.innerWidth / 2, window.innerHeight / 2, `完美奖金 +¥${gained} 已存入钱包！`, "#f1c40f");
-    }
+    
 };
 
 function renderWarmingRack() {
@@ -7090,12 +7917,12 @@ function updateHomeBackground() {
     const homeBg = getHomeBgImage();
     const startScreen = document.getElementById('start-screen');
     if (startScreen) {
-        const hasIntro = startScreen.classList.contains('is-jp-intro') || startScreen.classList.contains('is-cn-intro');
-        startScreen.style.background = hasIntro ? '#000' : `#000 url('${homeBg}') no-repeat center center / cover`;
+        startScreen.classList.remove('is-jp-intro');
+        startScreen.classList.remove('is-cn-intro');
+        startScreen.style.background = `#000 url('${homeBg}') no-repeat center center / cover`;
     }
     setGameBgVisual('saturate(1) brightness(1) contrast(1)', 0.34);
     setGameBgImage(homeBg, GAME_BG_ALT);
-    if (typeof updateHomeIntroVideo === 'function') updateHomeIntroVideo();
 }
 
 function updateBootBackground() {
@@ -7114,65 +7941,16 @@ function updateHomeIntroVideo() {
     if (!jpVideo || !cnVideo) return;
     const isHomeVisible = startScreen.style.display !== 'none';
 
-    if (!isHomeVisible) {
-        startScreen.classList.remove('is-jp-intro');
-        startScreen.classList.remove('is-cn-intro');
-        try { jpVideo.pause(); } catch (_) {}
-        try { cnVideo.pause(); } catch (_) {}
-        return;
-    }
-
-    try { if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard(); } catch (_) {}
-
-    if (region !== 'jp' && region !== 'cn') {
-        startScreen.classList.remove('is-jp-intro');
-        startScreen.classList.remove('is-cn-intro');
-        try { jpVideo.pause(); } catch (_) {}
-        try { cnVideo.pause(); } catch (_) {}
-        try { jpVideo.currentTime = 0; } catch (_) {}
-        try { cnVideo.currentTime = 0; } catch (_) {}
-        return;
-    }
-
-    const activeVideo = region === 'jp' ? jpVideo : cnVideo;
-    const otherVideo = region === 'jp' ? cnVideo : jpVideo;
-    startScreen.classList.remove(region === 'jp' ? 'is-cn-intro' : 'is-jp-intro');
-    startScreen.classList.add(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
-    startScreen.style.background = '#000';
-
-    if (!activeVideo.paused && activeVideo.readyState >= 2) return;
-
-    try { otherVideo.pause(); } catch (_) {}
-    try { otherVideo.currentTime = 0; } catch (_) {}
-    try { activeVideo.currentTime = 0; } catch (_) {}
-
-    const prev = activeVideo.__introEndedHandler;
-    if (prev) activeVideo.removeEventListener('ended', prev);
-    const onEnded = () => {
-        startScreen.classList.remove(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
-        activeVideo.__introEndedHandler = null;
+    startScreen.classList.remove('is-jp-intro');
+    startScreen.classList.remove('is-cn-intro');
+    if (isHomeVisible) {
         const homeBg = getHomeBgImage();
         startScreen.style.background = `#000 url('${homeBg}') no-repeat center center / cover`;
-        setTimeout(() => {
-            try { activeVideo.pause(); } catch (_) {}
-            try { activeVideo.currentTime = 0; } catch (_) {}
-            try { otherVideo.pause(); } catch (_) {}
-        }, 650);
-    };
-    activeVideo.__introEndedHandler = onEnded;
-    activeVideo.addEventListener('ended', onEnded, { once: true });
-
-    const p = activeVideo.play();
-    if (p && typeof p.then === 'function') {
-        p.catch(() => {
-            startScreen.classList.remove('is-jp-intro');
-            startScreen.classList.remove('is-cn-intro');
-            const homeBg = getHomeBgImage();
-            startScreen.style.background = `#000 url('${homeBg}') no-repeat center center / cover`;
-            try { jpVideo.pause(); } catch (_) {}
-            try { cnVideo.pause(); } catch (_) {}
-        });
     }
+    try { jpVideo.pause(); } catch (_) {}
+    try { cnVideo.pause(); } catch (_) {}
+    try { jpVideo.currentTime = 0; } catch (_) {}
+    try { cnVideo.currentTime = 0; } catch (_) {}
 }
 
 function updateBootIntroVideo() {
@@ -8204,7 +8982,7 @@ function startMarketChatterFlow() {
         // 顶部返回按钮
         const headerHtml = `
             <div style="position:absolute; top:0; left:0; width:100%; height:0; z-index:5002;">
-                <button class="icon-btn" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')" style="pointer-events:auto; position: absolute; top: 30px; left: 30px; padding: 0;">
+                <button class="icon-btn" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')" style="pointer-events:auto; position: absolute; top: 30px; right: 30px; left: auto; padding: 0;">
                     <img src="assets/icons/icon_back.png" alt="返回" style="width: 55px; height: 55px; margin: 0;">
                 </button>
             </div>
@@ -8724,16 +9502,12 @@ function renderShop() {
 
     // 4. 组装最终 HTML (Grid + Footer)
     overlay.innerHTML = `
-        <div class="shop-modal">
+            <div class="shop-modal">
             <div class="shop-header">
-                <button class="icon-btn" onclick="closeShop()" style="position: absolute; top: 20px; left: 20px; padding: 0; z-index: 10;">
+                <button class="icon-btn" onclick="closeShop()" style="position: absolute; top: 20px; right: 20px; left: auto; padding: 0; z-index: 10;">
                     <img src="assets/icons/icon_back.png" alt="返回" style="width: 45px; height: 45px; margin: 0;">
                 </button>
-                <div class="shop-title" style="margin-left: 60px;">商店</div>
-                <div style="position:absolute; right:40px; top:20px; display:flex; align-items:center; gap:8px;">
-                    <img src="assets/icons/icon_wallet.png" style="width:45px; height:45px;" alt="钱包">
-                    <span id="shop-balance" style="font-size:32px; font-weight:900; color:#fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">¥${game.coins}</span>
-                </div>
+                <div class="shop-title">商店</div>
             </div>
             <div class="shop-tabs">
                 ${tabsHtml}
@@ -8987,6 +9761,486 @@ let game = {
     timeRemaining: 120, // Global Timer
     lastTime: 0
 };
+
+const TASK_POOL = [
+    { id: 'combo', type: 'speed', desc: "连续出餐不断档达 5 次", target: 5, reward: 300 },
+    { id: 'sales', type: 'sales', desc: "累计卖出 8 份任意菜品", target: 8, reward: 400 },
+    { id: 'perfection', type: 'perfection', desc: "单局内无烧糊、无废弃食材", target: 1, reward: 500 }
+];
+
+let activeTasks = [];
+let dailyTaskRuntime = { comboStreak: 0 };
+
+function loadActiveTasks() {
+    try {
+        const raw = localStorage.getItem('activeTasksV1');
+        const parsed = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(parsed)) {
+            activeTasks = parsed
+                .filter(t => t && typeof t === 'object')
+                .map(t => ({
+                    id: String(t.id || ''),
+                    type: String(t.type || ''),
+                    desc: String(t.desc || ''),
+                    target: Math.max(1, Math.floor(Number(t.target) || 1)),
+                    reward: Math.max(0, Math.floor(Number(t.reward) || 0)),
+                    progress: Math.max(0, Math.floor(Number(t.progress) || 0)),
+                    status: String(t.status || 'ONGOING'),
+                    failed: !!t.failed
+                }))
+                .filter(t => t.id);
+        }
+    } catch (_) {}
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    reconcileActiveTasksStatus();
+}
+
+function saveActiveTasks() {
+    try { localStorage.setItem('activeTasksV1', JSON.stringify(activeTasks || [])); } catch (_) {}
+}
+
+let __taskSaveTimer = null;
+function scheduleSaveActiveTasks() {
+    if (__taskSaveTimer) clearTimeout(__taskSaveTimer);
+    __taskSaveTimer = setTimeout(() => {
+        __taskSaveTimer = null;
+        saveActiveTasks();
+    }, 250);
+}
+
+function refreshDailyTasks() {
+    activeTasks = (Array.isArray(activeTasks) ? activeTasks : []).filter(t => t && t.status !== 'CLAIMED');
+    const pool = Array.isArray(TASK_POOL) ? TASK_POOL.filter(Boolean) : [];
+    while (activeTasks.length < 3 && pool.length) {
+        const randomTask = pool[Math.floor(Math.random() * pool.length)];
+        if (!randomTask || !randomTask.id) break;
+        const exists = activeTasks.some(t => t && t.id === randomTask.id && t.status !== 'CLAIMED');
+        if (!exists) {
+            activeTasks.push({ ...randomTask, progress: 0, status: 'ONGOING', failed: false });
+        } else {
+            if (pool.length <= activeTasks.length) break;
+        }
+    }
+    scheduleSaveActiveTasks();
+}
+
+function resetComboStreak() {
+    dailyTaskRuntime.comboStreak = 0;
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    activeTasks.forEach(t => {
+        if (t && t.status === 'ONGOING' && t.id === 'combo') t.progress = 0;
+    });
+    scheduleSaveActiveTasks();
+}
+
+function markPerfectionFailed() {
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    activeTasks.forEach(t => {
+        if (t && t.status === 'ONGOING' && t.id === 'perfection') t.failed = true;
+    });
+    scheduleSaveActiveTasks();
+}
+
+function onDishServedForTasks(servedCount = 1) {
+    const inc = Math.max(1, Math.floor(Number(servedCount) || 1));
+    dailyTaskRuntime.comboStreak = Math.max(0, Math.floor(Number(dailyTaskRuntime.comboStreak) || 0)) + 1;
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    activeTasks.forEach(t => {
+        if (!t || t.status !== 'ONGOING') return;
+        if (t.id === 'combo') t.progress = dailyTaskRuntime.comboStreak;
+        if (t.id === 'sales') t.progress = Math.max(0, Math.floor(Number(t.progress) || 0)) + inc;
+    });
+    reconcileActiveTasksStatus();
+    scheduleSaveActiveTasks();
+}
+
+function reconcileActiveTasksStatus() {
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    let changed = false;
+    activeTasks.forEach(task => {
+        if (!task || task.status !== 'ONGOING') return;
+        if (task.id === 'perfection') return;
+        const target = Math.max(1, Math.floor(Number(task.target) || 1));
+        const progress = Math.max(0, Math.floor(Number(task.progress) || 0));
+        if (progress >= target) {
+            task.status = 'COMPLETED';
+            changed = true;
+        }
+    });
+    if (changed) scheduleSaveActiveTasks();
+    return changed;
+}
+
+function applyDailyTaskSettlement() {
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    let newlyCompleted = 0;
+
+    activeTasks.forEach(task => {
+        if (!task || task.status !== 'ONGOING') return;
+        const target = Math.max(1, Math.floor(Number(task.target) || 1));
+        const progress = Math.max(0, Math.floor(Number(task.progress) || 0));
+        let isSuccess = false;
+        if (task.id === 'perfection') isSuccess = !task.failed;
+        else isSuccess = progress >= target;
+
+        if (isSuccess) {
+            task.status = 'COMPLETED';
+            newlyCompleted++;
+        } else {
+            if (task.id === 'combo') task.progress = 0;
+            if (task.id === 'perfection') {
+                task.progress = 0;
+                task.failed = false;
+            }
+        }
+    });
+
+    if (activeTasks.length < 3) refreshDailyTasks();
+    dailyTaskRuntime.comboStreak = 0;
+    scheduleSaveActiveTasks();
+}
+
+function renderLobbyDailyChecklist() {
+    const todoNote = document.getElementById('lobby-todo-note');
+    if (!todoNote) return;
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    if (activeTasks.length === 0) refreshDailyTasks();
+    reconcileActiveTasksStatus();
+    try { if (typeof window.updateLobbyRewardsAttention === 'function') window.updateLobbyRewardsAttention(); } catch (_) {}
+    let isHidden = false;
+    try { isHidden = localStorage.getItem('lobbyRewardsNoteHiddenV1') === '1'; } catch (_) {}
+    if (isHidden) {
+        todoNote.style.display = 'none';
+        return;
+    }
+    todoNote.style.display = 'block';
+
+    const receiptNo = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+    const baseHeight = todoNote && todoNote.dataset ? Number(todoNote.dataset.baseHeight) : 0;
+    todoNote.style.cssText = `
+        position: absolute; bottom: 40px; right: 40px; width: 310px;
+        background: #fdfbf7; border: 1px solid #dcdde1;
+        padding: 18px 18px 30px 18px; box-shadow: 0 12px 26px rgba(0,0,0,0.16);
+        font-family: 'Courier New', Courier, monospace; color: #2f3640;
+        z-index: 10;
+    `;
+
+    let html = `
+        <div style="text-align:center; border-bottom:2px dashed #a4b0be; padding-bottom:12px; margin-bottom:14px; position:relative;">
+            <button onclick="playButtonSound(); closeLobbyRewardsNote(); event.stopPropagation();" aria-label="关闭" style="position:absolute; top:-4px; right:-4px; width:28px; height:28px; border:none; background: rgba(17,17,17,0.08); color:#111; font-weight:900; border-radius:9px; cursor:pointer; line-height:28px; padding:0; font-family:inherit;">×</button>
+            <div style="font-size:20px; font-weight:900; letter-spacing:2.2px; color:#111;">营业奖励</div>
+            <div style="font-size:13px; color:#7f8fa6; margin-top:6px;">RECEIPT NO. ${receiptNo}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+    `;
+
+    activeTasks.forEach((task) => {
+        if (!task || !task.id) return;
+        if (task.status === 'ONGOING') {
+            const progressText = `${Math.max(0, task.progress || 0)}/${Math.max(1, task.target || 1)}`;
+            html += `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; font-size:14px; gap:12px; padding:8px 8px;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:900; color:#111; margin-bottom:6px; white-space:normal; word-break:break-word;">
+                            ${task.desc || ''} <span style="display:inline-flex; align-items:center; gap:6px; font-weight:900; color:#111; white-space:nowrap; overflow:visible; line-height:1; transform: translateY(4px);">
+                                <img src="assets/icons/硬币.png" alt="" style="width:16px; height:16px; object-fit:contain; transform: scale(2); transform-origin: center center;">
+                                <span style="display:inline-block; font-size:14px; line-height:1; transform: scale(1.3); transform-origin: left center;">¥${task.reward || 0}</span>
+                            </span>
+                        </div>
+                        <div style="color:#7f8fa6; font-weight:700; font-size:13px;">进度: ${progressText}</div>
+                    </div>
+                    <button disabled style="background: rgba(17,17,17,0.10); color: rgba(17,17,17,0.45); border: 1px solid rgba(17,17,17,0.14); padding:12px 10px; font-family:inherit; font-weight:900; font-size:16px; cursor: default; border-radius:8px; flex:0 0 auto; width: 88px; min-height: 52px; text-align:center;">领取</button>
+                </div>
+            `;
+        } else if (task.status === 'COMPLETED') {
+            html += `
+                <div class="lobby-task-row" data-task-row="1" data-task-id="${task.id}" style="display:flex; justify-content:space-between; align-items:flex-start; font-size:14px; background: rgba(241,196,15,0.10); padding:8px 8px; gap:12px;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:900; color:#111; margin-bottom:6px; white-space:normal; word-break:break-word;">
+                            <span style="text-decoration: line-through; text-decoration-color: #f1c40f; text-decoration-thickness: 3px;">${task.desc || ''}</span> <span style="display:inline-flex; align-items:center; gap:6px; font-weight:900; color:#111; white-space:nowrap; overflow:visible; line-height:1; transform: translateY(4px);">
+                                <img src="assets/icons/硬币.png" alt="" style="width:16px; height:16px; object-fit:contain; transform: scale(2); transform-origin: center center;">
+                                <span style="display:inline-block; font-size:14px; line-height:1; transform: scale(1.3); transform-origin: left center;">¥${task.reward || 0}</span>
+                            </span>
+                        </div>
+                        <div style="color: transparent; font-weight:700; font-size:13px;">&nbsp;</div>
+                    </div>
+                    <button onclick="claimTaskReward('${task.id}', this)" style="background:#f1c40f; color:#111; border: 1px solid transparent; padding:12px 10px; font-family:inherit; font-weight:900; font-size:16px; cursor:pointer; border-radius:8px; flex:0 0 auto; width: 88px; min-height: 52px; text-align:center;">领取</button>
+                </div>
+            `;
+        }
+    });
+
+    html += `
+        </div>
+        <div style="text-align:center; margin-top:18px; font-size:12px; color:#a4b0be; letter-spacing:1px;">
+            || |||| | || | |||| ||
+        </div>
+    `;
+
+    todoNote.innerHTML = html;
+    const desiredH = Math.max(0, Math.ceil(todoNote.scrollHeight));
+    const nextBase = Math.max(0, Math.ceil(Number(baseHeight) || 0), desiredH);
+    if (nextBase > 0 && todoNote.dataset) {
+        todoNote.dataset.baseHeight = String(nextBase);
+        todoNote.style.height = nextBase + 'px';
+    }
+    todoNote.onclick = (e) => {
+        const target = e && e.target ? e.target : null;
+        const isBtn = !!(target && typeof target.closest === 'function' && target.closest('button'));
+        if (!isBtn && typeof playSfx === 'function') playSfx(260, 'triangle', 0.06);
+    };
+    todoNote.onpointerdown = (e) => {
+        const target = e && e.target ? e.target : null;
+        const isBtn = !!(target && typeof target.closest === 'function' && target.closest('button'));
+        if (isBtn && typeof playSfx === 'function') playSfx(360, 'square', 0.08);
+    };
+}
+
+window.openLobbyRewardsNote = function() {
+    try { localStorage.setItem('lobbyRewardsNoteHiddenV1', '0'); } catch (_) {}
+    const note = document.getElementById('lobby-todo-note');
+    if (note) note.style.display = 'block';
+    if (typeof renderLobbyDailyChecklist === 'function') renderLobbyDailyChecklist();
+    try { if (typeof window.updateLobbyRewardsAttention === 'function') window.updateLobbyRewardsAttention(); } catch (_) {}
+};
+
+window.closeLobbyRewardsNote = function() {
+    try { localStorage.setItem('lobbyRewardsNoteHiddenV1', '1'); } catch (_) {}
+    const note = document.getElementById('lobby-todo-note');
+    if (note) note.style.display = 'none';
+    try { if (typeof window.updateLobbyRewardsAttention === 'function') window.updateLobbyRewardsAttention(); } catch (_) {}
+};
+
+window.claimTaskReward = function(taskId, btnEl) {
+    const id = String(taskId || '');
+    if (!id) return;
+    if (!Array.isArray(activeTasks)) activeTasks = [];
+    const idx = activeTasks.findIndex(t => t && t.id === id);
+    if (idx === -1) return;
+    const task = activeTasks[idx];
+    if (!task || task.status !== 'COMPLETED') return;
+
+    const reward = Math.max(0, Math.floor(Number(task.reward) || 0));
+    task.status = 'CLAIMING';
+    if (btnEl && btnEl.style) {
+        btnEl.disabled = true;
+        btnEl.style.opacity = '0';
+        btnEl.style.pointerEvents = 'none';
+    }
+
+    const row = btnEl && typeof btnEl.closest === 'function' ? btnEl.closest('[data-task-row="1"]') : null;
+    const note = document.getElementById('lobby-todo-note');
+    try {
+        const fromIcon = (row ? row : btnEl && btnEl.closest('div'))?.querySelector('img[src*="硬币.png"]') || btnEl;
+        const targetIcon = document.querySelector('.home-wallet-row .wallet-icon') || document.getElementById('home-balance');
+        if (fromIcon && targetIcon && typeof window.enqueueCoinFlight === 'function') {
+            const coinCount = Math.max(6, Math.min(12, Math.floor(reward / 100) + 6));
+            window.enqueueCoinFlight(fromIcon, targetIcon, coinCount, () => {
+                try {
+                    if (typeof sfxEnabled !== 'undefined' && !sfxEnabled) {
+                    } else {
+                        const base = (typeof revenueAudio !== 'undefined' && revenueAudio) ? revenueAudio : null;
+                        const a = base ? base.cloneNode() : new Audio('audio/coin.mp3');
+                        a.volume = 0.65;
+                        a.currentTime = 0;
+                        a.play().catch(() => {});
+                    }
+                } catch (_) {}
+
+                const prevCoins = Math.max(0, Math.floor(Number(game.coins) || 0));
+                game.coins = prevCoins + reward;
+                try {
+                    const shopBalance = document.getElementById('shop-balance');
+                    if (shopBalance) shopBalance.innerText = `¥${game.coins}`;
+                } catch (_) {}
+                if (reward > 0 && typeof animateHomeBalanceRoll === 'function') animateHomeBalanceRoll(prevCoins, game.coins);
+                task.status = 'CLAIMED';
+                try { if (typeof saveGameState === 'function') saveGameState(); } catch (_) {}
+            });
+        } else {
+            const prevCoins = Math.max(0, Math.floor(Number(game.coins) || 0));
+            game.coins = prevCoins + reward;
+            if (reward > 0 && typeof animateHomeBalanceRoll === 'function') animateHomeBalanceRoll(prevCoins, game.coins);
+            task.status = 'CLAIMED';
+        }
+    } catch (_) {}
+
+    const CONFETTI_MS = 4200;
+    const COLLAPSE_DELAY_MS = CONFETTI_MS + 80;
+    const FINALIZE_DELAY_MS = COLLAPSE_DELAY_MS + 260;
+    const CONFETTI_REMOVE_MS = CONFETTI_MS + 280;
+
+    const spawnConfetti = (anchorRow) => {
+        if (!note) return;
+        const existing = note.querySelector('.lobby-confetti');
+        if (existing) existing.remove();
+        const c = document.createElement('div');
+        c.className = 'lobby-confetti';
+        if (anchorRow) {
+            const top = Math.max(0, Math.round(anchorRow.offsetTop || 0));
+            const height = Math.max(1, Math.round(anchorRow.offsetHeight || 1));
+            c.style.top = top + 'px';
+            c.style.height = height + 'px';
+            c.style.setProperty('--fall', Math.max(18, Math.round(height * 0.55)) + 'px');
+        } else {
+            c.style.top = '0px';
+            c.style.height = '100%';
+            c.style.setProperty('--fall', '44px');
+        }
+        const colors = ['#ff3b3b', '#ff9500', '#ffd60a', '#34c759', '#0a84ff', '#af52de', '#ff2d55'];
+        const count = 14;
+        const anchorHeight = anchorRow ? Math.max(1, Math.round(anchorRow.offsetHeight || 1)) : 44;
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('i');
+            p.style.left = (10 + Math.random() * 80).toFixed(2) + '%';
+            p.style.animationDelay = (Math.random() * 70).toFixed(0) + 'ms';
+            p.style.background = colors[i % colors.length];
+            p.style.filter = 'saturate(1.35) contrast(1.05)';
+            p.style.setProperty('--dx', (Math.floor((Math.random() * 2 - 1) * 26)) + 'px');
+            p.style.setProperty('--up', Math.max(10, Math.round(anchorHeight * 0.35)) + 'px');
+            p.style.setProperty('--spin', (220 + Math.floor(Math.random() * 220)) + 'deg');
+            p.style.transform = `translate(0,0) rotate(0deg)`;
+            c.appendChild(p);
+        }
+        note.appendChild(c);
+        setTimeout(() => { try { c.remove(); } catch (_) {} }, CONFETTI_REMOVE_MS);
+    };
+
+    const finalize = () => {
+        const removeIdx = Array.isArray(activeTasks) ? activeTasks.findIndex(t => t && t.id === id) : -1;
+        if (removeIdx >= 0) activeTasks.splice(removeIdx, 1);
+        if (activeTasks.length < 3) refreshDailyTasks();
+        scheduleSaveActiveTasks();
+        if (typeof updateHomeProfileCard === 'function') updateHomeProfileCard();
+        if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
+        if (typeof renderLobbyDailyChecklist === 'function') renderLobbyDailyChecklist();
+        try { if (typeof window.updateLobbyRewardsAttention === 'function') window.updateLobbyRewardsAttention(); } catch (_) {}
+        if (typeof saveGameState === 'function') saveGameState();
+    };
+
+    if (row && row.classList) {
+        if (note && note.dataset && !(Number(note.dataset.baseHeight) > 0)) {
+            const h = Math.max(0, Math.round(note.getBoundingClientRect().height));
+            if (h > 0) {
+                note.dataset.baseHeight = String(h);
+                note.style.height = h + 'px';
+            }
+        }
+        try { row.classList.add('is-claimed-out'); } catch (_) {}
+        spawnConfetti(row);
+        setTimeout(() => {
+            try { row.classList.add('is-collapsing'); } catch (_) {}
+        }, COLLAPSE_DELAY_MS);
+        setTimeout(() => {
+            finalize();
+        }, FINALIZE_DELAY_MS);
+    } else {
+        spawnConfetti(null);
+        finalize();
+    }
+};
+
+loadActiveTasks();
+
+window.__coinFxQueue = [];
+window.__coinFxRunning = false;
+window.enqueueCoinFlight = function(fromEl, toEl, count = 8, onComplete) {
+    const f = fromEl && typeof fromEl.getBoundingClientRect === 'function' ? fromEl.getBoundingClientRect() : null;
+    const t = toEl && typeof toEl.getBoundingClientRect === 'function' ? toEl.getBoundingClientRect() : null;
+    if (!f || !t) return;
+    const task = {
+        sx: Math.round(f.left + f.width / 2),
+        sy: Math.round(f.top + f.height / 2),
+        tx: Math.round(t.left + t.width / 2),
+        ty: Math.round(t.top + t.height / 2),
+        count: Math.max(1, Math.floor(count)),
+        onComplete: (typeof onComplete === 'function') ? onComplete : null
+    };
+    window.__coinFxQueue.push(task);
+    if (!window.__coinFxRunning) runCoinFxQueue();
+};
+function runCoinFxQueue() {
+    if (!window.__coinFxQueue.length) { window.__coinFxRunning = false; return; }
+    window.__coinFxRunning = true;
+    const task = window.__coinFxQueue.shift();
+    const dx = task.tx - task.sx;
+    const dy = task.ty - task.sy;
+    const dist = Math.hypot(dx, dy);
+    const gameEl = document.getElementById('game-container');
+    const bounds = (() => {
+        if (gameEl && typeof gameEl.getBoundingClientRect === 'function') {
+            const r = gameEl.getBoundingClientRect();
+            if (r && r.width > 0 && r.height > 0) return r;
+        }
+        return { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
+    })();
+    const baseArc = Math.max(40, Math.round(dist * 0.25));
+    const coinVisualSize = 40;
+    const topMargin = 16;
+    const maxArc = Math.max(0, Math.round(Math.min(task.sy, task.ty) - (bounds.top + topMargin) - coinVisualSize));
+    const arc = Math.max(0, Math.min(baseArc, maxArc));
+    const body = document.body;
+    let finished = 0;
+    const onBatchComplete = () => {
+        try { if (navigator && typeof navigator.vibrate === 'function') navigator.vibrate(18); } catch (_) {}
+        try { if (typeof playSfx === 'function') playSfx(760, 'triangle', 0.08, 0.2); } catch (_) {}
+        const bal = document.getElementById('home-balance');
+        if (bal && bal.classList) {
+            try { bal.classList.remove('balance-pop'); } catch (_) {}
+            try { bal.classList.add('balance-pop'); } catch (_) {}
+            setTimeout(() => { try { bal.classList.remove('balance-pop'); } catch (_) {} }, 900);
+        }
+        try { if (task && typeof task.onComplete === 'function') task.onComplete(); } catch (_) {}
+        runCoinFxQueue();
+    };
+    for (let i = 0; i < task.count; i++) {
+        const coin = document.createElement('div');
+        coin.className = 'coin-fx';
+        coin.style.left = (task.sx - 10) + 'px';
+        coin.style.top = (task.sy - 10) + 'px';
+        coin.style.setProperty('--dx', dx + 'px');
+        coin.style.setProperty('--dy', dy + 'px');
+        coin.style.setProperty('--arc', arc + 'px');
+        const dur = Math.round(800 + Math.random() * 400);
+        const delay = Math.round(i * 70 + Math.random() * 40);
+        coin.style.animation = `coinFlight ${dur}ms ease-out ${delay}ms 1 forwards`;
+        body.appendChild(coin);
+        coin.addEventListener('animationend', () => {
+            try { coin.remove(); } catch (_) {}
+            finished++;
+            if (finished >= task.count) onBatchComplete();
+        });
+    }
+}
+
+window.updateLobbyRewardsAttention = function() {
+    const badge = document.getElementById('lobby-rewards-attn');
+    if (!badge) return;
+    const note = document.getElementById('lobby-todo-note');
+    let noteVisible = false;
+    try { if (note) noteVisible = getComputedStyle(note).display !== 'none'; } catch (_) {}
+    const hasPending = Array.isArray(activeTasks) && activeTasks.some(t => t && t.status === 'COMPLETED');
+    badge.style.display = (!noteVisible && hasPending) ? 'block' : 'none';
+};
+try { if (typeof window.updateLobbyRewardsAttention === 'function') window.updateLobbyRewardsAttention(); } catch (_) {}
+
+window.updateLobbyMapAttention = function() {
+    const badge = document.getElementById('lobby-map-attn');
+    if (!badge) return;
+    const map = document.getElementById('map-screen');
+    let mapVisible = false;
+    try { if (map) mapVisible = getComputedStyle(map).display !== 'none'; } catch (_) {}
+    const stores = (game && game.stores) ? game.stores : null;
+    const activeId = game ? game.activeStoreId : null;
+    const hasPending = !!(stores && Object.keys(stores).some(id => {
+        if (!id || id === activeId) return false;
+        const st = stores[id];
+        const pending = st ? Number(st.pendingIncome) : 0;
+        return Number.isFinite(pending) && pending > 0;
+    }));
+    badge.style.display = (!mapVisible && hasPending) ? 'block' : 'none';
+};
+try { if (typeof window.updateLobbyMapAttention === 'function') window.updateLobbyMapAttention(); } catch (_) {}
 
 // [系统新增] 新手引导状态机 (0:未开始, 1:提示开柜, 2:提示放备菜盘, 3:提示烹饪, 4:提示交单, 5:已完成)
 let tutorialStep = 0;
@@ -9972,8 +11226,13 @@ function takeOrder(order) {
     const dishIndex = order.dishes.findIndex(d => (d.name || d.n) === heldDish.name);
     // [核心修复] 菜送错了：自动退回原工位
     if (dishIndex === -1) {
+        if (typeof resetComboStreak === 'function') resetComboStreak();
         const rect = order.dom.getBoundingClientRect();
-        triggerFeedback(rect.left + rect.width / 2, rect.top - 20, "菜送错了!", "red");
+        if (typeof triggerWrongDishToast === 'function') {
+            triggerWrongDishToast(rect.left + rect.width / 2, rect.top + rect.height / 2, order.dom);
+        } else {
+            triggerFeedback(rect.left + rect.width / 2, rect.top - 20, "菜送错了!", "red");
+        }
 
         // 尝试退回原工位
         if (holdingThing.sourceSid) {
@@ -9988,7 +11247,6 @@ function takeOrder(order) {
                 holdingThing = null; // 清空手牌
                 updateCursor();
                 playSfx(150, 'sawtooth', 0.2);
-                triggerFeedback(rect.left + rect.width / 2, rect.top + 20, "已退回工位", "orange");
             } else {
                 triggerFeedback(rect.left + rect.width / 2, rect.top + 20, "原工位已满，无法退回", "#999");
             }
@@ -10097,6 +11355,7 @@ function takeOrder(order) {
     }
     game.totalOrdersCompleted++;
     game.totalDishesServed++;
+    if (typeof onDishServedForTasks === 'function') onDishServedForTasks(1);
     // 关键：累加及格率数据
     game.dailyDishCount = (game.dailyDishCount || 0) + 1;
     game.dailyQualitySum = (game.dailyQualitySum || 0) + quality;
@@ -10278,12 +11537,18 @@ function update() {
             // [核心修复] 计算动态罚款 (订单总价的 20%)
             const orderTotal = order.dishes.reduce((sum, d) => sum + (d.price || 0), 0);
             const penalty = Math.ceil(orderTotal * 0.2);
+            if (typeof resetComboStreak === 'function') resetComboStreak();
             
             if (order.dom) {
                  const rect = order.dom.getBoundingClientRect();
                  // [UI优化] 顾客离开飘字与订单收入飘字保持一致 (位置:底部+5px, 时长:3500ms, 动画:floatUpEarnings, 图标:少硬币)
-                 const iconHtml = `<img src="assets/icons/icon_少硬币.png" class="revenue-icon">`;
-                 triggerFeedback(rect.left + rect.width/2, rect.bottom + 5, `顾客离开 ${iconHtml} -¥${penalty}`, "#e74c3c", 'float-text-earnings', 3500);
+                const leaveHtml = `
+                    <div style="width:${rect.width}px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;">
+                        <img src="assets/ui/顾客离开.png" style="width:${rect.width}px; height:auto; object-fit:contain; display:block;">
+                        <div style="font-weight: 900; font-size: 22px; line-height: 1; color: #e74c3c;">-¥${penalty}</div>
+                    </div>
+                `;
+                triggerFeedback(rect.left + rect.width/2, rect.top + rect.height/2, leaveHtml, "#e74c3c", 'float-text-earnings vcenter', 3500);
                  order.dom.remove();
             }
             game.activeOrders.splice(idx, 1);
@@ -10315,6 +11580,7 @@ function triggerFeedback(x, y, text, color, className, duration) {
     const div = document.createElement('div');
     div.className = className || 'float-text';
     div.style.zIndex = 9999; // [核心修改] 确保不被遮挡
+    if (typeof text === 'string' && text.indexOf('¥') !== -1) div.style.fontFamily = 'var(--money-font)';
     div.innerHTML = text; // [核心修改] 支持图片标签渲染
     document.body.appendChild(div);
     
@@ -10324,7 +11590,7 @@ function triggerFeedback(x, y, text, color, className, duration) {
     
     // [优化] 垂直偏移调整：所有飘字（包括订单收入）下移 20px 以避开遮挡
     // 如果是 float-text-earnings (订单收入)，则额外应用偏移
-    const isEarnings = className === 'float-text-earnings';
+    const isEarnings = div.classList.contains('float-text-earnings');
     const yOffset = isEarnings ? 20 : 0;
     
     let stackKey = null;
@@ -10340,7 +11606,10 @@ function triggerFeedback(x, y, text, color, className, duration) {
     }
     
     const stackOffset = isEarnings ? stackIndex * 28 : 0;
-    div.style.top = (y + yOffset + stackOffset) + 'px';
+    const h = div.offsetHeight;
+    const vcenter = (div.className || '').indexOf('vcenter') !== -1;
+    const baseTop = (y + yOffset + stackOffset) - (vcenter ? (h / 2) : 0);
+    div.style.top = baseTop + 'px';
     
     div.style.color = color;
     
@@ -10775,7 +12044,7 @@ function renderStation(sid, updateMode = 'full') {
             }
 
             const dishHtml = `
-                <div style="position:absolute; width:100%; height:100%; top:0; left:0; z-index:100; pointer-events:none;">
+                <div class="dish-pop-layer" style="position:absolute; width:100%; height:100%; top:0; left:0; z-index:100; pointer-events:none;">
                     <img src="${dishImg}" 
                          alt="${dishName}" 
                          class="station-dish-icon" 
@@ -10876,7 +12145,13 @@ function updateHUD() {
     // 根据需求：目标 (资金目标) -> 可能指 今日目标，也可能指 钱包余额 / 下一级目标
     // 假设需求是：钱包余额 / 目标
     const targetEl = document.getElementById('target-current');
-    if(targetEl) targetEl.innerText = `¥${game.coins}`;
+    if (targetEl) {
+        const next = Math.max(0, Math.floor(Number(game.coins) || 0));
+        const prev = Math.floor(Number(targetEl.dataset.lastValue) || 0);
+        if (targetEl.dataset.lastValue && next > prev) animateMoneyRollEl(targetEl, prev, next);
+        else targetEl.innerText = `¥${next}`;
+        targetEl.dataset.lastValue = String(next);
+    }
     
     const goalEl = document.getElementById('target-goal');
     if (goalEl) goalEl.innerText = '';
@@ -10893,15 +12168,22 @@ function updateHUD() {
     if (dayLabel) {
         const currentDay = (game && Number.isFinite(game.currentDay)) ? game.currentDay : ((game && Number.isFinite(game.level)) ? game.level : 1);
         if (game) game.currentDay = currentDay;
-        let dayText = `第 ${currentDay} 天`;
+        let labelText = `营业额`;
         if (currentDay <= 3) {
-            dayText += ` <span style="display:inline-block; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: #d32f2f; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #ff5252; margin-left: 8px; vertical-align: middle; animation: pulseGlow 1.5s infinite; text-shadow: none;">🎊开业红利(收益x2)</span>`;
+            labelText += ` <span style="display:inline-block; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: #d32f2f; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #ff5252; margin-left: 8px; vertical-align: middle; animation: pulseGlow 1.5s infinite; text-shadow: none;">🎊开业红利(收益x2)</span>`;
         }
-        dayLabel.innerHTML = dayText;
+        dayLabel.innerHTML = labelText;
     }
 
     // 更新今日营收数值
-    document.getElementById('revenue').innerText = `¥${game.dailyRevenue}`;
+    const revenueEl = document.getElementById('revenue');
+    if (revenueEl) {
+        const next = Math.max(0, Math.floor(Number(game.dailyRevenue) || 0));
+        const prev = Math.floor(Number(revenueEl.dataset.lastValue) || 0);
+        if (revenueEl.dataset.lastValue && next > prev) animateMoneyRollEl(revenueEl, prev, next);
+        else revenueEl.innerText = `¥ ${next}`;
+        revenueEl.dataset.lastValue = String(next);
+    }
 
     // 更新合格率
     const count = game.dailyDishCount || 0;
@@ -10972,6 +12254,113 @@ function switchScreen(screenId) {
     const playArea = document.getElementById('play-area');
     const hud = document.getElementById('hud');
     const belt = document.getElementById('belt-container');
+    const fixedHomeInfo = document.querySelector('.home-top-left');
+    if (fixedHomeInfo) {
+        fixedHomeInfo.style.display = screenId === 'boot-screen' ? 'none' : 'flex';
+        if (screenId === 'game-container') {
+            fixedHomeInfo.classList.add('is-game-board');
+            fixedHomeInfo.classList.remove('entering');
+            void fixedHomeInfo.offsetWidth;
+            fixedHomeInfo.classList.add('entering');
+            setTimeout(() => { try { fixedHomeInfo.classList.remove('entering'); } catch (_) {} }, 900);
+        } else {
+            fixedHomeInfo.classList.remove('is-game-board');
+            fixedHomeInfo.classList.remove('entering');
+        }
+    }
+    const gameTimerEl = document.getElementById('game-timer-container');
+    const passRateEl = document.getElementById('pass-rate-container');
+    const positionGameTimer = () => {
+        const gc = document.getElementById('game-container');
+        const hudEl = document.getElementById('hud');
+        const homeInfo = document.querySelector('.home-top-left.is-game-board');
+        const timer = document.getElementById('game-timer-container');
+        if (!gc || !hudEl || !homeInfo || !timer) return;
+        const hudRect = hudEl.getBoundingClientRect();
+        const hudStyle = window.getComputedStyle(hudEl);
+        const padLeft = parseFloat(hudStyle.paddingLeft) || 0;
+        const padRight = parseFloat(hudStyle.paddingRight) || 0;
+        const homeRect = homeInfo.getBoundingClientRect();
+        const timerRect = timer.getBoundingClientRect();
+        const gap = 12;
+        const iconBleedLeft = 68;
+        const extraRight = 20;
+        const extraDown = 40;
+        let left = (homeRect.right + gap + iconBleedLeft + extraRight) - hudRect.left;
+        let top = (homeRect.top) - hudRect.top;
+        const maxLeft = (hudEl.clientWidth - padRight) - timerRect.width;
+        if (Number.isFinite(maxLeft)) left = Math.min(left, maxLeft);
+        left = Math.max(padLeft, left);
+        top = Math.max(0, top) + extraDown;
+        timer.style.left = `${left}px`;
+        timer.style.top = `${top}px`;
+        timer.style.display = 'flex';
+    };
+    const positionPassRate = () => {
+        const hudEl = document.getElementById('hud');
+        const timer = document.getElementById('game-timer-container');
+        const passRate = document.getElementById('pass-rate-container');
+        if (!hudEl || !timer || !passRate) return;
+        const timerRect = timer.getBoundingClientRect();
+        const hudRect = hudEl.getBoundingClientRect();
+        const extraDownBase = 34;
+        const extraDownMore = 40;
+        const gapY = 16;
+        const left = Math.max(0, (timerRect.left - hudRect.left) - 60);
+        const topFromTimer = (timerRect.top - hudRect.top) + timer.offsetHeight + gapY;
+        const top = Math.max(0, topFromTimer) + extraDownBase + extraDownMore;
+        passRate.style.left = `${left}px`;
+        passRate.style.top = `${top}px`;
+        passRate.style.display = 'flex';
+    };
+    if (gameTimerEl) {
+        if (screenId === 'game-container') {
+            requestAnimationFrame(() => {
+                positionGameTimer();
+                requestAnimationFrame(positionGameTimer);
+            });
+            requestAnimationFrame(() => {
+                positionPassRate();
+                requestAnimationFrame(positionPassRate);
+            });
+            if (!window.__homeInfoTimerRO) {
+                if (typeof ResizeObserver === 'function') {
+                    window.__homeInfoTimerRO = new ResizeObserver(() => {
+                        requestAnimationFrame(positionGameTimer);
+                        requestAnimationFrame(positionPassRate);
+                    });
+                    const homeInfoEl = document.querySelector('.home-top-left');
+                    if (homeInfoEl) window.__homeInfoTimerRO.observe(homeInfoEl);
+                }
+            }
+            if (!window.__passRateTimerRO) {
+                if (typeof ResizeObserver === 'function') {
+                    window.__passRateTimerRO = new ResizeObserver(() => requestAnimationFrame(positionPassRate));
+                    window.__passRateTimerRO.observe(document.getElementById('game-timer-container'));
+                }
+            }
+            if (!window.__homeInfoTimerResizeHandler) {
+                window.__homeInfoTimerResizeHandler = () => {
+                    requestAnimationFrame(positionGameTimer);
+                    requestAnimationFrame(positionPassRate);
+                };
+                window.addEventListener('resize', window.__homeInfoTimerResizeHandler);
+            }
+            if (!window.__passRateResizeHandler) {
+                window.__passRateResizeHandler = () => requestAnimationFrame(positionPassRate);
+                window.addEventListener('resize', window.__passRateResizeHandler);
+            }
+        } else {
+            if (window.__homeInfoTimerRO) {
+                try { window.__homeInfoTimerRO.disconnect(); } catch (_) {}
+                window.__homeInfoTimerRO = null;
+            }
+            if (window.__passRateTimerRO) {
+                try { window.__passRateTimerRO.disconnect(); } catch (_) {}
+                window.__passRateTimerRO = null;
+            }
+        }
+    }
 
     // 2. 确保主容器始终显示
     if (container) container.style.display = 'flex';
@@ -11002,13 +12391,10 @@ function switchScreen(screenId) {
         // --- 首页模式 ---
         if (bootScreen) bootScreen.style.display = 'none';
         if (startScreen) {
-            const region = (typeof getCurrentRegionId === 'function') ? getCurrentRegionId() : 'cn';
             startScreen.classList.remove('is-jp-intro');
             startScreen.classList.remove('is-cn-intro');
-            if (region === 'jp' || region === 'cn') {
-                startScreen.classList.add(region === 'jp' ? 'is-jp-intro' : 'is-cn-intro');
-                startScreen.style.background = '#000';
-            }
+            const homeBg = (typeof getHomeBgImage === 'function') ? getHomeBgImage() : '';
+            if (homeBg) startScreen.style.background = `#000 url('${homeBg}') no-repeat center center / cover`;
             startScreen.style.display = 'flex';
         }
         if (playArea) playArea.style.display = 'none';
@@ -11913,6 +13299,8 @@ function playTrashAnimation() {
 function toggleTrashMode() { 
     // 1. 优先处理手持物品的丢弃操作 
     if (holdingThing) { 
+        if (typeof markPerfectionFailed === 'function') markPerfectionFailed();
+        if (typeof resetComboStreak === 'function') resetComboStreak();
         holdingThing = null; 
         updateCursor(); 
         // [修改] 丢弃音效改为 "倒垃圾.mp3"
@@ -11928,7 +13316,8 @@ function toggleTrashMode() {
         const btn = document.getElementById('global-trash-card'); 
         if (btn) { 
             const rect = btn.getBoundingClientRect(); 
-            triggerFeedback(rect.left + rect.width/2, rect.top - 20, "已丢弃", "#999"); 
+            const discardedImg = `<img src="assets/ui/已丢弃.png" style="width:${rect.width}px; height:auto; object-fit:contain; display:block;">`;
+            triggerFeedback(rect.left + rect.width/2, rect.top + rect.height/2, discardedImg, "#999", 'float-text-earnings vcenter', 3500); 
         } 
         return; 
     } 
@@ -11983,6 +13372,33 @@ function triggerPrepStockInsufficientToast(sid) {
     div.style.top = y + 'px';
     div.style.transform = 'translate(-50%, calc(-50% - 10px)) scale(1)';
 
+    setTimeout(() => div.classList.add('is-fading'), 920);
+    setTimeout(() => div.remove(), 1600);
+}
+
+function triggerWrongDishToast(x, y, orderEl) {
+    const id = 'wrong-dish-toast';
+    const existing = document.getElementById(id);
+    if (existing) existing.remove();
+
+    if (orderEl && orderEl.classList) {
+        orderEl.classList.remove('wrong-dish-tint');
+        void orderEl.offsetWidth;
+        orderEl.classList.add('wrong-dish-tint');
+        setTimeout(() => {
+            try { orderEl.classList.remove('wrong-dish-tint'); } catch (_) {}
+        }, 1600);
+    }
+
+    const div = document.createElement('div');
+    div.id = id;
+    div.className = 'prep-stock-toast';
+    div.classList.add('is-entering');
+    div.innerHTML = `<img src="assets/ui/上错菜了.png" alt="上错菜了">`;
+    document.body.appendChild(div);
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.style.transform = 'translate(-50%, calc(-50% - 10px)) scale(1)';
     setTimeout(() => div.classList.add('is-fading'), 920);
     setTimeout(() => div.remove(), 1600);
 }
@@ -12316,6 +13732,12 @@ function trashStation(sid, type = 'all', withSound = true, isPenalty = true) {
     }
 
     const s = stations[sid];
+    const discardingPrep = (type === 'prep' || type === 'all') && s && Array.isArray(s.currentIngredients) && s.currentIngredients.length > 0;
+    const discardingCook = (type === 'cook' || type === 'all') && s && (s.stage === 'COOKING' || s.stage === 'FINISHED');
+    if (discardingPrep || discardingCook) {
+        if (typeof markPerfectionFailed === 'function') markPerfectionFailed();
+        if (typeof resetComboStreak === 'function') resetComboStreak();
+    }
     
     // 1. Clear Prep (Ingredients)
     if (type === 'prep' || type === 'all') {
@@ -12801,11 +14223,11 @@ function showResult(msg) {
         updateGameBackground();
         
         const modalTitle = document.getElementById('modal-title');
-        if (modalTitle) modalTitle.innerHTML = "<img src='assets/icons/icon_wallet.png' class='wallet-icon' style='width:32px;height:32px;vertical-align:bottom;margin-right:8px;'> 今日结算";
+        if (modalTitle) modalTitle.textContent = "今日结算";
         
         // 1. 渲染图表 (保持原有的图表逻辑)
         let chartHtml = '<div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">';
-        chartHtml += '<div style="font-size:14px; color:#666; margin-bottom:10px;">近7日营收趋势</div>';
+        chartHtml += '<div style="font-size:14px; color:#cfcfcf; margin-bottom:10px;">近7日营收趋势</div>';
         
         const historySource = getActiveStoreHistory();
         const uniqueHistory = [];
@@ -12878,15 +14300,15 @@ function showResult(msg) {
             const btnHome = document.createElement('button');
             btnHome.innerText = "🏠 返回首页";
             btnHome.onclick = () => hideResultModal();
-            btnHome.style.cssText = "flex:1; background:transparent; border:1px solid #ccc; color:#666; padding:12px; border-radius:12px; cursor:pointer; font-weight:bold; font-size:15px;";
+            btnHome.style.cssText = "flex:1; background:linear-gradient(135deg, #2ecc71, #27ae60); border:none; color:#fff; padding:12px; border-radius:12px; cursor:pointer; font-weight:800; font-size:15px; box-shadow:0 4px 15px rgba(46, 204, 113, 0.4); display:flex; align-items:center; justify-content:center; gap:8px; text-shadow:0 1px 1px rgba(0,0,0,0.2);";
             
             // [修复] “继续营业”按钮
             const btnContinue = document.createElement('button');
             btnContinue.id = "btn-continue-next"; // [关键] 赋予ID，供startNextLevel查找
-            btnContinue.innerText = "📅 开始第 " + (game.level + 1) + " 天";
+            btnContinue.innerHTML = `<img src="assets/icons/icon_日历.png" alt="日历" style="width:18px;height:18px;display:inline-block;"> 开始第 ${(game.level + 1)} 天`;
             // [关键] 传入正确的ID 'btn-continue-next'
             btnContinue.onclick = () => startNextLevel('btn-continue-next');
-            btnContinue.style.cssText = "flex:2; background:#2ecc71; color:white; padding:12px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size:16px; box-shadow:0 4px 0 #27ae60;";
+            btnContinue.style.cssText = "flex:2; background:#2ecc71; color:white; padding:12px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size:16px; box-shadow:0 4px 0 #27ae60; display:flex; align-items:center; justify-content:center; gap:8px;";
 
             actionRow.appendChild(btnHome);
             actionRow.appendChild(btnContinue);
@@ -13203,6 +14625,7 @@ window.claimStoreIncome = function(storeId, event) {
         if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay();
         if (typeof renderLocationStep1 === 'function') renderLocationStep1();
         if (typeof saveGameState === 'function') saveGameState();
+        try { if (typeof window.updateLobbyMapAttention === 'function') window.updateLobbyMapAttention(); } catch (_) {}
     }
 };
 
@@ -13212,6 +14635,7 @@ function showLocationSelection() {
     const ach = document.getElementById('achievement-modal');
     if (ach) ach.style.display = 'none';
     switchScreen('map-screen');
+    try { if (typeof window.updateLobbyMapAttention === 'function') window.updateLobbyMapAttention(); } catch (_) {}
     if (typeof renderLocationStep1 === 'function') {
         renderLocationStep1();
     }
@@ -13222,6 +14646,7 @@ function returnToHome() {
     const ach = document.getElementById('achievement-modal');
     if (ach) ach.style.display = 'none';
     switchScreen('start-screen');
+    try { if (typeof window.updateLobbyMapAttention === 'function') window.updateLobbyMapAttention(); } catch (_) {}
 }
 
 function closeLocationSelection() {
@@ -13231,6 +14656,7 @@ function closeLocationSelection() {
     if (oldBar) oldBar.remove();
     
     switchScreen('start-screen');
+    try { if (typeof window.updateLobbyMapAttention === 'function') window.updateLobbyMapAttention(); } catch (_) {}
 }
 
 let pendingStoreSwitch = null;
@@ -13407,6 +14833,12 @@ function renderLocationStep1() {
         const card = document.createElement('div'); 
         card.className = 'empire-card'; 
         card.style.borderColor = borderColor; 
+
+        const titleLvRaw = (game && game.playerProfile && typeof game.playerProfile.titleLevel === 'number')
+            ? game.playerProfile.titleLevel
+            : (game && typeof game.titleLevel === 'number' ? game.titleLevel : 1);
+        const titleLv = Math.max(1, Math.min(6, Math.floor(Number(titleLvRaw) || 1)));
+        const titleBadgeSrc = (typeof getBadgeImagePath === 'function') ? getBadgeImagePath(titleLv) : '';
         
         let badgeHtml = ''; 
         if (isLive) badgeHtml = `<div class="card-badge badge-live">营业中</div>`; 
@@ -13418,7 +14850,7 @@ function renderLocationStep1() {
         const pending = Number.isFinite(pendingRaw) ? pendingRaw : 0;
         if (pending > 0) {
             incomeBubble = `
-                <div onclick="claimStoreIncome('${storeId}', event)" style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); background: #f1c40f; color: #8e4b10; font-weight: bold; font-size: 13px; padding: 4px 10px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; animation: incomeBounce 1s infinite; border: 2px solid #fff; white-space: nowrap; z-index: 50;">
+                <div onclick="claimStoreIncome('${storeId}', event)" style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); background: #f1c40f; color: #8e4b10; font-weight: bold; font-size: 13px; padding: 4px 10px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; animation: incomeBounce 1s infinite; border: 2px solid #fff; white-space: nowrap; z-index: 50; font-family: var(--money-font);">
                     💰 待收: ¥${pending}
                 </div>
             `;
@@ -13429,7 +14861,10 @@ function renderLocationStep1() {
             ${incomeBubble}
             <img class="empire-thumb" src="${imgSrc}" alt="${displayName}" loading="lazy" decoding="async" onerror="this.style.display='none'">
             <div class="empire-card-body">
-                <div class="empire-card-title">${districtName}</div>
+                <div class="empire-card-title">
+                    ${titleBadgeSrc ? `<img class="empire-title-badge" src="${titleBadgeSrc}" alt="T${titleLv}">` : ''}
+                    <span class="empire-title-text">${districtName}</span>
+                </div>
                 <div class="empire-card-subtitle">
                     <span>${regionInfo.flag}</span>
                     <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${regionInfo.country}</span>
@@ -13945,7 +15380,7 @@ function renderLocationStep2(regionId) {
                 ${tagHtml}
             </div>
             <div class="di-info">
-                <div style="display:flex; align-items:center;"><img src="assets/icons/icon_wallet.png" class="wallet-icon" style="width:16px;height:16px;margin-right:4px;"> 费用: ¥${district.unlockCost}</div>
+                <div style="display:flex; align-items:center;"><img src="assets/icons/icon_wallet.png" class="wallet-icon" style="width:16px;height:16px;margin-right:4px;"> 费用: <span class="money-font">¥${district.unlockCost}</span></div>
                 <div>👥 客群: ${district.customerProfile.type}</div>
                 <div>💸 消费: ${district.customerProfile.spend}</div>
                 <div>⏳ 耐心: ${district.customerProfile.patience}</div>
@@ -14240,16 +15675,21 @@ function settleDay(reason = "营业结束") {
         }
     }
 
+    if (typeof applyDailyTaskSettlement === 'function') applyDailyTaskSettlement();
     updateBalanceDisplay();
 
     const rateHtml = `<span style="font-weight:900; color:${dailyRate >= 0.8 ? '#2ecc71' : '#f39c12'}">${ratePercent}%</span>`;
 
     // [核心修改] 日报文案：强调“钱包余额”与目标的差距
-    let msg = `<b>${reason}</b><br>`;
-    msg += `当日营业额: <b>¥${game.dailyRevenue}</b><br>`;
-    msg += `钱包余额: <b style="color:#f1c40f">¥${game.coins}</b> <span style="color:#aaa">/ ¥${game.targetRevenue}</span><br>`;
-    if (spoiledCost > 0) msg += `变质损耗: <b style="color:#e74c3c">-¥${spoiledCost}</b><br>`;
-    msg += `当日合格率: ${rateHtml}`;
+    let msg = '';
+    msg += `<img src="assets/icons/icon_wallet.png" alt="钱包" style="width:18px;height:18px;vertical-align:text-bottom;margin-right:6px;">钱包余额: <b id="settlement-wallet-balance" style="color:#f1c40f; font-family: var(--money-font);">¥${game.coins}</b><br>`;
+    msg += `<div style="display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+        <div style="display:inline-flex; align-items:baseline; white-space:nowrap;">
+            <img src="assets/icons/硬币.png" alt="硬币" style="width:18px;height:18px;vertical-align:text-bottom;margin-right:6px;">当日营业额: <b style="font-family: var(--money-font);">¥${game.dailyRevenue}</b>
+        </div>
+        ${spoiledCost > 0 ? `<div style="display:inline-flex; align-items:baseline; white-space:nowrap;">变质损耗: <b style="color:#e74c3c; font-family: var(--money-font);">-¥${spoiledCost}</b></div>` : ``}
+    </div><br>`;
+    msg += `<img src="assets/icons/及格率.png" alt="及格率" style="width:18px;height:18px;vertical-align:text-bottom;margin-right:6px;">当日合格: ${rateHtml}`;
     logSystemEvent('SETTLEMENT_TRIGGER', { day: game.level, revenue: game.dailyRevenue });
 
     // [核心修复] 无论是否有钱，统一显示标准结算弹窗 
@@ -14306,7 +15746,6 @@ function cancelAction() {
                 holdingThing = null;
                 updateCursor();
                 if (typeof playSfx === 'function') playSfx(180, 'triangle', 0.12);
-                triggerFeedback(window.innerWidth/2, window.innerHeight/2, "已退回工位", "orange");
                 return;
             } else {
                 triggerFeedback(window.innerWidth/2, window.innerHeight/2, "原工位已满，无法退回", "#999");
@@ -15581,6 +17020,10 @@ function showPrepModal() {
 
                     #intel-scroll-hint {
                         position: absolute;
+                        left: 100%;
+                        margin-left: 18px;
+                        top: 50%;
+                        transform: translate(0, -50%);
                         display: none;
                         padding: 8px 10px;
                         border-radius: 10px;
@@ -15625,7 +17068,7 @@ function showPrepModal() {
                         opacity: 1;
                     }
                 </style> 
-                <button id="btn-close-polaroid-top" class="icon-btn" style="position: absolute; top: 30px; left: 30px; padding: 0; z-index: 100000; pointer-events: auto;"> 
+                <button id="btn-close-polaroid-top" class="icon-btn" style="position: absolute; top: 30px; right: 30px; left: auto; padding: 0; z-index: 100000; pointer-events: auto;"> 
                     <img src="assets/icons/icon_back.png" alt="返回" style="width: 55px; height: 55px; margin: 0;"> 
                 </button> 
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;"> 
@@ -15768,12 +17211,12 @@ function showPrepModal() {
                         const listEl = contentArea.querySelector('.thermal-list');
                         if (listEl) {
                             const ensureHint = () => {
-                                let hint = overlay.querySelector('#intel-scroll-hint');
+                                let hint = panel ? panel.querySelector('#intel-scroll-hint') : null;
                                 if (!hint) {
                                     hint = document.createElement('div');
                                     hint.id = 'intel-scroll-hint';
                                     hint.textContent = '← 滚动查看更多';
-                                    overlay.appendChild(hint);
+                                    if (panel) panel.appendChild(hint);
                                 }
                                 return hint;
                             };
@@ -15786,17 +17229,13 @@ function showPrepModal() {
                                 }
                                 const r = listEl.getBoundingClientRect();
                                 const pr = (panel && typeof panel.getBoundingClientRect === 'function') ? panel.getBoundingClientRect() : r;
-                                const hintWidth = 140;
-                                const x = Math.min(pr.right + 18, window.innerWidth - hintWidth - 12);
-                                const y = r.top + r.height / 2;
-                                hint.style.left = x + 'px';
+                                const y = r.top + r.height / 2 - pr.top;
                                 hint.style.top = y + 'px';
-                                hint.style.transform = 'translate(0, -50%)';
                                 hint.style.display = 'block';
                             };
                             requestAnimationFrame(updateHint);
                             listEl.addEventListener('scroll', () => {
-                                const hint = overlay.querySelector('#intel-scroll-hint');
+                                const hint = panel ? panel.querySelector('#intel-scroll-hint') : null;
                                 if (hint && listEl.scrollTop > 4) hint.style.display = 'none';
                             }, { passive: true });
                         }
@@ -16586,13 +18025,9 @@ function kmesAutoPrep() {
     }
 
     if (!targetDishName) {
-        // 如果没找到可做的，且有因为缺货被跳过的
-        if (firstMissingDish) {
-            const stationEl = document.getElementById('s_' + targetSid);
-            if (stationEl) {
-                const rect = stationEl.getBoundingClientRect();
-                triggerFeedback(rect.left + rect.width/2, rect.top, "库存不足!", "#e74c3c");
-            }
+        // 如果没找到可做的，且有因为缺货被跳过的：改为备菜区 toast 提示
+        if (firstMissingDish && typeof triggerPrepStockInsufficientToast === 'function') {
+            triggerPrepStockInsufficientToast(targetSid);
         }
         return;
     }
@@ -16772,6 +18207,260 @@ function kmesAutoServe() {
     if (typeof renderWarmingRack === 'function') renderWarmingRack();
 }
 
+function showEmpireBlueprint(onComplete) {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const host = document.getElementById('game-container') || document.body;
+    const useFixed = host === document.body;
+    const overlay = document.createElement('div');
+    overlay.id = 'blueprint-overlay';
+    overlay.style.cssText = `${useFixed ? 'position:fixed' : 'position:absolute'}; inset:0; width:100%; height:100%; background: url('assets/bg/餐厅解锁地图.jpg') center/cover no-repeat; background-color:#000; z-index:999999; opacity:1; transition: opacity 0.35s ease; overflow:hidden;`;
+
+    const currentTitleLvRaw = (game && game.playerProfile && typeof game.playerProfile.titleLevel === 'number')
+        ? game.playerProfile.titleLevel
+        : (game && typeof game.titleLevel === 'number' ? game.titleLevel : 1);
+    const playerLevel = Math.max(1, Math.min(6, Math.floor(Number(currentTitleLvRaw) || 1)));
+
+    const goals = Array.isArray(TIER_GOALS) ? TIER_GOALS.filter(Boolean) : [];
+    let activeIndex = Math.max(0, Math.min(goals.length - 1, playerLevel - 1));
+    for (let i = 0; i < goals.length; i++) {
+        const lv = Number(goals[i] && goals[i].level);
+        if (Number.isFinite(lv) && Math.floor(lv) === playerLevel) {
+            activeIndex = i;
+            break;
+        }
+    }
+
+    const style = document.createElement('style');
+    style.id = 'bp-carousel-style';
+    style.innerHTML = `
+        .bp-carousel-container { position:absolute; left:50%; top: 300px; transform: translateX(-50%); width: 1100px; height: 440px; display:flex; align-items:center; justify-content:center; perspective: 1200px; }
+        .bp-carousel-track { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; z-index: 1; }
+        .bp-card-item { position:absolute; left:50%; top:50%; transform-style: preserve-3d; transform-origin: center; will-change: transform, opacity, filter; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; }
+        .bp-carousel-btn { position:absolute; top:50%; transform: translateY(-50%); width: 54px; height: 54px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.22); background: rgba(0,0,0,0.18); color: rgba(255,255,255,0.92); font-weight: 900; font-size: 20px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease; z-index: 500; pointer-events: auto; }
+        .bp-carousel-btn:hover { background: rgba(255,255,255,0.10); border-color: rgba(241, 196, 15, 0.55); transform: translateY(-50%) scale(1.06); }
+        .bp-carousel-btn:active { transform: translateY(-50%) scale(0.96); }
+        @keyframes bpBadgePop {
+            0% { transform: scale(0.7); opacity: 0; }
+            60% { transform: scale(1.06); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .bp-card-badge-img { transform-origin: center; }
+        .bp-badge-pop { animation: bpBadgePop 0.6s ease-out both; }
+    `;
+    document.head.appendChild(style);
+
+    overlay.innerHTML = `
+        <div style="position:absolute; inset:0; width:100%; height:100%; background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.85)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); pointer-events:none;"></div>
+        <div id="empire-blueprint-content" style="position:absolute; inset:0; width:100%; height:100%; opacity:0; transform: translateY(10px) scale(0.985); transition: opacity 0.22s ease, transform 0.22s ease;">
+            <div style="position:absolute; left:50%; top: 128px; transform: translateX(-50%); display:inline-flex; align-items:center; gap:10px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255,255,255,0.16); padding: 10px 22px; border-radius: 999px;">
+                <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">餐饮帝国扩张蓝图</div>
+            </div>
+            <div style="position:absolute; left:50%; top: 182px; transform: translateX(-50%); color: rgba(255,255,255,0.85); font-size: 13px; line-height: 1.2;">规划主线晋升条件与核心特权</div>
+            <div class="bp-carousel-container">
+                <button id="bp-prev" class="bp-carousel-btn" style="left: -72px;">◀</button>
+                <div id="bp-track" class="bp-carousel-track"></div>
+                <button id="bp-next" class="bp-carousel-btn" style="right: -72px;">▶</button>
+            </div>
+            <button id="btn-accept-blueprint" class="glass-btn btn-primary-glass" style="position:absolute; left:50%; bottom: 118px; transform: translateX(-50%); width: 320px; border-radius: 14px;">确认蓝图，开启大亨之路</button>
+        </div>
+    `;
+    host.appendChild(overlay);
+
+    const content = overlay.querySelector('#empire-blueprint-content');
+    if (content) {
+        requestAnimationFrame(() => {
+            content.style.opacity = '1';
+            content.style.transform = 'none';
+        });
+    }
+
+    const track = overlay.querySelector('#bp-track');
+    const cardW = 320;
+    const badgeAreaH = 260;
+    const cardH = 360;
+    const badgeBox = { outer: 208, inner: 184 };
+    const items = goals.map((tier, idx) => {
+        const tierLv = Math.max(1, Math.min(6, Math.floor(Number(tier && tier.level) || 1)));
+        const isUnlocked = tierLv <= playerLevel;
+        const isCurrent = tierLv === playerLevel;
+
+        const badgeSrc = typeof getBadgeImagePath === 'function' ? getBadgeImagePath(tierLv) : '';
+        const cardBorder = isCurrent ? 'rgba(241, 196, 15, 0.85)' : 'rgba(255,255,255,0.18)';
+        const cardBg = isCurrent ? 'linear-gradient(145deg, rgba(241, 196, 15, 0.18), rgba(255,255,255,0.06))' : 'linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05))';
+        const badgeFilter = isUnlocked ? '' : 'filter: grayscale(1) saturate(0) brightness(0.78) contrast(1.08); opacity: 0.95;';
+        const statusText = isCurrent ? '当前' : (isUnlocked ? '已达成' : '锁定');
+        const statusColor = isCurrent ? 'rgba(46, 204, 113, 0.95)' : (isUnlocked ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.65)');
+        const lockHtml = isUnlocked ? '' : `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size: 140px; line-height:1; opacity:0.85; filter: grayscale(1) saturate(0) brightness(0.72) contrast(1.05); pointer-events:none;">🔒</div>`;
+
+        const el = document.createElement('div');
+        el.className = 'bp-card-item';
+        el.setAttribute('data-idx', String(idx));
+        el.setAttribute('data-unlocked', isUnlocked ? '1' : '0');
+        el.style.width = `${cardW}px`;
+        el.style.height = `${cardH}px`;
+        el.style.marginLeft = `${-cardW / 2}px`;
+        el.style.marginTop = `${-cardH / 2}px`;
+        el.style.boxSizing = 'border-box';
+        el.innerHTML = `
+            <div style="position:relative; width:${cardW}px; height:${cardH}px; box-sizing:border-box; padding: 12px 14px 12px; border-radius: 16px; background: ${cardBg}; border: none; display:flex; flex-direction:column; align-items:center;">
+                <div style="position:absolute; top: 10px; right: 10px; color: ${statusColor}; font-weight: 900; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.14);">${statusText}</div>
+                <div style="width:100%; height:${badgeAreaH}px; display:flex; align-items:center; justify-content:center;">
+                    <div style="width: ${badgeBox.outer}px; height: ${badgeBox.outer}px; border-radius: 22px; display:flex; align-items:center; justify-content:center; background: transparent; border: none; position: relative; overflow: hidden;">
+                        ${badgeSrc ? `<img src="${badgeSrc}" class="bp-card-badge-img" style="width:${badgeBox.inner}px;height:${badgeBox.inner}px;object-fit:contain;${badgeFilter}">` : `<div class="bp-card-badge-img" style="font-size:64px; line-height:1;">🏆</div>`}
+                        ${lockHtml}
+                    </div>
+                </div>
+                <div style="width:100%; height:calc(100% - ${badgeAreaH}px); display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:6px;">
+                    <div style="color:#ffffff; font-size:16px; font-weight:900; letter-spacing:0.5px; line-height:1.1;">T${tierLv} ${tier.name || ''}</div>
+                    <div style="color: rgba(255,255,255,0.88); font-size: 12px; line-height: 1.25;">条件：${tier.condition || ''}</div>
+                    <div style="color: rgba(241, 196, 15, 0.95); font-size: 12px; line-height: 1.25;">特权：${tier.spoiler || ''}</div>
+                </div>
+            </div>
+        `;
+        if (track) track.appendChild(el);
+        el.onclick = () => {
+            if (idx === activeIndex) return;
+            activeIndex = idx;
+            updateCarousel();
+        };
+        return el;
+    });
+
+    const updateCarousel = () => {
+        const spacing = 350;
+        const maxSide = 3;
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const offset = i - activeIndex;
+            const abs = Math.abs(offset);
+            const sign = offset < 0 ? -1 : 1;
+            const show = abs <= maxSide;
+
+            const x = sign * spacing * Math.min(abs, maxSide);
+            const z = -Math.min(abs, maxSide) * 220;
+            const rotY = sign * Math.min(abs, maxSide) * 28;
+            const scale = offset === 0 ? 1 : (abs === 1 ? 0.86 : (abs === 2 ? 0.72 : 0.62));
+            const opacity = show ? (offset === 0 ? 1 : (abs === 1 ? 0.85 : 0.55)) : 0;
+            const blur = offset === 0 ? 0 : (abs === 1 ? 0.6 : (abs === 2 ? 1.2 : 2.2));
+
+            item.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${rotY}deg) scale(${scale})`;
+            item.style.opacity = String(opacity);
+            item.style.filter = `blur(${blur}px)`;
+            item.style.zIndex = String(100 - abs);
+            item.style.pointerEvents = show ? 'auto' : 'none';
+        }
+
+        if (lastCenterIndex !== activeIndex) {
+            const centerItem = items[activeIndex];
+            if (centerItem && centerItem.getAttribute('data-unlocked') === '1') {
+                const badge = centerItem.querySelector('.bp-card-badge-img');
+                if (badge) {
+                    badge.classList.remove('bp-badge-pop');
+                    void badge.offsetWidth;
+                    badge.classList.add('bp-badge-pop');
+                }
+            }
+            lastCenterIndex = activeIndex;
+        }
+    };
+    let lastCenterIndex = null;
+
+    const clampIndex = (n) => Math.max(0, Math.min(items.length - 1, n));
+    const goTo = (n) => {
+        activeIndex = clampIndex(n);
+        updateCarousel();
+    };
+
+    const prevBtn = overlay.querySelector('#bp-prev');
+    const nextBtn = overlay.querySelector('#bp-next');
+    if (prevBtn) prevBtn.onclick = () => {
+        if (activeIndex > 0) {
+            activeIndex--;
+            if (typeof playSfx === 'function') playSfx(200, 'sine', 0.1);
+            updateCarousel();
+        }
+    };
+    if (nextBtn) nextBtn.onclick = () => {
+        if (activeIndex < items.length - 1) {
+            activeIndex++;
+            if (typeof playSfx === 'function') playSfx(200, 'sine', 0.1);
+            updateCarousel();
+        }
+    };
+
+    overlay.addEventListener('wheel', (e) => {
+        if (!e) return;
+        try { e.preventDefault(); } catch (_) {}
+        const dy = e.deltaY || 0;
+        if (Math.abs(dy) < 6) return;
+        if (dy > 0) goTo(activeIndex + 1);
+        else goTo(activeIndex - 1);
+    }, { passive: false });
+
+    let dragStartX = 0;
+    let dragging = false;
+    const onPointerDown = (e) => {
+        if (!e || e.button !== 0) return;
+        const t = e.target;
+        try {
+            if (t && typeof t.closest === 'function') {
+                if (t.closest('.bp-carousel-btn') || t.closest('#btn-accept-blueprint')) return;
+            } else if (t && t.tagName === 'BUTTON') {
+                return;
+            }
+        } catch (_) {}
+        dragging = true;
+        dragStartX = e.clientX;
+        try { overlay.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+    const onPointerUp = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        try { overlay.releasePointerCapture(e.pointerId); } catch (_) {}
+        const dx = e.clientX - dragStartX;
+        if (Math.abs(dx) < 22) return;
+        if (dx < 0) goTo(activeIndex + 1);
+        else goTo(activeIndex - 1);
+    };
+    overlay.addEventListener('pointerdown', onPointerDown);
+    overlay.addEventListener('pointerup', onPointerUp);
+
+    const onKeyDown = (e) => {
+        if (!e) return;
+        if (e.key === 'ArrowLeft') goTo(activeIndex - 1);
+        if (e.key === 'ArrowRight') goTo(activeIndex + 1);
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    const cleanup = () => {
+        document.body.style.overflow = prevOverflow;
+        try { window.removeEventListener('keydown', onKeyDown); } catch (_) {}
+        try { overlay.removeEventListener('pointerdown', onPointerDown); } catch (_) {}
+        try { overlay.removeEventListener('pointerup', onPointerUp); } catch (_) {}
+        try { host.removeChild(overlay); } catch (_) {}
+        try { document.head.removeChild(style); } catch (_) {}
+    };
+
+    const acceptBtn = overlay.querySelector('#btn-accept-blueprint');
+    if (acceptBtn) {
+        acceptBtn.onclick = () => {
+            if (typeof playButtonSound === 'function') playButtonSound();
+            else if (typeof playSfx === 'function') playSfx(400, 'square', 0.1);
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                cleanup();
+                if (typeof onComplete === 'function') onComplete();
+            }, 520);
+        };
+    }
+
+    requestAnimationFrame(() => {
+        updateCarousel();
+    });
+}
+
 function startGame() {
     AudioController.playTheme();
     
@@ -16792,7 +18481,9 @@ function startGame() {
     if (!hasPlayed) {
         setTimeout(() => {
             renderStoryModal(INTRO_STORY, () => {
-                initGame();
+                showEmpireBlueprint(() => {
+                    initGame();
+                });
             });
         }, 500);
     } else {
