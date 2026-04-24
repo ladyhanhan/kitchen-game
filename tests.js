@@ -1,6 +1,35 @@
 
 /** Unit Tests **/
 const Tests = {
+    testStartButtonDayLine: function() {
+        console.log("Running Start Button Day Line Test...");
+        const el = document.getElementById('btn-start-dayline');
+        if (!el) {
+            console.error("FAIL: #btn-start-dayline not found.");
+            return;
+        }
+        const originalGet = window.getOperatedDaysSafe;
+        const runCase = (value, expectedText) => {
+            window.getOperatedDaysSafe = () => value;
+            try { updateStartButtonDayLine(); } catch (e) { console.error("FAIL: updateStartButtonDayLine threw: " + e.message); return; }
+            const got = el.textContent;
+            if (got !== expectedText) {
+                console.error(`FAIL: operatedDays=${value} expected "${expectedText}" got "${got}"`);
+            } else {
+                console.log(`PASS: operatedDays=${value} -> "${got}"`);
+            }
+        };
+        try {
+            runCase(0, '第 1 天');
+            runCase(1, '第 2 天');
+            runCase(99, '第 100 天');
+            runCase(null, '第 -- 天');
+            runCase(undefined, '第 -- 天');
+        } finally {
+            window.getOperatedDaysSafe = originalGet;
+        }
+        console.log("Start Button Day Line Test Completed.");
+    },
     testAchievementModal: function() {
         console.log("Running Achievement Modal Test...");
         // Mock Data
