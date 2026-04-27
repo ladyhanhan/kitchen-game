@@ -1587,9 +1587,13 @@
         #boot-screen #btn-boot-start {
             font-size: 24px;
         }
+        #btn-start .btn-start-title,
+        #btn-start .btn-start-dayline { display: block; transform: translateY(4px); }
         #btn-start .btn-start-dayline { font-size: 20px; }
         @media (max-width: 768px) {
             #start-screen #btn-start, #boot-screen #btn-boot-start { font-size: 22px; }
+            #btn-start .btn-start-title,
+            #btn-start .btn-start-dayline { display: block; transform: translateY(4px); }
             #btn-start .btn-start-dayline { font-size: 18px; }
         }
 
@@ -6431,7 +6435,7 @@
         <div class="home-main-actions">
             <button id="btn-start" aria-describedby="btn-start-dayline" style="padding:14px 50px 18px 50px; background:#FCC307; color:white; border:none; border-radius:16px; cursor:pointer; font-weight:900; box-shadow:0 8px 0 #c7a000, 0 10px 20px rgba(0,0,0,0.4); transition:all 0.3s; margin-top:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; line-height:1; transform: translateY(2px);">
                 <span class="btn-start-title" style="color:#522717; opacity:0.82;">开门营业</span>
-                <span id="btn-start-dayline" class="btn-start-dayline" aria-label="已营业第 ? 天" style="font-weight:700; opacity:0.82; color:#522717;">第 -- 天</span>
+                <span id="btn-start-dayline" class="btn-start-dayline" aria-label="DAY ?" style="font-weight:700; opacity:0.82; color:#522717;">DAY --</span>
             </button>
         </div>
         <div id="lobby-todo-note" style="position: absolute; top: 96px; left: 30px; width: 300px; background: #f7f0dd; border: 1px solid rgba(0, 0, 0, 0.22); border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,0.45); padding: 14px 14px 12px 14px; font-family: 'Courier New', monospace; color: rgba(18, 18, 18, 0.92); z-index: 10; background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 100% 4px, 18px 18px; background-position: 0 0, 3px 7px;">
@@ -7276,7 +7280,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const debugMenu = document.getElementById('debug-menu');
     const btnExitTest = document.getElementById('btn-exit-test');
     const inTestMode = !!sessionStorage.getItem('inTestMode');
-    if (debugMenu) debugMenu.style.display = inTestMode ? 'none' : 'flex';
+    if (debugMenu) debugMenu.style.display = 'none';
     if (btnExitTest) btnExitTest.style.display = inTestMode ? 'block' : 'none';
 
     if (inTestMode) {
@@ -8719,13 +8723,13 @@ function updateStartButtonDayLine() {
     if (!dayline) return;
     const operatedDays = getOperatedDaysSafe();
     if (operatedDays === null) {
-        dayline.textContent = '第 -- 天';
-        dayline.setAttribute('aria-label', '已营业第 ? 天');
+        dayline.textContent = 'DAY --';
+        dayline.setAttribute('aria-label', 'DAY ?');
         return;
     }
     const x = Math.max(1, operatedDays + 1);
-    dayline.textContent = `第 ${x} 天`;
-    dayline.setAttribute('aria-label', `已营业第 ${x} 天`);
+    dayline.textContent = `DAY ${x}`;
+    dayline.setAttribute('aria-label', `DAY ${x}`);
 }
 
 const REGION_DICT = {
@@ -12499,8 +12503,7 @@ try {
     document.addEventListener('DOMContentLoaded', () => {
         const debugMenu = document.getElementById('debug-menu');
         if (!debugMenu) return;
-        const visible = localStorage.getItem('debug_menu_visible');
-        debugMenu.style.display = (visible === '1') ? 'flex' : 'none';
+        debugMenu.style.display = 'none';
     });
 } catch (_) {}
 
@@ -19093,11 +19096,11 @@ function runPrepLogicTests() {
                 const ok = got === expected;
                 console[ok ? 'log' : 'error'](`[TEST] start button day line (${String(v)}): ${ok ? 'PASS' : 'FAIL'} (${got} vs ${expected})`);
             };
-            runCase(0, '第 1 天');
-            runCase(1, '第 2 天');
-            runCase(99, '第 100 天');
-            runCase(null, '第 -- 天');
-            runCase(undefined, '第 -- 天');
+            runCase(0, 'DAY 1');
+            runCase(1, 'DAY 2');
+            runCase(99, 'DAY 100');
+            runCase(null, 'DAY --');
+            runCase(undefined, 'DAY --');
             window.getOperatedDaysSafe = original;
         }
     } catch (e) {
