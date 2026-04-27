@@ -3595,18 +3595,19 @@
         position: relative; z-index: 1; 
         display: flex; flex-direction: column; 
         height: 100%; width: 100%; 
-        max-width: min(1200px, 95vw); /* 等比缩放，适配视口宽度 */
+        max-width: min(840px, 95vw); /* [优化] 缩窄容器宽度，确保页头、卡片、页脚在视觉上对齐 */
         margin: 0 auto; 
-        padding: 15px 0 0 0; /* [优化] 移除左右内边距，确保内容与Footer边界一致 */
+        padding: 15px 0 0 0; 
         box-sizing: border-box; 
     } 
     .prep-header { 
         flex: 0 0 auto; margin-bottom: 15px; 
-        padding: 0 20px; /* [优化] 在此控制内边距 */
+        padding: 0 10px; /* [优化] 减小内边距 */
         display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start;
+        position: relative;
     } 
     #prep-top-controls {
-        padding: 0 20px; /* [优化] 在此控制内边距 */
+        padding: 0 10px; /* [优化] 减小内边距 */
     }    .prep-header-content { display: flex; flex-direction: column; }
     
     /* 返回按钮样式 */
@@ -3645,9 +3646,8 @@
     .prep-subtitle { font-size: clamp(10px, 2.5vw, 14px); color: rgba(255,255,255,0.8); margin-top: 4px; font-weight: 400; letter-spacing: 1px; } 
     
     .prep-grid { 
-        flex: 1; overflow-y: auto; padding: 5px 20px; /* [优化] 在此控制内边距，保持与Header对齐 */
+        flex: 1; overflow-y: auto; padding: 5px 10px; /* [优化] 保持内边距一致 */
         display: flex; flex-direction: column; gap: min(20px, 4vw); 
-        /* 滚动条规避：内容区域内部滚动 */
     } 
     .prep-grid::-webkit-scrollbar { width: 6px; } 
     .prep-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; } 
@@ -3693,18 +3693,18 @@
     .prep-footer { 
         flex: 0 0 auto; background: rgba(15, 15, 15, 0.95); 
         border-top: 1px solid rgba(255,255,255,0.1); 
-        padding: min(18px, 3vw) min(32px, 5vw); 
-        padding-bottom: min(19px, 3vw);
+        padding: min(15px, 3vw) min(20px, 4vw); /* [优化] 减小左右内边距 */
+        padding-bottom: min(15px, 3vw);
         display: flex; justify-content: space-between; align-items: center; 
-        border-radius: 12px 12px 0 0; /* [优化] 加大圆角 */
+        border-radius: 12px 12px 0 0; 
         margin-top: 0; 
         box-shadow: 0 -4px 25px rgba(0,0,0,0.4); 
-        width: 100%; /* [优化] 自动继承父级max-width且填满 */
+        width: 100%; 
         box-sizing: border-box;
     } 
-    .pf-info { display: flex; flex-direction: column; } 
-    .pf-label { font-size: clamp(9px, 2vw, 11px); color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; } 
-    .pf-val { font-size: clamp(16px, 4vw, 20px); font-weight: 900; color: #fff; font-family: var(--money-font) !important; } 
+    .pf-info { display: flex; flex-direction: column; align-items: center; } 
+    .pf-label { font-size: clamp(9px, 2vw, 11px); color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; } 
+    .pf-val { font-size: clamp(16px, 4vw, 20px); font-weight: 900; color: #fff; font-family: var(--money-font) !important; text-align: center; } 
     .pf-val.highlight { color: #f1c40f; } 
     .money-font { font-family: var(--money-font) !important; }
     #target-current,
@@ -5690,103 +5690,81 @@
 
         /* Supplier Crate Card Redesign */
         .supplier-crate {
-            flex: 1;
-            min-width: min(140px, 30vw); /* 允许在小屏幕上更小 */
-            padding: min(16px, 3vw);
-            border-radius: 16px; /* Unified border-radius */
+            flex: 0 0 min(256px, 45vw);
+            aspect-ratio: 4 / 3;
+            padding: 0;
+            border-radius: 12px;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            transition: all 0.25s ease-out; /* Unified animation duration & easing */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Unified shadow */
-            border: 1px solid rgba(255, 255, 255, 0.15); /* Unified border */
+            transition: all 0.25s ease-out;
+            box-shadow: none;
+            border: none;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            min-height: min(120px, 40vw); /* 增加最小高度保证比例 */
-            /* Gradient base */
-            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
-            backdrop-filter: blur(10px);
+            justify-content: flex-start;
+            align-items: center;
+            background-color: transparent;
+            container-type: size;
         }
 
-        /* Texture overlay & Hover Effect */
-        .supplier-crate::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px); /* Micro-texture */
-            background-size: 12px 12px;
-            opacity: 0.2;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+        .supplier-crate.meat {
+            background-image: url('assets/ui/鲜肉全包箱.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .supplier-crate.vege {
+            background-image: url('assets/ui/农场全素框.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .supplier-crate.seafood {
+            background-image: url('assets/ui/码头海鲜桶.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .supplier-crate:hover {
-            transform: translateY(-4px) scale(1.02); /* Lift & Scale */
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25); /* Deepen Shadow */
-            z-index: 10;
-        }
-
-        .supplier-crate:hover::before {
-            opacity: 0.4;
-        }
-
-        /* Theme Variations (Muted/Earthy Tones) */
-        .supplier-crate.meat {
-            /* Muted Terracotta/Marsala */
-            background: linear-gradient(135deg, rgba(160, 82, 77, 0.85) 0%, rgba(189, 107, 102, 0.85) 100%);
-            border-color: rgba(231, 76, 60, 0.3);
-        }
-        .supplier-crate.vege {
-            /* Muted Sage/Olive */
-            background: linear-gradient(135deg, rgba(85, 122, 95, 0.85) 0%, rgba(115, 156, 125, 0.85) 100%);
-            border-color: rgba(46, 204, 113, 0.3);
-        }
-        .supplier-crate.seafood {
-            /* Muted Slate/Steel Blue */
-            background: linear-gradient(135deg, rgba(74, 105, 133, 0.85) 0%, rgba(106, 137, 166, 0.85) 100%);
-            border-color: rgba(52, 152, 219, 0.3);
+            transform: scale(1.05);
+            box-shadow: none;
+            border: none;
         }
 
         /* Content Typography */
         .crate-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-        .crate-icon-svg {
-            width: 24px;
-            height: 24px;
-            fill: #fff;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-            flex-shrink: 0;
-        }
-        .crate-title {
-            font-size: clamp(14px, 4vw, 18px); /* 18-20px */
-            font-weight: 700; /* Bold */
-            color: #fff;
-            line-height: 1.4;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            display: contents;
         }
         .crate-desc {
-            font-size: clamp(11px, 3vw, 14px); /* 14-16px */
-            color: rgba(255, 255, 255, 0.95); /* WCAG AA Contrast */
-            line-height: 1.5;
-            margin-bottom: 12px;
-            flex-grow: 1;
+            display: none;
         }
+        .crate-title {
+            display: none;
+        }
+
         .crate-price-tag {
-            align-self: flex-end;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 6px 12px;
-            border-radius: 20px;
+            position: absolute;
+            bottom: 5cqh;
+            left: 50%;
+            transform: translate(-40%, -10px);
             color: #f1c40f;
             font-weight: 900;
-            font-size: 16px;
+            font-size: clamp(12px, 10cqw, 24px);
             letter-spacing: 0.5px;
-            backdrop-filter: blur(4px);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+            -webkit-text-stroke: 2px rgba(0,0,0,0.9);
+            paint-order: stroke fill;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+
+        .supplier-crate.vege .crate-price-tag {
+            transform: translate(calc(-40% + 2px), -10px);
+        }
+
+        .supplier-crate.seafood .crate-price-tag {
+            transform: translate(calc(-40% + 6px), -8px);
         }
 
         /* KMES Control Card */
@@ -16020,6 +15998,7 @@ function showFrenchMenuDraftModal(onComplete) {
                 #fr-menu-draft-modal[data-stage="matching"] #btn-fr-reroll { display: none; }
                 #fr-menu-draft-modal[data-stage="matching"] .fr-lock { display: none; }
                 #fr-menu-draft-modal[data-stage="matching"] .fr-card-scene .fr-card-inner { transition-duration: 0s; }
+                #fr-menu-draft-modal[data-stage="matching"] .fr-price-tag { display: none !important; }
                 #fr-menu-draft-modal .fr-cards-row {
                     display: flex;
                     gap: 18px;
@@ -19694,11 +19673,11 @@ function showPrepModal() {
         
         <div class="prep-container">
             <div class="prep-header prep-ui-hidden">
-                <div class="prep-header-content" style="margin-left: 20px;">
+                <div class="prep-header-content" style="margin-left: 10px;">
                     <h1 class="prep-title" style="margin-top:0;">清晨集市</h1>
                     <div class="prep-subtitle">根据刚才的情报，合理规划采购...</div>
                 </div>
-                <button class="icon-btn" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')" style="position: absolute; top: 30px; right: 30px; padding: 0; z-index: 10;">
+                <button class="icon-btn" onclick="playSfx(300, 'sine', 0.1); switchScreen('start-screen')" style="position: absolute; top: 20px; right: 10px; padding: 0; z-index: 10;">
                     <img src="assets/icons/icon_back.png" alt="返回" style="width: 55px; height: 55px; margin: 0;">
                 </button>
             </div>
@@ -19839,31 +19818,25 @@ function showPrepModal() {
                     <svg style="width:min(16px, 4vw);height:min(16px, 4vw);fill:#95a5a6;" viewBox="0 0 24 24"><path d="M20,6h-4V4c0-1.1-0.9-2-2-2h-4C8.9,2,8,2.9,8,4v2H4C2.9,6,2,6.9,2,8v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M10,4h4v2h-4V4z M20,20H4V8h16V20z"/></svg>
                     ${crateConfig.title} <span style="font-weight:400; font-size:clamp(10px, 2.5vw, 12px); background:rgba(231,76,60,0.1); color:#e74c3c; padding:2px 6px; border-radius:4px; margin-left:8px;">5折优惠</span>
                 </div>
-                <div style="display: flex; gap: min(12px, 2.5vw); overflow-x: auto; padding: 4px; scroll-behavior: smooth;">
+                <div style="display: flex; gap: min(12px, 2.5vw); overflow: hidden; padding: 4px; align-items: center; justify-content: center;">
                     <div class="supplier-crate meat" onclick="buyCrate('meat')">
                         <div class="crate-header">
-                            <svg class="crate-icon-svg" viewBox="0 0 24 24"><path d="M19.33 10.22l-4.55-4.55a2.53 2.53 0 0 0-3.58 0L9.41 7.46a2.53 2.53 0 0 0 0 3.58l.74.74-5.94 5.94A2.5 2.5 0 0 0 2.44 21.25l.31.31a2.5 2.5 0 0 0 3.53 0l5.94-5.94.74.74a2.53 2.53 0 0 0 3.58 0l1.79-1.79a2.53 2.53 0 0 0 0-3.58z"/></svg>
                             <div class="crate-title">${crateConfig.meat.title}</div>
                         </div>
-                        <div class="crate-desc">${crateConfig.meat.desc}</div>
                         <div class="crate-price-tag">¥${crateConfig.meat.cost}</div>
                     </div>
 
                     <div class="supplier-crate vege" onclick="buyCrate('vege')">
                         <div class="crate-header">
-                            <svg class="crate-icon-svg" viewBox="0 0 24 24"><path d="M17,8C8,10,5.9,16.17,3.82,21.34l1.89.66L9.5,22l4.2,4.2c.3.3.7.3,1,0l.7-.7c.3-.3.3-.7,0-1l-4.2-4.2l-2-3.8l.66-1.89C15.17,12.9,21,11,23,2c-7,0-10,3-13,6"/></svg>
                             <div class="crate-title">${crateConfig.vege.title}</div>
                         </div>
-                        <div class="crate-desc">${crateConfig.vege.desc}</div>
                         <div class="crate-price-tag">¥${crateConfig.vege.cost}</div>
                     </div>
 
                     <div class="supplier-crate seafood" onclick="buyCrate('seafood')">
                         <div class="crate-header">
-                            <svg class="crate-icon-svg" viewBox="0 0 24 24"><path d="M21.5,10.5l-1.9-1.9c-0.4-0.4-0.9-0.5-1.4-0.3c-1.4,0.5-2.9,0.8-4.5,0.8c-1.6,0-3.1-0.3-4.5-0.8c-0.5-0.2-1-0.1-1.4,0.3L4,12.5l-2.6-2.6c-0.4-0.4-1-0.4-1.4,0l0,0c-0.4,0.4-0.4,1,0,1.4l3,3c0.4,0.4,1,0.4,1.4,0l3.8-3.8c0.4,0.4,0.9,0.5,1.4,0.3"/></svg>
                             <div class="crate-title">${crateConfig.seafood.title}</div>
                         </div>
-                        <div class="crate-desc">${crateConfig.seafood.desc}</div>
                         <div class="crate-price-tag">¥${crateConfig.seafood.cost}</div>
                     </div>
                 </div>
@@ -20127,7 +20100,7 @@ function showPrepModal() {
                     </div> 
                      
                     <div id="camera-flash"></div> 
-                    <button id="btn-close-polaroid-bottom" class="btn-start-shopping" style="position: fixed; right: 36px; bottom: 28px; background:none; border:none; padding:0; box-shadow:none; width:auto; height:auto; display:flex; align-items:center; justify-content:center; z-index: 100000; pointer-events: auto;"> 
+                    <button id="btn-close-polaroid-bottom" class="btn-start-shopping" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 28px; background:none; border:none; padding:0; box-shadow:none; width:auto; height:auto; display:none; align-items:center; justify-content:center; z-index: 100000; pointer-events: auto;"> 
                         <img src="assets/ui/开始买菜.png" alt="开始买菜" style="height:80px; width:auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); transition: transform 0.2s; cursor: pointer; transform: scale(1);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"> 
                     </button> 
                 </div> 
@@ -20193,6 +20166,11 @@ function showPrepModal() {
                     this.style.textShadow = "none"; 
                     this.style.transform = this.style.transform.replace(/scale\\([0-9.]+\\)/, 'scale(0.55)'); 
                     this.style.zIndex = "20"; 
+ 
+                    if (foundSilhouettes >= totalSilhouettes && totalSilhouettes > 0) {
+                        const btnBottom = document.getElementById('btn-close-polaroid-bottom');
+                        if (btnBottom) btnBottom.style.display = 'flex';
+                    }
  
                     const ingName = this.getAttribute('data-name'); 
                     const emoji = this.getAttribute('data-emoji'); 
