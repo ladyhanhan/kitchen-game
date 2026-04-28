@@ -15605,13 +15605,13 @@ function showKPIModal(kpi, onConfirm) {
     modal.className = 'prep-overlay';
     modal.style.cssText = 'display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.88); z-index: 150000;';
     modal.innerHTML = `
-        <div style="width:min(600px, 95vw); aspect-ratio: 600/450; background: url('assets/ui/弹窗_今日营业目标.png') no-repeat center center / contain; color:#fff; text-align:center; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 40px;">
+        <div style="width:min(480px, 80vw); aspect-ratio: 600/450; background: url('assets/ui/弹窗_今日营业目标.png') no-repeat center center / contain; color:#fff; text-align:center; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 32px;">
             <button id="daily-kpi-close" class="icon-btn" style="position:absolute; top: 8%; right: 6%; padding: 0; z-index: 10; background: none; border: none; cursor: pointer;">
-                <img src="assets/icons/icon_关闭.png" alt="关闭" style="width: 48px; height: 48px;">
+                <img src="assets/icons/icon_关闭.png" alt="关闭" style="width: 38px; height: 38px;">
             </button>
-            <div style="font-family: Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 800; letter-spacing: 4px; color: #522717; line-height: 1; margin: 20px 0 10px; transform: translateY(12px);">¥${Number.isFinite(kpi) ? kpi : 0}</div>
-            <div style="font-size: 18px; color: #522717; line-height: 1.5; margin-bottom: 24px; font-weight: 400; transform: translateY(24px);">未达成目标，本日经营将重新开始</div>
-            <button id="daily-kpi-confirm" style="background: none; border: none; cursor: pointer; padding: 0; width: 240px; transition: transform 0.1s; transform: translateY(44px);" onmouseover="this.style.transform='translateY(44px) scale(1.05)'" onmouseout="this.style.transform='translateY(44px) scale(1.0)'">
+            <div style="font-family: Helvetica, Arial, sans-serif; font-size: 38px; font-weight: 800; letter-spacing: 3px; color: #522717; line-height: 1; margin: 16px 0 8px; transform: translateY(10px);">¥${Number.isFinite(kpi) ? kpi : 0}</div>
+            <div style="font-size: 14px; color: #522717; line-height: 1.5; margin-bottom: 19px; font-weight: 400; transform: translateY(20px);">未达成目标，本日经营将重新开始</div>
+            <button id="daily-kpi-confirm" style="background: none; border: none; cursor: pointer; padding: 0; width: 192px; transition: transform 0.1s; transform: translateY(35px);" onmouseover="this.style.transform='translateY(35px) scale(1.05)'" onmouseout="this.style.transform='translateY(35px) scale(1.0)'">
                 <img src="assets/ui/弹窗_开始挑战.png" alt="开始挑战" style="width: 100%; display: block;">
             </button>
         </div>
@@ -15714,10 +15714,11 @@ function showFrenchMenuDraftModal(onComplete) {
     const overlay = document.createElement('div');
     overlay.id = 'fr-menu-draft-modal';
     overlay.className = 'prep-overlay fr-menu-draft';
-    overlay.style.cssText = "z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:120px; box-sizing:border-box; overflow:visible; color:#fff; font-family: OPPOSans, sans-serif;";
+    overlay.style.cssText = "z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:120px; box-sizing:border-box; overflow:visible; color:#fff; font-family: OPPOSans, sans-serif; position:absolute !important; inset:0 !important; width:100% !important; height:100% !important;";
     let stage = 'pre_draw';
     let lockedCards = Array.isArray(menu) ? Array(menu.length).fill(false) : [];
     let isRerolling = false;
+    let activeMatchCardIdx = -1;
 
     const getUnlockedFranceRecipePool = () => {
         const all = Array.isArray(RECIPES) ? RECIPES.filter(Boolean) : [];
@@ -15795,7 +15796,6 @@ function showFrenchMenuDraftModal(onComplete) {
                 <button class="fr-lock" type="button" data-lock-idx="${idx}" aria-label="${locked ? '解锁该卡片' : '锁定该卡片'}" title="${locked ? '解锁' : '锁定'}">${locked ? '📌' : ''}</button>
                 ${slotsHtml}
                 <div class="fr-card-title">${(r && r.name) ? r.name : '未知菜品'}</div>
-                <div class="fr-card-rule"></div>
                 <div class="fr-card-dome">
                     <div class="fr-card-dome-glow"></div>
                     <img src="${img}" alt="${(r && r.name) ? r.name : ''}" class="fr-card-img" onerror="this.onerror=null; this.style.display='none';">
@@ -15845,13 +15845,16 @@ function showFrenchMenuDraftModal(onComplete) {
         const cardsHtml = menu.map((r, idx) => {
             const locked = !!lockedCards[idx];
             const flipped = (stage === 'matching') ? 'flipped' : '';
-            let tierClass = '';
-            if (r && r.tierName === '基础入门') tierClass = 'tier-basic';
-            else if (r && r.tierName === '进阶硬菜') tierClass = 'tier-advanced';
-            else if (r && r.tierName === '大师名菜') tierClass = 'tier-master';
-            else if (r && r.tierName === '传奇料理') tierClass = 'tier-legend';
+            const tierRaw = (r && (r.tierName ?? r.tier ?? r.category)) ?? '';
+            const tierName = String(tierRaw).trim();
+            const tierNum = Number.isFinite(Number(tierRaw)) ? Number(tierRaw) : null;
+            let tierClass = 'tier-basic';
+            if (tierName === '进阶硬菜' || tierNum === 2 || tierName.toLowerCase() === 'advanced') tierClass = 'tier-advanced';
+            else if (tierName === '大师名菜' || tierNum === 3 || tierName.toLowerCase() === 'master') tierClass = 'tier-master';
+            else if (tierName === '传奇料理' || tierNum === 4 || tierName.toLowerCase() === 'legend') tierClass = 'tier-legend';
+            const active = (stage === 'matching' && idx === activeMatchCardIdx) ? 'is-active' : '';
             return `
-                <div class="fr-card-scene ${tierClass} ${locked ? 'is-locked' : ''} ${flipped}" id="fr-card-${idx}" data-card-idx="${idx}">
+                <div class="fr-card-scene ${tierClass} ${active} ${locked ? 'is-locked' : ''} ${flipped}" id="fr-card-${idx}" data-card-idx="${idx}">
                     <div class="fr-card-inner">
                         <div class="fr-card-back"></div>
                         <div class="fr-card-front">
@@ -15872,20 +15875,9 @@ function showFrenchMenuDraftModal(onComplete) {
                     if (!k) return;
                     set.add(k);
                 };
-                if (Array.isArray(unlockedRecipeIds)) {
-                    const unlockedSet = new Set(unlockedRecipeIds.map(String));
-                    (RECIPES || []).forEach(r => {
-                        if (!r || !r.id) return;
-                        if (!unlockedSet.has(String(r.id))) return;
-                        if (normalizeCookbookRegionId(r.region) !== 'france') return;
-                        (Array.isArray(r.ingredients) ? r.ingredients : []).forEach(add);
-                    });
-                }
-                if (set.size === 0) {
-                    (Array.isArray(menu) ? menu : []).forEach(r => {
-                        (Array.isArray(r && r.ingredients) ? r.ingredients : []).forEach(add);
-                    });
-                }
+                (Array.isArray(menu) ? menu : []).forEach(r => {
+                    (Array.isArray(r && r.ingredients) ? r.ingredients : []).forEach(add);
+                });
                 const list = Array.from(set)
                     .map(id => (dict ? dict[id] : null))
                     .filter(ing => ing && ing.id && ing.icon);
@@ -15929,7 +15921,8 @@ function showFrenchMenuDraftModal(onComplete) {
                     pointer-events: auto;
                 }
                 #fr-menu-draft-modal .fr-center {
-                    width: min(1100px, 96vw);
+                    width: 100%;
+                    max-width: 100%;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -15938,6 +15931,7 @@ function showFrenchMenuDraftModal(onComplete) {
                     position: relative;
                     z-index: 1;
                     padding-bottom: 36px;
+                    margin: 0 auto;
                 }
                 #fr-menu-draft-modal .fr-title {
                     color:#fff;
@@ -16003,29 +15997,36 @@ function showFrenchMenuDraftModal(onComplete) {
                 #fr-menu-draft-modal[data-stage="matching"] .fr-price-tag { display: none !important; }
                 #fr-menu-draft-modal .fr-cards-row {
                     display: flex;
-                    gap: 18px;
+                    gap: 20px;
                     align-items: flex-start;
                     justify-content: center;
                     flex-wrap: nowrap;
-                    overflow-x: auto;
-                    overflow-y: visible;
-                    padding: 34px 6px 24px;
-                    min-height: 430px;
+                    padding: 40px 10px 30px;
+                    min-height: 460px;
                     width: 100%;
-                    transform: translateY(0);
+                    box-sizing: border-box;
                     position: relative;
                     z-index: 2;
+                    transform: translateY(0);
+                    overflow: visible;
                 }
+                
                 #fr-menu-draft-modal[data-stage="matching"] .fr-cards-row { transform: translateY(-40px); }
                 #fr-menu-draft-modal .fr-card-scene {
                     perspective: 1000px;
                     width: 280px;
                     height: 378px;
-                    margin: 0 10px;
                     flex: 0 0 auto;
                     position: relative;
                     z-index: 2;
                     transform: translateZ(1px);
+                    transition: transform 220ms ease;
+                }
+                #fr-menu-draft-modal[data-stage="drawn"] .fr-card-scene.is-locked {
+                    transform: translateZ(1px) translateY(38px);
+                }
+                #fr-menu-draft-modal[data-stage="matching"] .fr-card-scene.is-active {
+                    transform: translateZ(1px) translateY(-38px);
                 }
                 #fr-menu-draft-modal .fr-card-inner {
                     position: relative;
@@ -16065,22 +16066,22 @@ function showFrenchMenuDraftModal(onComplete) {
                     border: none;
                 }
                 #fr-menu-draft-modal .fr-card-scene.tier-advanced .fr-card-front {
-                    background: #f7f0dd url('assets/ui/卡牌_进阶硬菜.png') no-repeat center center;
+                    background: url('assets/ui/卡牌_进阶硬菜.png') no-repeat center center;
                     background-size: cover;
                     border: none;
                 }
                 #fr-menu-draft-modal .fr-card-scene.tier-master .fr-card-front {
-                    background: #f7f0dd url('assets/ui/卡牌_大师名菜.png') no-repeat center center;
+                    background: url('assets/ui/卡牌_大师名菜.png') no-repeat center center;
                     background-size: cover;
                     border: none;
                 }
                 #fr-menu-draft-modal .fr-card-scene.tier-legend .fr-card-front {
-                    background: #f7f0dd url('assets/ui/卡牌_传奇料理.png') no-repeat center center;
+                    background: url('assets/ui/卡牌_传奇料理.png') no-repeat center center;
                     background-size: cover;
                     border: none;
                 }
                 #fr-menu-draft-modal .fr-card-scene.is-locked .fr-card-front {
-                    box-shadow: 0 10px 22px rgba(0,0,0,0.22), 0 0 0 2px rgba(241,196,15,0.55);
+                    box-shadow: 0 10px 22px rgba(0,0,0,0.22);
                 }
                 #fr-menu-draft-modal .fr-card-front::before {
                     content: "";
@@ -16090,7 +16091,10 @@ function showFrenchMenuDraftModal(onComplete) {
                     border-radius: 12px;
                     pointer-events: none;
                 }
-                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-card-front::before { display: none; }
+                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-card-front::before,
+                #fr-menu-draft-modal .fr-card-scene.tier-advanced .fr-card-front::before,
+                #fr-menu-draft-modal .fr-card-scene.tier-master .fr-card-front::before,
+                #fr-menu-draft-modal .fr-card-scene.tier-legend .fr-card-front::before { display: none; }
                 #fr-menu-draft-modal .fr-card-front-content {
                     height: 100%;
                     padding: 14px 14px 16px;
@@ -16116,7 +16120,7 @@ function showFrenchMenuDraftModal(onComplete) {
                     right: 10px;
                     width: 34px;
                     height: 34px;
-                    border-radius: 10px;
+                    border-radius: 50%;
                     border: 1px solid rgba(0,0,0,0.22);
                     background: rgba(255,255,255,0.72);
                     box-shadow: 0 8px 16px rgba(0,0,0,0.16);
@@ -16150,7 +16154,10 @@ function showFrenchMenuDraftModal(onComplete) {
                     text-shadow: none;
                     word-break: break-word;
                 }
-                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-card-title {
+                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-card-title,
+                #fr-menu-draft-modal .fr-card-scene.tier-advanced .fr-card-title,
+                #fr-menu-draft-modal .fr-card-scene.tier-master .fr-card-title,
+                #fr-menu-draft-modal .fr-card-scene.tier-legend .fr-card-title {
                     position: absolute;
                     left: 14px;
                     right: 14px;
@@ -16159,12 +16166,12 @@ function showFrenchMenuDraftModal(onComplete) {
                     transform: translateY(30px);
                     color: #ffffff;
                 }
-                #fr-menu-draft-modal[data-stage="matching"] .fr-card-scene.tier-basic .fr-card-title { bottom: 92px; }
+                #fr-menu-draft-modal[data-stage="matching"] .fr-card-scene.tier-basic .fr-card-title,
+                #fr-menu-draft-modal[data-stage="matching"] .fr-card-scene.tier-advanced .fr-card-title,
+                #fr-menu-draft-modal[data-stage="matching"] .fr-card-scene.tier-master .fr-card-title,
+                #fr-menu-draft-modal[data-stage="matching"] .fr-card-scene.tier-legend .fr-card-title { bottom: 92px; }
                 #fr-menu-draft-modal .fr-card-rule {
-                    height: 1px;
-                    width: 76%;
-                    margin: 0 auto;
-                    background: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.28), rgba(0,0,0,0));
+                    display: none;
                 }
                 #fr-menu-draft-modal .fr-card-dome {
                     width: 170px;
@@ -16180,7 +16187,10 @@ function showFrenchMenuDraftModal(onComplete) {
                     position: relative;
                     overflow: hidden;
                 }
-                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-card-dome { transform: translateY(50px); }
+                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-card-dome,
+                #fr-menu-draft-modal .fr-card-scene.tier-advanced .fr-card-dome,
+                #fr-menu-draft-modal .fr-card-scene.tier-master .fr-card-dome,
+                #fr-menu-draft-modal .fr-card-scene.tier-legend .fr-card-dome { transform: translateY(68px); }
                 #fr-menu-draft-modal .fr-card-dome-glow {
                     display: none;
                 }
@@ -16200,7 +16210,10 @@ function showFrenchMenuDraftModal(onComplete) {
                     padding-top: 6px;
                     transform: translateY(-40px);
                 }
-                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-slots {
+                #fr-menu-draft-modal .fr-card-scene.tier-basic .fr-slots,
+                #fr-menu-draft-modal .fr-card-scene.tier-advanced .fr-slots,
+                #fr-menu-draft-modal .fr-card-scene.tier-master .fr-slots,
+                #fr-menu-draft-modal .fr-card-scene.tier-legend .fr-slots {
                     position: absolute;
                     left: 14px;
                     right: 14px;
@@ -16215,7 +16228,7 @@ function showFrenchMenuDraftModal(onComplete) {
                     border-radius: 10px;
                     border: 2px dashed rgba(0, 0, 0, 0.28);
                     background: rgba(255,255,255,0.55);
-                    box-shadow: inset 0 4px 10px rgba(0,0,0,0.10);
+                    box-shadow: none;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
@@ -16233,12 +16246,18 @@ function showFrenchMenuDraftModal(onComplete) {
                     border-style: solid;
                     border-color: rgba(0, 0, 0, 0.28);
                     background: rgba(255,255,255,0.92);
-                    box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.12), inset 0 4px 10px rgba(0,0,0,0.08);
+                    box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.12);
                     color: rgba(18,18,18,0.92);
                 }
                 #fr-menu-draft-modal .fr-shelf {
                     flex: 0 0 auto;
                     padding: 20px 22px 22px;
+                    width: fit-content;
+                    max-width: calc(100% - 40px);
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    margin-left: auto;
+                    margin-right: auto;
                     background: #f7f0dd;
                     background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
                     background-size: 100% 4px, 18px 18px;
@@ -16255,21 +16274,21 @@ function showFrenchMenuDraftModal(onComplete) {
                     text-align: center;
                 }
                 #fr-menu-draft-modal .fr-shelf-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+                    display: inline-flex;
+                    flex-wrap: nowrap;
+                    align-items: stretch;
                     gap: 10px;
-                    max-height: 300px;
-                    overflow: auto;
                     padding: 10px 0 10px;
                 }
                 #fr-menu-draft-modal .fr-ing {
-                    width: 100%;
+                    width: 92px;
                     min-height: 76px;
                     border: 1px solid rgba(0, 0, 0, 0.22);
                     background: rgba(255,255,255,0.45);
                     color: rgba(18,18,18,0.92);
                     cursor: pointer;
                     display: flex;
+                    flex: 0 0 92px;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
@@ -16277,18 +16296,18 @@ function showFrenchMenuDraftModal(onComplete) {
                     padding: 8px 8px 10px;
                     transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
                     border-radius: 12px;
-                    box-shadow: 0 10px 18px rgba(0,0,0,0.10);
+                    box-shadow: none;
                 }
                 #fr-menu-draft-modal .fr-ing:hover {
                     transform: translateY(-3px);
                     filter: brightness(1.06);
-                    box-shadow: 0 14px 26px rgba(0,0,0,0.16);
+                    box-shadow: none;
                 }
                 #fr-menu-draft-modal .fr-ing:active {
                     transform: translateY(-1px) scale(0.98);
                 }
                 #fr-menu-draft-modal .fr-ing-icon {
-                    font-size: 28px;
+                    font-size: 34px;
                     line-height: 1;
                     filter: drop-shadow(0 10px 12px rgba(0,0,0,0.22));
                     transform: translateZ(0);
@@ -16360,8 +16379,8 @@ function showFrenchMenuDraftModal(onComplete) {
                 <div class="fr-cards-row">
                     ${cardsRowHtml}
                 </div>
-                ${stage === 'matching' ? '<div class="fr-shelf-hint">点击下方食材填入上方槽位（点错会提示）。</div>' : ''}
-                <div class="fr-shelf" style="width: 100%;">
+                ${stage === 'matching' ? '<div class="fr-shelf-hint">点击下方食材填入上方槽位（点错会提示）</div>' : ''}
+                <div class="fr-shelf">
                     <div class="fr-shelf-grid">
                         ${ingHtml}
                     </div>
@@ -16456,6 +16475,7 @@ function showFrenchMenuDraftModal(onComplete) {
                 if (typeof playButtonSound === 'function') playButtonSound();
                 if (stage !== 'drawn') return;
                 lockedCards = Array.isArray(menu) ? Array(menu.length).fill(false) : [];
+                activeMatchCardIdx = -1;
                 stage = 'matching';
                 render();
             };
@@ -16485,12 +16505,62 @@ function showFrenchMenuDraftModal(onComplete) {
             btn.style.cursor = allFilled ? 'pointer' : 'default';
         };
 
+        const getCardSceneFromEl = (el) => {
+            if (!(el instanceof HTMLElement)) return null;
+            return el.closest('.fr-card-scene');
+        };
+        const getCardSlots = (cardIdx) => {
+            const scene = overlay.querySelector(`#fr-card-${cardIdx}`) || overlay.querySelector(`.fr-card-scene[data-card-idx="${cardIdx}"]`);
+            if (!scene) return [];
+            return Array.from(scene.querySelectorAll('.fr-slot')).filter(s => s instanceof HTMLElement);
+        };
+        const isCardComplete = (cardIdx) => {
+            const slots = getCardSlots(cardIdx);
+            return slots.length > 0 && slots.every(s => s.dataset && s.dataset.filled && s.dataset.filled === s.dataset.expected);
+        };
+        const findFirstCardNeedingIngredient = (ingId) => {
+            const n = Array.isArray(menu) ? menu.length : 0;
+            for (let i = 0; i < n; i++) {
+                if (isCardComplete(i)) continue;
+                const slots = getCardSlots(i).filter(s => s.dataset && s.dataset.expected === ingId);
+                const target = slots.find(s => (!s.dataset || !s.dataset.filled));
+                if (target) return i;
+            }
+            return -1;
+        };
+        const setActiveCard = (cardIdx) => {
+            const iNum = Number(cardIdx);
+            if (!Number.isFinite(iNum)) return;
+            const i = Math.floor(iNum);
+            activeMatchCardIdx = i;
+            overlay.querySelectorAll('.fr-card-scene').forEach(scene => {
+                const idx = scene.getAttribute('data-card-idx');
+                scene.classList.toggle('is-active', String(i) === String(idx));
+            });
+        };
+        const ensureActiveCard = () => {
+            if (stage !== 'matching') return;
+            const n = Array.isArray(menu) ? menu.length : 0;
+            if (n <= 0) return;
+            if (!Number.isFinite(activeMatchCardIdx) || activeMatchCardIdx < 0 || activeMatchCardIdx >= n) return;
+            if (isCardComplete(activeMatchCardIdx)) setActiveCard(-1);
+        };
+
         overlay.querySelectorAll('.fr-slot').forEach(slot => {
             slot.addEventListener('click', () => {
                 if (typeof playButtonSound === 'function') playButtonSound();
                 if (stage !== 'matching') return;
                 const s = slot;
                 if (!(s instanceof HTMLElement)) return;
+                const scene = getCardSceneFromEl(s);
+                const idx = scene ? scene.getAttribute('data-card-idx') : null;
+                if (idx !== null && isCardComplete(Number(idx))) return;
+                if (idx !== null && activeMatchCardIdx < 0) setActiveCard(idx);
+                ensureActiveCard();
+                if (idx !== null && activeMatchCardIdx >= 0 && String(idx) !== String(activeMatchCardIdx)) {
+                    try { if (typeof showToast === 'function') showToast('请先完成当前卡牌，再匹配其它卡牌'); } catch (_) {}
+                    return;
+                }
                 if (s.dataset && s.dataset.filled) {
                     s.dataset.filled = '';
                     s.innerHTML = '+';
@@ -16509,15 +16579,29 @@ function showFrenchMenuDraftModal(onComplete) {
                 if (typeof playButtonSound === 'function') playButtonSound();
                 if (stage !== 'matching') return;
                 const ingId = btnEl.getAttribute('data-ing') || '';
-                const slots = Array.from(overlay.querySelectorAll('.fr-slot')).filter(s => (s instanceof HTMLElement) && s.dataset && s.dataset.expected === ingId);
-                const target = slots.find(s => (s instanceof HTMLElement) && (!s.dataset || !s.dataset.filled));
+                ensureActiveCard();
+                if (!ingId) return;
+                if (activeMatchCardIdx < 0) {
+                    const next = findFirstCardNeedingIngredient(ingId);
+                    if (next >= 0) setActiveCard(next);
+                }
+                const slots = activeMatchCardIdx >= 0
+                    ? getCardSlots(activeMatchCardIdx).filter(s => s.dataset && s.dataset.expected === ingId)
+                    : [];
+                const target = slots.find(s => (!s.dataset || !s.dataset.filled));
                 if (!target || !(target instanceof HTMLElement)) {
                     try { if (typeof playSfx === 'function') playSfx(200, 'sawtooth', 0.5); } catch (_) {}
                     const prevShadow = btnEl.style.boxShadow;
                     btnEl.style.boxShadow = '0 0 20px rgba(231,76,60,0.75)';
+                    if (btnEl.__errTimer) {
+                        clearTimeout(btnEl.__errTimer);
+                        btnEl.__errTimer = null;
+                    }
                     setTimeout(() => {
-                        btnEl.style.boxShadow = prevShadow || '';
+                        btnEl.style.boxShadow = '';
+                        btnEl.__errTimer = null;
                     }, 420);
+                    btnEl.__errTimer = setTimeout(() => {}, 0);
                     return;
                 }
                 const ing = (typeof INGREDIENTS !== 'undefined' && INGREDIENTS) ? INGREDIENTS[ingId] : null;
@@ -16526,8 +16610,9 @@ function showFrenchMenuDraftModal(onComplete) {
                 target.style.borderStyle = 'solid';
                 target.style.borderColor = 'rgba(212, 175, 55, 0.75)';
                 target.style.color = '#fff';
-                target.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.06), 0 0 22px rgba(212, 175, 55, 0.22), inset 0 4px 10px rgba(0,0,0,0.80)';
+                target.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.06), 0 0 22px rgba(212, 175, 55, 0.22)';
                 refreshConfirmState();
+                if (activeMatchCardIdx >= 0 && isCardComplete(activeMatchCardIdx)) setActiveCard(-1);
             });
         });
 
@@ -16547,6 +16632,7 @@ function showFrenchMenuDraftModal(onComplete) {
         }
 
         refreshConfirmState();
+        ensureActiveCard();
     };
 
     render();
