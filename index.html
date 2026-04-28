@@ -3188,7 +3188,8 @@
         border-radius: 16px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        width: 100%; /* 由 Grid 控制宽度 */
+        width: auto; /* [修改] 由外部容器布局控制宽度 */
+        min-width: 0; /* 防止内容撑开容器 */
         min-height: min(178px, 25vw);
         position: relative;
         box-sizing: border-box;
@@ -3337,38 +3338,39 @@
         border-color: rgba(76, 175, 80, 0.3);
     }
     
-    /* 容器布局修正 - 使用 Grid 确保每行6个 */
+    /* 容器布局修正 - 不做左右滚动，换行显示 */
     .category-items {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: min(15px, 3vw); /* [优化] 等比缩放间距 */
-        justify-content: start;
+        display: flex;
+        flex-wrap: wrap;
+        gap: min(15px, 3vw);
+        justify-content: flex-start;
         padding: 10px;
         width: 100%;
-        max-width: 1500px; /* [优化] 限制最大宽度，防止大屏卡片过宽 */
-        margin: 0 auto; /* [优化] 居中显示 */
+        max-width: 1500px;
+        margin: 0 auto;
         box-sizing: border-box;
+        overflow-x: hidden; /* 禁用左右滚动 */
     }
     
-    /* 响应式适配：屏幕较窄时自动调整，但保持均匀分布 */
-    @media (max-width: 1200px) {
-        .category-items {
-            grid-template-columns: repeat(4, 1fr);
-        }
+    /* 响应式适配：固定列数，默认每行4个，最少3个 */
+    .category-items .ingredient-card {
+        flex: 0 0 calc((100% - 3 * min(15px, 3vw)) / 4); /* 默认4列 */
+        min-width: 0;
     }
-    @media (max-width: 992px) {
-        .category-items {
-            grid-template-columns: repeat(3, 1fr);
+
+    @media (max-width: 1200px) {
+        .category-items .ingredient-card {
+            flex: 0 0 calc((100% - 2 * min(15px, 3vw)) / 3); /* 3列 */
         }
     }
     @media (max-width: 768px) {
-        .category-items {
-            grid-template-columns: repeat(2, 1fr);
+        .category-items .ingredient-card {
+            flex: 0 0 calc((100% - 1 * min(15px, 3vw)) / 2); /* 2列 */
         }
     }
-    @media (max-width: 576px) {
-        .category-items {
-            grid-template-columns: repeat(1, 1fr);
+    @media (max-width: 480px) {
+        .category-items .ingredient-card {
+            flex: 0 0 100%; /* 1列 */
         }
     }
 
@@ -3646,7 +3648,7 @@
     .prep-subtitle { font-size: clamp(10px, 2.5vw, 14px); color: rgba(255,255,255,0.8); margin-top: 4px; font-weight: 400; letter-spacing: 1px; } 
     
     .prep-grid { 
-        flex: 1; overflow-y: auto; padding: 5px 10px; /* [优化] 保持内边距一致 */
+        flex: 1; overflow-y: auto; overflow-x: hidden; padding: 5px 10px; /* [优化] 保持内边距一致 */
         display: flex; flex-direction: column; gap: min(20px, 4vw); 
     } 
     .prep-grid::-webkit-scrollbar { width: 6px; } 
@@ -3702,9 +3704,9 @@
         width: 100%; 
         box-sizing: border-box;
     } 
-    .pf-info { display: flex; flex-direction: column; align-items: center; } 
-    .pf-label { font-size: clamp(9px, 2vw, 11px); color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; } 
-    .pf-val { font-size: clamp(16px, 4vw, 20px); font-weight: 900; color: #fff; font-family: var(--money-font) !important; text-align: center; } 
+    .pf-info { display: flex; flex-direction: column; align-items: flex-start; } 
+    .pf-label { font-size: clamp(9px, 2vw, 11px); color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; } 
+    .pf-val { font-size: clamp(16px, 4vw, 20px); font-weight: 900; color: #fff; font-family: var(--money-font) !important; text-align: left; } 
     .pf-val.highlight { color: #f1c40f; } 
     .money-font { font-family: var(--money-font) !important; }
     #target-current,
