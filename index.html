@@ -6912,7 +6912,10 @@ window.showTitleUpgradeModal = function(newTitleLevel) {
 
         setTimeout(() => {
             if (typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
-                if (newTitleLevel === 2) { try { localStorage.removeItem('story_title_t2'); } catch (_) {} checkAndTriggerStory('title_t2', STORY_EVENTS.TITLE_T2); }
+                if (newTitleLevel === 2) {
+                    try { localStorage.setItem('pending_story_title_t2', '1'); } catch (_) {}
+                    try { localStorage.removeItem('story_title_t2'); } catch (_) {}
+                }
                 if (newTitleLevel === 3) { try { localStorage.removeItem('story_title_t3'); } catch (_) {} checkAndTriggerStory('title_t3', STORY_EVENTS.TITLE_T3); }
                 if (newTitleLevel === 4) { try { localStorage.removeItem('story_title_t4'); } catch (_) {} checkAndTriggerStory('title_t4', STORY_EVENTS.TITLE_T4); }
                 if (newTitleLevel === 5) { try { localStorage.removeItem('story_title_t5'); } catch (_) {} checkAndTriggerStory('title_t5', STORY_EVENTS.TITLE_T5); }
@@ -8155,9 +8158,9 @@ window.claimPerfectBonus = function() {
 function renderWarmingRack() {
     let rackContainer = document.getElementById('warming-rack-container');
     if (!rackContainer) {
-        const kmesArea = document.getElementById('kmes-card') || document.getElementById('kmes-panel') || document.querySelector('.kmes-container');
-        if (kmesArea) {
-            kmesArea.insertAdjacentHTML('afterend', `
+        const anchor = document.getElementById('kmes-card') || document.getElementById('kmes-panel') || document.querySelector('.kmes-container') || document.getElementById('play-area') || document.body;
+        if (anchor) {
+            anchor.insertAdjacentHTML('beforeend', `
                 <div id="warming-rack-container" style="display:none; position:absolute; right:248px; top:210px; width:188px; height:252px; background: rgba(0,0,0,0.10); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 10px; box-shadow: 0 10px 24px rgba(0,0,0,0.18); backdrop-filter: blur(3px); overflow:hidden; z-index:100;">
                     <div style="color: rgba(255,255,255,0.88); font-size: 12px; font-weight: 900; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">恒温出餐台</div>
                     <div id="warming-rack-slots" style="display:flex; flex-direction:column; gap:8px; height:204px;"></div>
@@ -8173,8 +8176,12 @@ function renderWarmingRack() {
     if (!slotsDOM) return;
     if (!Array.isArray(warmingRack)) warmingRack = [];
 
-    const kmesCard = document.getElementById('kmes-card');
-    if (kmesCard && kmesCard.offsetParent === null) {
+    const inv = (typeof getStoreInventory === 'function') ? (getStoreInventory() || {}) : (game && game.inventory ? game.inventory : {});
+    const hasOmni = !!(
+        (typeof inv.pot === 'number' && Number.isFinite(inv.pot) && inv.pot >= 3) ||
+        !!inv['pot_omni1'] || !!inv['pot_omni2'] || !!inv['pot_omni3']
+    );
+    if (!hasOmni) {
         rackContainer.style.display = 'none';
         return;
     }
@@ -9911,6 +9918,10 @@ function startNintendoBGM() {
 }
 
 function startMusic() {
+    if (document.getElementById('story-overlay')) return;
+    try {
+        if (typeof currentDialogueBgm !== 'undefined' && currentDialogueBgm && !currentDialogueBgm.paused) return;
+    } catch (_) {}
     // 检查当前是否处于“非游戏状态”（即 Loading 或 Start 界面）
     const loadingEl = document.getElementById('loading');
     const startScreen = document.getElementById('start-screen');
@@ -14932,6 +14943,8 @@ function initStations() {
     const kitchen = document.getElementById('kitchen-area');
     if (!kitchen) return;
     kitchen.innerHTML = '';
+
+    const maxPotLevel = Math.max(0, Math.floor(Number(getStoreInventory().pot) || 0));
     
     // 获取当前解锁数量 (1, 2, 或 3)
     const expLvl = (game.inventory && game.inventory.expansion) ? game.inventory.expansion : 0;
@@ -14969,13 +14982,10 @@ function initStations() {
                     recipe: null, 
                     progress: 0, 
                     maintenance: 0,
-                    // [新增] 默认装备当前拥有的最高级锅，但允许独立修改
-                    equipLevel: getStoreInventory().pot || 0
+                    equipLevel: maxPotLevel
                 };
             }
-            if (typeof stations[sid].equipLevel !== 'number') {
-                stations[sid].equipLevel = getStoreInventory().pot || 0;
-            }
+            stations[sid].equipLevel = maxPotLevel;
             
             // 清理旧定时器/音频
             if (stations[sid].audio) { stations[sid].audio.pause(); stations[sid].audio = null; }
@@ -15682,7 +15692,7 @@ function showKPIModal(kpi, onConfirm) {
                 <img src="assets/icons/icon_关闭.png" alt="关闭" style="width: 38px; height: 38px;">
             </button>
             <div style="font-family: Helvetica, Arial, sans-serif; font-size: 38px; font-weight: 800; letter-spacing: 3px; color: #522717; line-height: 1; margin: 16px 0 8px; transform: translateY(10px);">¥${Number.isFinite(kpi) ? kpi : 0}</div>
-            <div style="font-size: 14px; color: #522717; line-height: 1.5; margin-bottom: 19px; font-weight: 400; transform: translateY(20px);">未达成目标，本日经营将重新开始</div>
+            <div style="font-size: 16px; color: #522717; line-height: 1.5; margin-bottom: 19px; font-weight: 500; transform: translateY(26px);">未达成目标，本日经营将重新开始</div>
             <button id="daily-kpi-confirm" style="background: none; border: none; cursor: pointer; padding: 0; width: 192px; transition: transform 0.1s; transform: translateY(35px);" onmouseover="this.style.transform='translateY(35px) scale(1.05)'" onmouseout="this.style.transform='translateY(35px) scale(1.0)'">
                 <img src="assets/ui/弹窗_开始挑战.png" alt="开始挑战" style="width: 100%; display: block;">
             </button>
@@ -15999,6 +16009,7 @@ function showFrenchMenuDraftModal(onComplete) {
         }
         const cardsRowHtml = (stage === 'pre_draw') ? '' : cardsHtml;
 
+        overlay.setAttribute('data-stage', stage);
         overlay.innerHTML = `
             <style>
                 #fr-menu-draft-modal { user-select: none; position:absolute; inset:0; width:100%; height:100%; background: transparent; isolation: isolate; }
@@ -16061,7 +16072,7 @@ function showFrenchMenuDraftModal(onComplete) {
                     position: fixed;
                     left: 50%;
                     bottom: 96px;
-                    transform: translateX(-50%);
+                    transform: translateX(-50%) translateY(-50px);
                     z-index: 100000;
                     pointer-events: auto;
                     min-width: 260px;
@@ -16071,7 +16082,7 @@ function showFrenchMenuDraftModal(onComplete) {
                     position: fixed;
                     left: 50%;
                     bottom: 28px;
-                    transform: translateX(-50%);
+                    transform: translateX(-50%) translateY(-50px);
                     z-index: 100000;
                     pointer-events: auto;
                     min-width: 260px;
@@ -16117,7 +16128,7 @@ function showFrenchMenuDraftModal(onComplete) {
                     overflow: visible;
                 }
                 
-                #fr-menu-draft-modal[data-stage="matching"] .fr-cards-row { transform: translateY(-40px); }
+                #fr-menu-draft-modal[data-stage="matching"] .fr-cards-row { transform: translateY(0); }
                 #fr-menu-draft-modal .fr-card-scene {
                     perspective: 1000px;
                     width: 280px;
@@ -16240,8 +16251,10 @@ function showFrenchMenuDraftModal(onComplete) {
                 }
                 #fr-menu-draft-modal .fr-card-scene.is-locked .fr-lock {
                     transform: rotate(-12deg);
-                    background: rgba(241,196,15,0.18);
-                    border-color: rgba(241,196,15,0.8);
+                    background: transparent;
+                    border-color: transparent;
+                    box-shadow: none;
+                    font-size: 32px;
                 }
                 #fr-menu-draft-modal .fr-lock:active { transform: translateY(1px) rotate(0deg); }
                 #fr-menu-draft-modal .fr-card-scene.is-locked .fr-lock:active { transform: translateY(1px) rotate(-12deg); }
@@ -16340,7 +16353,7 @@ function showFrenchMenuDraftModal(onComplete) {
                     justify-content: center;
                     cursor: pointer;
                     color: rgba(18,18,18,0.62);
-                    font-size: 16px;
+                    font-size: 20px;
                     padding: 0;
                     transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
                 }
@@ -16349,11 +16362,19 @@ function showFrenchMenuDraftModal(onComplete) {
                     filter: brightness(1.08);
                 }
                 #fr-menu-draft-modal .fr-slot[data-filled]:not([data-filled=\"\"]) {
-                    border-style: solid;
-                    border-color: rgba(0, 0, 0, 0.28);
+                    border-style: none;
+                    border-color: transparent;
                     background: rgba(255,255,255,0.92);
                     box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.12);
                     color: rgba(18,18,18,0.92);
+                }
+                @keyframes fr-shelf-slide-in {
+                    from { transform: translateY(30px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes fr-shelf-hint-in {
+                    from { transform: translateY(10px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
                 }
                 #fr-menu-draft-modal .fr-shelf {
                     flex: 0 0 auto;
@@ -16372,12 +16393,21 @@ function showFrenchMenuDraftModal(onComplete) {
                     border-radius: 14px;
                     box-shadow: 0 12px 30px rgba(0,0,0,0.45);
                 }
+                #fr-menu-draft-modal[data-stage="matching"] .fr-shelf {
+                    animation: fr-shelf-slide-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+                }
                 #fr-menu-draft-modal .fr-shelf-hint {
                     font-size: 12px;
                     color: rgba(255, 255, 255, 0.86);
                     margin: 6px 0 10px;
                     letter-spacing: 0.2px;
                     text-align: center;
+                }
+                #fr-menu-draft-modal[data-stage="matching"] .fr-shelf-hint {
+                    opacity: 0;
+                    transform: translateY(10px);
+                    animation: fr-shelf-hint-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+                    animation-delay: 360ms;
                 }
                 #fr-menu-draft-modal .fr-shelf-grid {
                     display: inline-flex;
@@ -16498,7 +16528,6 @@ function showFrenchMenuDraftModal(onComplete) {
                 <img src="assets/ui/开始买菜.png" alt="开始买菜">
             </button>
         `;
-        overlay.setAttribute('data-stage', stage);
         updateRerollButtonState();
 
         const rerollBtn = overlay.querySelector('#btn-fr-reroll');
@@ -16712,10 +16741,11 @@ function showFrenchMenuDraftModal(onComplete) {
                 const ing = (typeof INGREDIENTS !== 'undefined' && INGREDIENTS) ? INGREDIENTS[ingId] : null;
                 target.dataset.filled = ingId;
                 target.innerHTML = ing && ing.icon ? ing.icon : '✓';
-                target.style.borderStyle = 'solid';
-                target.style.borderColor = 'rgba(212, 175, 55, 0.75)';
-                target.style.color = '#fff';
-                target.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.06), 0 0 22px rgba(212, 175, 55, 0.22)';
+                target.style.borderStyle = '';
+                target.style.borderColor = '';
+                target.style.color = '';
+                target.style.boxShadow = '';
+                target.style.background = '';
                 refreshConfirmState();
                 if (activeMatchCardIdx >= 0 && isCardComplete(activeMatchCardIdx)) setActiveCard(-1);
             });
@@ -17399,7 +17429,36 @@ function hideResultModal() {
     window.pendingDailyBonus = 0;
     const btn = document.getElementById('btn-claim-bonus');
     if (btn) btn.style.display = 'none';
+    try {
+        const dayFinished = (game && Number.isFinite(game.level)) ? Math.max(1, Math.floor(game.level)) : null;
+        if (dayFinished !== null) {
+            const hist = (typeof getActiveStoreHistory === 'function') ? getActiveStoreHistory() : [];
+            const hasEntry = Array.isArray(hist) && hist.some(h => h && Number.isFinite(Number(h.day)) && Math.floor(Number(h.day)) === dayFinished);
+            if (!hasEntry && typeof pushActiveStoreHistoryEntry === 'function') {
+                const safeDailyDishCount = Number.isFinite(game.dailyDishCount) ? game.dailyDishCount : 0;
+                const safeDailyQualitySum = Number.isFinite(game.dailyQualitySum) ? game.dailyQualitySum : 0;
+                const dailyRate = safeDailyDishCount > 0 ? (safeDailyQualitySum / safeDailyDishCount) : 0;
+                const ratePercent = (dailyRate * 100).toFixed(0);
+                pushActiveStoreHistoryEntry({ day: dayFinished, revenue: Number(game.dailyRevenue) || 0, rate: ratePercent });
+            }
+        }
+
+        if (game && game.dayEnded && Number.isFinite(game.level)) {
+            const nextDay = Math.max(1, Math.floor(game.level) + 1);
+            game.level = nextDay;
+            game.currentDay = nextDay;
+            const sid = (game && typeof game.activeStoreId === 'string' && game.activeStoreId) ? game.activeStoreId : null;
+            if (sid && game.stores && game.stores[sid] && typeof game.stores[sid] === 'object') {
+                game.stores[sid].level = nextDay;
+                if (Number.isFinite(game.stores[sid].currentDay)) game.stores[sid].currentDay = nextDay;
+            }
+            game.dayEnded = false;
+        }
+        if (typeof saveGameState === 'function') saveGameState();
+    } catch (_) {}
     switchScreen('start-screen');
+    try { if (typeof updateStartButtonDayLine === 'function') updateStartButtonDayLine(); } catch (_) {}
+    try { if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay(); } catch (_) {}
 }
 
 window.showTooltip = function(evt, text) {
@@ -18219,6 +18278,14 @@ function renderStoryModal(storyData, onComplete) {
         currentVoiceAudio.pause();
         currentVoiceAudio = null;
     }
+    let prevBgmId = null;
+    try {
+        prevBgmId = (typeof AudioController !== 'undefined' && AudioController && AudioController.currentBgm) ? AudioController.currentBgm : null;
+        window.__bgmBeforeStory = prevBgmId;
+        if (typeof AudioController !== 'undefined' && AudioController && typeof AudioController.stopCurrent === 'function') {
+            AudioController.stopCurrent();
+        }
+    } catch (_) {}
 
     // 1. [优化] 极速淡出原 BGM (50ms 一次，迅速降噪) 
     const fadeOutBgm = () => { 
@@ -18276,10 +18343,15 @@ function renderStoryModal(storyData, onComplete) {
                 currentDialogueBgm = null;
             }
 
-            // [修复] 恢复之前的 BGM (如果不为空)
-            if (typeof AudioController !== 'undefined' && AudioController.currentBgm) {
-                AudioController.play(AudioController.currentBgm);
-            }
+            try {
+                const restoreId = window.__bgmBeforeStory || null;
+                window.__bgmBeforeStory = null;
+                if (restoreId && typeof AudioController !== 'undefined' && AudioController && typeof AudioController.play === 'function') {
+                    AudioController.play(restoreId);
+                } else if (typeof startMusic === 'function') {
+                    startMusic();
+                }
+            } catch (_) {}
 
             overlay.remove(); 
             updateHomeTopLeftBoardMode();
@@ -19078,85 +19150,41 @@ function startNextLevel(btnId = 'modal-btn') {
         isLive: game.isLive,
         isPaused: game.isPaused
     };
-    // Mock API Call
-    new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (!navigator.onLine) {
-                reject(new Error("无网络连接"));
-                return;
+    setTimeout(() => {
+        try {
+            const nextDay = (Number.isFinite(game.level)) ? Math.max(1, Math.floor(game.level) + 1) : 2;
+            game.level = nextDay;
+            game.currentDay = nextDay;
+            game.isLive = false;
+            game.isPaused = false;
+            game.dayEnded = false;
+            const sid = (game && typeof game.activeStoreId === 'string' && game.activeStoreId) ? game.activeStoreId : null;
+            if (sid && game.stores && game.stores[sid] && typeof game.stores[sid] === 'object') {
+                game.stores[sid].level = nextDay;
+                if (Number.isFinite(game.stores[sid].currentDay)) game.stores[sid].currentDay = nextDay;
             }
-            // 移除随机报错，让体验更丝滑
-            const nextLevel = game.level + 1;
-            const orderGenSuccess = generateDailyOrders(nextLevel);
-            if (!orderGenSuccess) {
-                reject(new Error("订单生成失败"));
-                return;
-            }
-            resolve({ newLevel: nextLevel });
-        }, 500);
-    })
-    .then(data => {
-        console.log("Business state switched successfully:", data);
-        
-        game.level = data.newLevel;
-        game.isLive = false;
-        game.isPaused = true;
-        game.dayEnded = false;
-        
-        initDailyInventory();
-
-        // [系统新增] 食材测试模式：每日打烊/开业自动补齐 50 份
-        if (sessionStorage.getItem('ingredientAutoFill') === 'true') {
-            const currentDay = game.currentDay;
-            const activeInv = resolveIngredientInventoryRoot(game.activeStoreId || 'cn:main');
-
-            if (typeof INGREDIENTS !== 'undefined' && INGREDIENTS) {
-                Object.keys(INGREDIENTS).forEach(ingId => {
-                    let inv = activeInv[ingId] || [];
-                    inv = normalizeIngredientBatches(inv, currentDay);
-                    const totalQty = inv.reduce((sum, batch) => sum + batch.qty, 0);
-
-                    if (totalQty < 50) {
-                        inv.push({ qty: 50 - totalQty, expiryDay: currentDay + 3 });
-                    }
-                    activeInv[ingId] = inv;
-                });
-            }
+            if (typeof saveGameState === 'function') saveGameState();
+            const overlay = document.getElementById('overlay');
+            if (overlay) overlay.style.display = 'none';
+            const ach = document.getElementById('achievement-modal');
+            if (ach) ach.style.display = 'none';
+            if (typeof switchScreen === 'function') switchScreen('start-screen');
+            try { if (typeof updateStartButtonDayLine === 'function') updateStartButtonDayLine(); } catch (_) {}
+            try { if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay(); } catch (_) {}
+        } catch (error) {
+            console.error('Business state switch error:', error);
+            game.level = previousState.level;
+            game.isLive = previousState.isLive;
+            game.isPaused = previousState.isPaused;
+            triggerFeedback(window.innerWidth/2, 100, `开启失败: ${error && error.message ? error.message : '未知错误'}`, "#ff4757");
+            btn.innerText = "重试开启";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
         }
-        
-        // [核心修复] 立即保存新关卡进度！防止刷新后回退到旧天数
-        saveGameState();
-        
-        initLevel(false);
-        
-        document.getElementById('pause-overlay').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('achievement-modal').style.display = 'none';
-        
-        btn.disabled = false;
-        btn.innerText = originalText;
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
-        updateGameBackground('IDLE');
-        if(typeof stations === 'object') {
-            Object.keys(stations).forEach(sid => {
-                if(typeof renderStation === 'function') renderStation(sid);
-            });
-        }
-        
-        prepareDailyKPI(() => showPrepModal());
-    })
-    .catch(error => {
-        console.error('Business state switch error:', error);
-        game.level = previousState.level;
-        game.isLive = previousState.isLive;
-        game.isPaused = previousState.isPaused;
-        triggerFeedback(window.innerWidth/2, 100, `开启失败: ${error.message}`, "#ff4757");
-        btn.disabled = false;
-        btn.innerText = "重试开启";
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
-    });
+    }, 200);
 }
 
 function runPrepLogicTests() {
@@ -21803,6 +21831,21 @@ function startGame() {
     // if (gameUI) gameUI.style.display = 'block';
     
     if (sessionStorage.getItem('inTestMode')) {
+        initGame();
+        return;
+    }
+
+    const pendingTitleT2Story = (() => {
+        try { return localStorage.getItem('pending_story_title_t2') === '1'; } catch (_) {}
+        return false;
+    })();
+    const day = (game && Number.isFinite(game.level)) ? Math.max(1, Math.floor(game.level)) : 1;
+    if (pendingTitleT2Story && day === 3 && typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
+        try { localStorage.removeItem('pending_story_title_t2'); } catch (_) {}
+        const triggered = checkAndTriggerStory('title_t2', STORY_EVENTS.TITLE_T2, () => {
+            initGame();
+        });
+        if (triggered) return;
         initGame();
         return;
     }
