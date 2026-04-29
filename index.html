@@ -1857,7 +1857,8 @@
     #start-screen.title-modal-open .home-top-right,
     #start-screen.title-modal-open .home-main-actions,
     #start-screen.title-modal-open .home-title,
-    #start-screen.title-modal-open #lobby-todo-note {
+    #start-screen.title-modal-open #lobby-todo-note,
+    #start-screen.title-modal-open #lobby-rewards-backdrop {
         display: none !important;
     }
 
@@ -6418,6 +6419,7 @@
                 <span id="btn-start-dayline" class="btn-start-dayline" aria-label="DAY ?" style="font-weight:700; opacity:0.82; color:#522717;">DAY --</span>
             </button>
         </div>
+        <div id="lobby-rewards-backdrop" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; backdrop-filter: blur(4px);"></div>
         <div id="lobby-todo-note" style="position: absolute; top: 96px; left: 30px; width: 300px; background: #f7f0dd; border: 1px solid rgba(0, 0, 0, 0.22); border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,0.45); padding: 14px 14px 12px 14px; font-family: 'Courier New', monospace; color: rgba(18, 18, 18, 0.92); z-index: 10; background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 100% 4px, 18px 18px; background-position: 0 0, 3px 7px;">
             <div style="font-weight: 900; font-size: 14px; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 1px dashed rgba(0, 0, 0, 0.22); padding-bottom: 8px; text-align: center; color:#2c3e50; text-shadow:none;">当前待办</div>
             <div id="todo-target" style="font-size: 13px; font-weight: 900; margin-bottom: 6px; color:#c0392b; text-shadow:none;">目标：晋升 T2 星级店长</div>
@@ -7647,6 +7649,35 @@ function loadUnlockedRecipeIdsFromStorage() {
         }
     });
 
+    const FR_TIER_BY_ID = {
+        fr_normandy_apple: '基础入门',
+        fr_green_beans: '基础入门',
+        fr_butter_spinach: '基础入门',
+        fr_lyonnaise_potato: '基础入门',
+        fr_mixed_mushrooms: '基础入门',
+        fr_asparagus_avocado: '进阶硬菜',
+        fr_bacon_cabbage: '进阶硬菜',
+        fr_veal_liver: '进阶硬菜',
+        fr_beef_tenderloin: '进阶硬菜',
+        fr_provencal_artichoke: '进阶硬菜',
+        fr_sausage_lentils: '大师名菜',
+        fr_squid_provencal: '大师名菜',
+        fr_scallop_avocado: '大师名菜',
+        fr_garlic_escargot: '大师名菜',
+        fr_truffle_egg: '大师名菜',
+        fr_coq_au_vin: '传奇料理',
+        fr_beef_stroganoff: '传奇料理',
+        fr_lamb_provencal: '传奇料理',
+        fr_red_mullet: '传奇料理',
+        fr_foie_gras: '传奇料理'
+    };
+    RECIPES.forEach(r => {
+        if (!r || typeof r !== 'object') return;
+        if (normalizeCookbookRegionId(r.region) !== 'france') return;
+        const fixed = FR_TIER_BY_ID[String(r.id || '')];
+        if (fixed) r.tierName = fixed;
+    });
+
     const starterFreeIds = new Set(['tomato_egg', 'onion_egg', 'jp_01', 'jp_02']);
     const storyAutoArchiveIds = new Set(['gaosheng_ribs']);
     const freePickByRegionDay = new Map();
@@ -7900,7 +7931,7 @@ window.getRecipeTier = function(recipeId) {
 
     const region = normalizeCookbookRegionId(recipe.region || '');
     if (region === 'france' && recipe.tierName) {
-        const tn = String(recipe.tierName);
+        const tn = String(recipe.tierName).replace(/[\s\u00A0\u3000]+/g, '').trim();
         if (tn === '基础入门') return 1;
         if (tn === '进阶硬菜') return 2;
         if (tn === '大师名菜') return 3;
@@ -8891,7 +8922,7 @@ window.openCookbook = function(regionId) {
     let lastTierName = null;
     grid.innerHTML = sortedRecipes.map(r => {
         const currentTierName = getTierName(r);
-        if (r && r.tierName !== currentTierName) r.tierName = currentTierName;
+        if (r && !r.tierName) r.tierName = currentTierName;
         const tierHeader = (currentTierName && currentTierName !== lastTierName)
             ? (() => {
                 lastTierName = currentTierName;
@@ -11453,7 +11484,7 @@ function renderLobbyDailyChecklist() {
         border-radius: 10px;
         padding: 18px 18px 30px 18px; box-shadow: 0 12px 30px rgba(0,0,0,0.45);
         font-family: "Courier New", monospace; color: rgba(18, 18, 18, 0.92);
-        z-index: 10;
+        z-index: 10000;
         background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
         background-size: 100% 4px, 18px 18px;
         background-position: 0 0, 3px 7px;
@@ -11532,16 +11563,29 @@ function renderLobbyDailyChecklist() {
 
 window.openLobbyRewardsNote = function() {
     try { localStorage.setItem('lobbyRewardsNoteHiddenV1', '0'); } catch (_) {}
+    const backdrop = document.getElementById('lobby-rewards-backdrop');
     const note = document.getElementById('lobby-todo-note');
-    if (note) note.style.display = 'block';
+    if (backdrop) {
+        backdrop.style.display = 'block';
+        backdrop.onclick = (e) => {
+            if (e) e.stopPropagation();
+            if (typeof window.closeLobbyRewardsNote === 'function') window.closeLobbyRewardsNote();
+        };
+    }
+    if (note) {
+        note.style.zIndex = '10000';
+        note.style.display = 'block';
+    }
     if (typeof renderLobbyDailyChecklist === 'function') renderLobbyDailyChecklist();
     try { if (typeof window.updateLobbyRewardsAttention === 'function') window.updateLobbyRewardsAttention(); } catch (_) {}
 };
 
 window.closeLobbyRewardsNote = function() {
     try { localStorage.setItem('lobbyRewardsNoteHiddenV1', '1'); } catch (_) {}
+    const backdrop = document.getElementById('lobby-rewards-backdrop');
     const note = document.getElementById('lobby-todo-note');
     if (note) note.style.display = 'none';
+    if (backdrop) backdrop.style.display = 'none';
     try { if (typeof window.updateLobbyRewardsAttention === 'function') window.updateLobbyRewardsAttention(); } catch (_) {}
 };
 
@@ -15747,6 +15791,28 @@ function showFrenchMenuDraftModal(onComplete) {
     let lockedCards = Array.isArray(menu) ? Array(menu.length).fill(false) : [];
     let isRerolling = false;
     let activeMatchCardIdx = -1;
+    const FR_TIER_CLASS_BY_ID = {
+        fr_normandy_apple: 'tier-basic',
+        fr_green_beans: 'tier-basic',
+        fr_butter_spinach: 'tier-basic',
+        fr_lyonnaise_potato: 'tier-basic',
+        fr_mixed_mushrooms: 'tier-basic',
+        fr_asparagus_avocado: 'tier-advanced',
+        fr_bacon_cabbage: 'tier-advanced',
+        fr_veal_liver: 'tier-advanced',
+        fr_beef_tenderloin: 'tier-advanced',
+        fr_provencal_artichoke: 'tier-advanced',
+        fr_sausage_lentils: 'tier-master',
+        fr_squid_provencal: 'tier-master',
+        fr_scallop_avocado: 'tier-master',
+        fr_garlic_escargot: 'tier-master',
+        fr_truffle_egg: 'tier-master',
+        fr_coq_au_vin: 'tier-legend',
+        fr_beef_stroganoff: 'tier-legend',
+        fr_lamb_provencal: 'tier-legend',
+        fr_red_mullet: 'tier-legend',
+        fr_foie_gras: 'tier-legend'
+    };
 
     const getUnlockedFranceRecipePool = () => {
         const all = Array.isArray(RECIPES) ? RECIPES.filter(Boolean) : [];
@@ -15873,13 +15939,25 @@ function showFrenchMenuDraftModal(onComplete) {
         const cardsHtml = menu.map((r, idx) => {
             const locked = !!lockedCards[idx];
             const flipped = (stage === 'matching') ? 'flipped' : '';
-            const tierRaw = (r && (r.tierName ?? r.tier ?? r.category)) ?? '';
-            const tierName = String(tierRaw).trim();
-            const tierNum = Number.isFinite(Number(tierRaw)) ? Number(tierRaw) : null;
-            let tierClass = 'tier-basic';
-            if (tierName === '进阶硬菜' || tierNum === 2 || tierName.toLowerCase() === 'advanced') tierClass = 'tier-advanced';
-            else if (tierName === '大师名菜' || tierNum === 3 || tierName.toLowerCase() === 'master') tierClass = 'tier-master';
-            else if (tierName === '传奇料理' || tierNum === 4 || tierName.toLowerCase() === 'legend') tierClass = 'tier-legend';
+            const rid = (r && (r.id || r.recipeId)) ? String(r.id || r.recipeId) : '';
+            const baseRecipe = rid ? (RECIPES || []).find(x => x && String(x.id) === rid) : null;
+            const normalizeTierName = (v) => String(v || '').replace(/[\s\u00A0\u3000]+/g, '').trim();
+            const tierNameFromR = normalizeTierName(r && r.tierName);
+            const tierNameFromBase = normalizeTierName(baseRecipe && baseRecipe.tierName);
+            const tierNameFromOther = normalizeTierName((r && (r.category ?? r.tier)) ?? (baseRecipe && (baseRecipe.category ?? baseRecipe.tier)) ?? '');
+            const tierName = (tierNameFromBase === '基础入门' || tierNameFromBase === '进阶硬菜' || tierNameFromBase === '大师名菜' || tierNameFromBase === '传奇料理')
+                ? tierNameFromBase
+                : ((tierNameFromR === '基础入门' || tierNameFromR === '进阶硬菜' || tierNameFromR === '大师名菜' || tierNameFromR === '传奇料理')
+                    ? tierNameFromR
+                    : tierNameFromOther);
+            const tierNum = Number.isFinite(Number(tierNameFromOther)) ? Number(tierNameFromOther) : (typeof window.getRecipeTier === 'function' ? window.getRecipeTier(baseRecipe || r) : null);
+            const fixedTierClass = FR_TIER_CLASS_BY_ID[rid];
+            let tierClass = fixedTierClass || 'tier-basic';
+            if (!fixedTierClass) {
+                if (tierName === '进阶硬菜' || tierNum === 2 || tierName.toLowerCase() === 'advanced') tierClass = 'tier-advanced';
+                else if (tierName === '大师名菜' || tierNum === 3 || tierName.toLowerCase() === 'master') tierClass = 'tier-master';
+                else if (tierName === '传奇料理' || tierNum === 4 || tierName.toLowerCase() === 'legend') tierClass = 'tier-legend';
+            }
             const active = (stage === 'matching' && idx === activeMatchCardIdx) ? 'is-active' : '';
             return `
                 <div class="fr-card-scene ${tierClass} ${active} ${locked ? 'is-locked' : ''} ${flipped}" id="fr-card-${idx}" data-card-idx="${idx}">
@@ -16460,12 +16538,11 @@ function showFrenchMenuDraftModal(onComplete) {
                     setTimeout(() => {
                         indices.forEach(i => {
                             menu[i] = pickRerolledRecipe(pool, menu[i]);
-                            const scene = overlay.querySelector(`#fr-card-${i}`);
-                            if (!scene) return;
-                            scene.classList.remove('is-locked');
-                            const front = scene.querySelector('.fr-card-front');
-                            if (front) front.innerHTML = buildCardInnerHtml(menu[i], i);
-                            bindLockButtonInCard(scene, i);
+                        });
+                        render();
+                        overlay.querySelectorAll('.fr-card-scene').forEach(scene => {
+                            const idx = Math.floor(Number(scene.getAttribute('data-card-idx')) || 0);
+                            if (Number.isFinite(idx) && lockedCards[idx]) scene.classList.add('flipped');
                         });
                         indices.forEach((i, k) => {
                             const scene = overlay.querySelector(`#fr-card-${i}`);
