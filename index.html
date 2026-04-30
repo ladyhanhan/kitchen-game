@@ -697,10 +697,13 @@
     cursor: pointer;
     animation: pulse 1.5s infinite;
     touch-action: manipulation;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 #btn-claim-bonus:hover {
     opacity: 0.85;
-    text-decoration: underline;
+    text-decoration: none;
 }
 #btn-claim-bonus:focus-visible {
     outline: 3px solid rgba(241, 196, 15, 0.85);
@@ -715,11 +718,12 @@
     animation: none;
 }
 #btn-claim-bonus .bonus-claim-content {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
     height: 100%;
+    width: 100%;
 }
 #btn-claim-bonus .bonus-claim-icon {
     height: 100%;
@@ -727,11 +731,21 @@
     display: block;
     object-fit: contain;
     position: relative;
+    top: -2px;
     z-index: 2;
 }
 #btn-claim-bonus .bonus-claim-text {
     position: relative;
     z-index: 2;
+    white-space: nowrap;
+}
+#btn-claim-bonus .bonus-claim-amount {
+    font-size: 34px;
+    line-height: 1;
+}
+#btn-claim-bonus .bonus-claim-plus {
+    position: relative;
+    top: -2px;
 }
 
         .order-list { width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: 0; }
@@ -6529,7 +6543,7 @@
             <button id="btn-claim-bonus" onclick="claimPerfectBonus()" style="display:none;">
                 <span class="bonus-claim-content">
                     <img class="bonus-claim-icon" src="assets/icons/钱箱关闭.png" alt="钱箱">
-                    <span class="bonus-claim-text">+¥0</span>
+                    <span class="bonus-claim-text"><span class="bonus-claim-plus">+</span> <span class="bonus-claim-amount">¥0</span></span>
                 </span>
             </button>
             <div class="modal-actions">
@@ -8064,7 +8078,7 @@ window.claimPerfectBonus = function() {
     if (btn) {
         btn.innerHTML = `<span class="bonus-claim-content">
             <img class="bonus-claim-icon" src="assets/icons/钱箱打开.png" alt="钱箱">
-            <span class="bonus-claim-text">奖金¥${gained}已入账</span>
+            <span class="bonus-claim-text">奖金 <span class="bonus-claim-amount">¥${gained}</span> 已入账</span>
         </span>`;
         btn.style.animation = "none";
         btn.disabled = true;
@@ -12882,6 +12896,7 @@ function spawnOrder(slotIdx, requeuedOrder = null) {
  
  // 高亮匹配检查 
  updateCursor(); 
+ try { window.kmesKick && window.kmesKick('order_spawn'); } catch (_) {}
  }
 
 function takeOrder(order) {
@@ -13054,6 +13069,7 @@ function takeOrder(order) {
     }
     if (typeof refreshCurrentHighlight === 'function' && window.currentGuidedRecipe) refreshCurrentHighlight();
     updateHUD();
+    try { window.kmesKick && window.kmesKick('order_served'); } catch (_) {}
 }
 
 // Removed legacy functions: startStage, handleStation, trashOrder, confirmPrep, finishDishOrOrder, finishOrderFinal
@@ -14661,6 +14677,7 @@ window.togglePantry = function() {
         if (!game.hasOpenedPantry) {
              game.hasOpenedPantry = true;
              console.log("KMES Triggered by Pantry Open");
+             try { if (game.kmesActive) window.kmesKick && window.kmesKick('pantry_open'); } catch (_) {}
         }
 
         // 播放打开音效
@@ -17396,17 +17413,17 @@ function showResult(msg) {
 
             // [修复] 补回“返回首页”按钮
             const btnHome = document.createElement('button');
-            btnHome.innerHTML = `<span style="font-size:18px; line-height:1; display:inline-flex; align-items:center;">🏠</span><span>返回首页</span>`;
+            btnHome.innerHTML = `<span style="font-size:18px; line-height:1; display:inline-flex; align-items:center;">🏠</span><span>返回大厅</span>`;
             btnHome.onclick = () => hideResultModal();
-            btnHome.style.cssText = "flex:1; background:linear-gradient(135deg, #2ecc71, #27ae60); border:none; color:#fff; padding:12px; border-radius:12px; cursor:pointer; font-weight:800; font-size:15px; box-shadow:0 4px 15px rgba(46, 204, 113, 0.4); display:flex; align-items:center; justify-content:center; gap:8px; text-shadow:0 1px 1px rgba(0,0,0,0.2);";
+            btnHome.style.cssText = "flex:1; background:linear-gradient(135deg, #2ecc71, #27ae60); border:none; color:#fff; padding:12px; border-radius:12px; cursor:pointer; font-weight:800; font-size:15px; box-shadow:none; display:flex; align-items:center; justify-content:center; gap:8px; text-shadow:0 1px 1px rgba(0,0,0,0.2);";
             
             // [修复] “继续营业”按钮
             const btnContinue = document.createElement('button');
             btnContinue.id = "btn-continue-next"; // [关键] 赋予ID，供startNextLevel查找
-            btnContinue.innerHTML = `<img src="assets/icons/icon_日历.png" alt="日历" style="width:22px;height:22px;display:inline-block;"> 开始第 ${(game.level + 1)} 天`;
+            btnContinue.innerHTML = `<img src="assets/icons/icon_日历.png" alt="日历" style="width:22px;height:22px;display:inline-block;"> DAY ${game.level + 1}`;
             // [关键] 传入正确的ID 'btn-continue-next'
-            btnContinue.onclick = () => startNextLevel('btn-continue-next');
-            btnContinue.style.cssText = "flex:2; background:linear-gradient(135deg, #2ecc71, #27ae60); border:none; color:#fff; padding:12px; border-radius:12px; cursor:pointer; font-weight:800; font-size:15px; box-shadow:0 4px 15px rgba(46, 204, 113, 0.4); display:flex; align-items:center; justify-content:center; gap:8px; text-shadow:0 1px 1px rgba(0,0,0,0.2);";
+            btnContinue.onclick = () => startNextLevel('btn-continue-next', true);
+            btnContinue.style.cssText = "flex:1; background:linear-gradient(135deg, #2ecc71, #27ae60); border:none; color:#fff; padding:12px; border-radius:12px; cursor:pointer; font-weight:800; font-size:15px; box-shadow:none; display:flex; align-items:center; justify-content:center; gap:8px; text-shadow:0 1px 1px rgba(0,0,0,0.2);";
 
             actionRow.appendChild(btnHome);
             actionRow.appendChild(btnContinue);
@@ -18563,6 +18580,28 @@ function renderLocationStep2(regionId) {
 
     // [核心修改] 使用新的 store 上下文判断
     const myCurrentLocationId = game.activeStoreId || 'cn:main';
+    const stores = (game && game.stores && typeof game.stores === 'object') ? game.stores : {};
+    const storeIds = Object.keys(stores);
+    const ultimateDays = (game && typeof game.ultimateGearDaysPlayed === 'number' && Number.isFinite(game.ultimateGearDaysPlayed)) ? game.ultimateGearDaysPlayed : 0;
+    const checkAutomation = (store) => {
+        if (!store || !store.inventory) return false;
+        const inv = store.inventory;
+        const hasOmni = !!(
+            (typeof inv.pot === 'number' && Number.isFinite(inv.pot) && inv.pot >= 3) ||
+            !!inv['pot_omni3']
+        );
+        const hasKmesMax = !!(
+            (typeof inv.kmes === 'number' && Number.isFinite(inv.kmes) && inv.kmes >= 3) ||
+            !!inv['kmes_3'] ||
+            !!inv['kmes_system']
+        );
+        return !!(hasOmni && hasKmesMax);
+    };
+    const cnStoreId = (stores['cn:main'] || stores['china'])
+        ? (stores['cn:main'] ? 'cn:main' : 'china')
+        : (storeIds.find(id => id.startsWith('cn:')) || null);
+    const cnStore = cnStoreId ? stores[cnStoreId] : null;
+    const meetsT3Conditions = !!(cnStore && checkAutomation(cnStore) && ultimateDays > 0);
 
     // Update Header
     document.getElementById('dp-flag').textContent = region.flag;
@@ -18591,6 +18630,9 @@ function renderLocationStep2(regionId) {
         
         const isAffordable = game.coins >= district.unlockCost;
         const isUnlocked = district.unlocked && region.unlocked;
+        const lacksFunds = !isAffordable;
+        const lacksLevel = !meetsT3Conditions;
+        const lacksBoth = !!(lacksFunds && lacksLevel);
         
         // [核心修改] 状态标签逻辑
         let tagHtml = '';
@@ -18601,8 +18643,12 @@ function renderLocationStep2(regionId) {
             tagHtml = '<span class="di-tag" style="background:#2ecc71; color:white;">✅ 营业中</span>';
         } else if (isOwned) {
              tagHtml = '<span class="di-tag" style="background:#3498db; color:white;">🏠 已拥有</span>';
-        } else if (!isAffordable) {
+        } else if (lacksBoth) {
+            tagHtml = '<span class="di-tag tag-expensive">条件不足</span>';
+        } else if (lacksFunds) {
             tagHtml = '<span class="di-tag tag-expensive">资金不足</span>';
+        } else if (lacksLevel) {
+            tagHtml = '<span class="di-tag tag-expensive">等级不足</span>';
         } else {
             tagHtml = '<span class="di-tag tag-open">可进驻</span>';
         }
@@ -18642,10 +18688,21 @@ function renderLocationStep2(regionId) {
                     confirmBtn.disabled = false;
                     confirmBtn.style.background = "#3498db"; // 蓝色
                     confirmBtn.style.cursor = "pointer";
-                } else if (!isAffordable) {
+                } else if (lacksBoth) {
+                    confirmBtn.innerText = "条件不符合";
+                    confirmBtn.disabled = true;
+                    confirmBtn.style.background = "#bdc3c7";
+                    confirmBtn.style.cursor = "default";
+                } else if (lacksFunds) {
                     confirmBtn.innerText = "资金不足";
                     confirmBtn.disabled = true;
                     confirmBtn.style.background = "#bdc3c7";
+                    confirmBtn.style.cursor = "default";
+                } else if (lacksLevel) {
+                    confirmBtn.innerText = "头衔等级不足";
+                    confirmBtn.disabled = true;
+                    confirmBtn.style.background = "#bdc3c7";
+                    confirmBtn.style.cursor = "default";
                 } else {
                     confirmBtn.innerText = `确认进驻 (¥${district.unlockCost})`;
                     confirmBtn.disabled = false;
@@ -18661,7 +18718,7 @@ function renderLocationStep2(regionId) {
             } else if (isOwned) {
                 item.style.border = "1px solid #3498db";
                 item.style.background = "rgba(52, 152, 219, 0.1)";
-            } else if (!isAffordable) {
+            } else if (lacksFunds || lacksLevel) {
                 item.style.opacity = '0.7';
             }
         } else {
@@ -18716,6 +18773,26 @@ function confirmNewJourney() {
     }
 
     // [路径B] 新店铺：需要购买/解锁
+    const activeStoreId = (game && typeof game.activeStoreId === 'string' && game.activeStoreId) ? game.activeStoreId : 'cn:main';
+    const cnStoreId = (game && game.stores && (game.stores['cn:main'] || game.stores['china'])) ? (game.stores['cn:main'] ? 'cn:main' : 'china') : null;
+    const cnStore = (cnStoreId && game && game.stores) ? game.stores[cnStoreId] : null;
+    const inv = cnStore && cnStore.inventory ? cnStore.inventory : null;
+    const hasOmni = !!(
+        inv &&
+        ((typeof inv.pot === 'number' && Number.isFinite(inv.pot) && inv.pot >= 3) || !!inv['pot_omni3'])
+    );
+    const hasKmesMax = !!(
+        inv &&
+        ((typeof inv.kmes === 'number' && Number.isFinite(inv.kmes) && inv.kmes >= 3) || !!inv['kmes_3'] || !!inv['kmes_system'])
+    );
+    const ultimateDays = (game && typeof game.ultimateGearDaysPlayed === 'number' && Number.isFinite(game.ultimateGearDaysPlayed)) ? game.ultimateGearDaysPlayed : 0;
+    const canOpenBranch = !!(hasOmni && hasKmesMax && ultimateDays > 0);
+    if (!canOpenBranch) {
+        showToast("头衔等级未达到进驻条件", 2500);
+        try { if (typeof playErrorSfx === 'function') playErrorSfx(); } catch (_) {}
+        return;
+    }
+
     if (game.coins < district.unlockCost) { showToast('资金不足', 1500); return; }
 
     const newBranchName = region.country + ' · ' + district.name;
@@ -18893,7 +18970,7 @@ function settleDay(reason = "营业结束") {
         bonusBtn.style.animation = 'pulse 1.5s infinite';
         bonusBtn.innerHTML = `<span class="bonus-claim-content">
             <img class="bonus-claim-icon" src="assets/icons/钱箱关闭.png" alt="钱箱">
-            <span class="bonus-claim-text">+¥0</span>
+            <span class="bonus-claim-text"><span class="bonus-claim-plus">+</span> <span class="bonus-claim-amount">¥0</span></span>
         </span>`;
     }
 
@@ -18908,7 +18985,7 @@ function settleDay(reason = "营业结束") {
             bonusBtn.style.display = 'block';
             bonusBtn.innerHTML = `<span class="bonus-claim-content">
                 <img class="bonus-claim-icon" src="assets/icons/钱箱关闭.png" alt="钱箱">
-                <span class="bonus-claim-text">+¥${dynamicBonus}</span>
+                <span class="bonus-claim-text"><span class="bonus-claim-plus">+</span> <span class="bonus-claim-amount">¥${dynamicBonus}</span></span>
             </span>`;
         }
     }
@@ -19148,16 +19225,16 @@ function initLevel(regenerateOrders = true) {
     console.log(`Level ${game.level} Initialized`);
 }
 
-function startNextLevel(btnId = 'modal-btn') {
+function startNextLevel(btnId = 'modal-btn', showKpiModal = false) {
     const btn = document.getElementById(btnId);
     if (!btn) return;
     window.pendingDailyBonus = 0;
     const bonusBtn = document.getElementById('btn-claim-bonus');
     if (bonusBtn) bonusBtn.style.display = 'none';
     // UI Feedback
-    const originalText = btn.innerText;
+    const originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerText = "正在开启...";
+    btn.textContent = "正在开启...";
     btn.style.opacity = "0.7";
     btn.style.cursor = "wait";
     const previousState = {
@@ -19186,16 +19263,19 @@ function startNextLevel(btnId = 'modal-btn') {
             if (typeof switchScreen === 'function') switchScreen('start-screen');
             try { if (typeof updateStartButtonDayLine === 'function') updateStartButtonDayLine(); } catch (_) {}
             try { if (typeof updateBalanceDisplay === 'function') updateBalanceDisplay(); } catch (_) {}
+            if (showKpiModal && typeof prepareDailyKPI === 'function') {
+                try { prepareDailyKPI(() => showPrepModal()); } catch (_) {}
+            }
         } catch (error) {
             console.error('Business state switch error:', error);
             game.level = previousState.level;
             game.isLive = previousState.isLive;
             game.isPaused = previousState.isPaused;
             triggerFeedback(window.innerWidth/2, 100, `开启失败: ${error && error.message ? error.message : '未知错误'}`, "#ff4757");
-            btn.innerText = "重试开启";
+            btn.textContent = "重试开启";
         } finally {
             btn.disabled = false;
-            btn.innerText = originalText;
+            btn.innerHTML = originalHtml;
             btn.style.opacity = "1";
             btn.style.cursor = "pointer";
         }
@@ -21094,6 +21174,8 @@ window.startLevel = initGame;
 // ==========================================
 
 let kmesTimer = null;
+let kmesIntervalMs = null;
+let kmesKickTimer = null;
 
 // [新增] KMES 开关控制
 function toggleKMES() {
@@ -21117,6 +21199,7 @@ function toggleKMES() {
     if (game.kmesActive) {
         playSfx(600, 'sine', 0.1);
         showToast("KMES 系统已启动", 1000);
+        try { if (game.hasOpenedPantry) window.kmesKick && window.kmesKick('toggle_on'); } catch (_) {}
     } else {
         playSfx(300, 'square', 0.1);
         showToast("KMES 系统已暂停", 1000);
@@ -21156,11 +21239,19 @@ function updateKMESCard() {
 
 function startKMES() {
     if (kmesTimer) clearInterval(kmesTimer);
-    // 每 1.5 秒执行一次自动化逻辑
-    kmesTimer = setInterval(runKMES, 1500);
+    const getDesiredIntervalMs = () => {
+        const lv = getStoreInventory().kmes || 0;
+        if (lv >= 3) return 400;
+        if (lv >= 2) return 450;
+        if (lv >= 1) return 900;
+        return 1500;
+    };
+    kmesIntervalMs = getDesiredIntervalMs();
+    kmesTimer = setInterval(runKMES, kmesIntervalMs);
     console.log("KMES System Started");
 
     updateKMESCard();
+    try { window.kmesKick && window.kmesKick('start'); } catch (_) {}
 }
 
 function stopKMES() {
@@ -21168,8 +21259,21 @@ function stopKMES() {
         clearInterval(kmesTimer);
         kmesTimer = null;
     }
+    if (kmesKickTimer) {
+        clearTimeout(kmesKickTimer);
+        kmesKickTimer = null;
+    }
+    kmesIntervalMs = null;
     console.log("KMES System Stopped");
 }
+
+window.kmesKick = function() {
+    if (kmesKickTimer) return;
+    kmesKickTimer = setTimeout(() => {
+        kmesKickTimer = null;
+        try { runKMES(); } catch (_) {}
+    }, 60);
+};
 
 function runKMES() {
     if (!game.isLive || game.isPaused) return;
@@ -21187,6 +21291,13 @@ function runKMES() {
     
     if (kmesLevel < 1) return;
 
+    const desired = (kmesLevel >= 3) ? 400 : (kmesLevel >= 2) ? 450 : 900;
+    if (kmesTimer && kmesIntervalMs !== desired) {
+        try { clearInterval(kmesTimer); } catch (_) {}
+        kmesIntervalMs = desired;
+        kmesTimer = setInterval(runKMES, kmesIntervalMs);
+    }
+
     // 按顺序执行自动化逻辑
     if (kmesLevel >= 1) kmesAutoPrep();
     if (kmesLevel >= 2) kmesAutoCook();
@@ -21194,40 +21305,61 @@ function runKMES() {
 }
 
 // Level 1: 自动配菜
+function getKMESRecipePool() {
+    const region = (typeof getCurrentRegionId === 'function') ? String(getCurrentRegionId() || '') : '';
+    const unlockedSig = Array.isArray(unlockedRecipeIds) ? unlockedRecipeIds.map(String).join(',') : '';
+    const recipesLen = (typeof RECIPES !== 'undefined' && Array.isArray(RECIPES)) ? RECIPES.length : 0;
+    const token = `${region}|${unlockedSig}|${recipesLen}`;
+    const cache = window.__kmesRecipePoolCache;
+    if (cache && cache.token === token && cache.pool) return cache.pool;
+
+    const a = (typeof getActiveRecipes === 'function') ? (getActiveRecipes() || []) : [];
+    const b = (typeof RECIPES !== 'undefined' && Array.isArray(RECIPES)) ? RECIPES : [];
+    const merged = a.concat(b).filter(Boolean);
+    const byId = new Map();
+    const byName = new Map();
+    const normalizeLoose = (raw) => {
+        let s = String(raw ?? '').normalize('NFKC').trim();
+        if (!s) return '';
+        s = s.replace(/[\u00A0\u3000]/g, ' ');
+        s = s.replace(/[\u200B-\u200D\uFE0F]/g, '');
+        s = s.replace(/\s+/g, ' ').trim();
+        s = s.replace(/(\s*[\(\（\[\【].*?[\)\）\]\】]\s*)$/g, '').trim();
+        s = s.replace(/\s*[x×*]\s*\d+\s*$/i, '').trim();
+        s = s.replace(/\s*\d+\s*份\s*$/i, '').trim();
+        s = s.replace(/[·•・\-—–~～:：]/g, '');
+        return s.replace(/[\s\u00A0\u3000]+/g, '').trim();
+    };
+    for (const r of merged) {
+        const id = normalizeLoose(r && (r.id || r.recipeId));
+        if (id && !byId.has(id)) byId.set(id, r);
+        const name = normalizeLoose(r && (r.name || r.n));
+        if (name && !byName.has(name)) byName.set(name, r);
+    }
+    const pool = { list: merged, byId, byName, normalizeLoose };
+    window.__kmesRecipePoolCache = { token, pool };
+    return pool;
+}
+
 function kmesAutoPrep() {
-    // 1. 统计当前需求
-    // [新增] 优先级排序：按剩余耐心值从低到高排序
+    let targetSid = null;
+    for (const sid in stations) {
+        if (stations[sid] && stations[sid].stage === 'IDLE') {
+            targetSid = sid;
+            break;
+        }
+    }
+    if (!targetSid) return;
+
     const sourceOrders = Array.isArray(game && game.orderSlots)
         ? game.orderSlots.filter(Boolean)
         : (Array.isArray(game && game.activeOrders) ? game.activeOrders : []);
     const sortedOrders = [...sourceOrders].sort((a, b) => {
         return (a.patience || 0) - (b.patience || 0);
     });
+    if (sortedOrders.length === 0) return;
 
-    const recipePool = (() => {
-        const a = (typeof getActiveRecipes === 'function') ? (getActiveRecipes() || []) : [];
-        const b = (typeof RECIPES !== 'undefined' && Array.isArray(RECIPES)) ? RECIPES : [];
-        const merged = a.concat(b).filter(Boolean);
-        const byId = new Map();
-        const byName = new Map();
-        const normalizeLoose = (raw) => {
-            let s = String(raw ?? '').normalize('NFKC').trim();
-            if (!s) return '';
-            s = s.replace(/[\u00A0\u3000]/g, ' ');
-            s = s.replace(/\s+/g, ' ').trim();
-            s = s.replace(/(\s*[\(\（\[\【].*?[\)\）\]\】]\s*)$/g, '').trim();
-            s = s.replace(/\s*[x×*]\s*\d+\s*$/i, '').trim();
-            s = s.replace(/\s*\d+\s*份\s*$/i, '').trim();
-            return s.replace(/[\s\u00A0\u3000]+/g, '').trim();
-        };
-        for (const r of merged) {
-            const id = normalizeLoose(r && (r.id || r.recipeId));
-            if (id && !byId.has(id)) byId.set(id, r);
-            const name = normalizeLoose(r && (r.name || r.n));
-            if (name && !byName.has(name)) byName.set(name, r);
-        }
-        return { list: merged, byId, byName, normalizeLoose };
-    })();
+    const recipePool = getKMESRecipePool();
 
     const normKey = (v) => recipePool.normalizeLoose(v);
     const resolveRecipeForDish = (dishLike) => {
@@ -21237,19 +21369,40 @@ function kmesAutoPrep() {
 
         const rawName = (typeof dishLike === 'string')
             ? dishLike
-            : (dishLike && (dishLike.name || dishLike.n || dishLike.title));
+            : (dishLike && (
+                dishLike.name ||
+                dishLike.n ||
+                dishLike.title ||
+                dishLike.dishName ||
+                dishLike.displayName ||
+                dishLike.label ||
+                (dishLike.recipe && dishLike.recipe.name) ||
+                (dishLike.dish && dishLike.dish.name)
+            ));
         const dishName = normKey(rawName);
         if (dishName && recipePool.byName.has(dishName)) return recipePool.byName.get(dishName) || null;
 
         if (dishName) {
-            const matches = [];
+            let best = null;
+            let bestScore = 0;
+            let secondScore = 0;
             for (const r of recipePool.list) {
                 const rn = normKey(r && (r.name || r.n));
                 if (!rn) continue;
-                if (dishName.includes(rn) || rn.includes(dishName)) matches.push(r);
-                if (matches.length > 2) break;
+                let score = 0;
+                if (rn === dishName) score = 1000;
+                else if (dishName.includes(rn)) score = 600 + Math.min(200, rn.length);
+                else if (rn.includes(dishName)) score = 520 + Math.min(200, dishName.length);
+                if (score <= 0) continue;
+                if (score > bestScore) {
+                    secondScore = bestScore;
+                    bestScore = score;
+                    best = r;
+                } else if (score > secondScore) {
+                    secondScore = score;
+                }
             }
-            if (matches.length === 1) return matches[0] || null;
+            if (best && (bestScore - secondScore) >= 40) return best;
         }
         return null;
     };
@@ -21308,20 +21461,6 @@ function kmesAutoPrep() {
             const key = (resolved && resolved.id) ? String(resolved.id) : normKey(item.dishName);
             addCount(readySupply, key, servings);
         }
-    }
-
-    // 3. 寻找空闲灶台 (提前获取，用于报错定位)
-    let targetSid = null;
-    for (const sid in stations) {
-        if (stations[sid].stage === 'IDLE') {
-            targetSid = sid;
-            break;
-        }
-    }
-    
-    if (!targetSid) {
-        // 无空闲灶台，直接返回
-        return; 
     }
 
     // 4. 寻找一个待做的菜品 (且库存充足)
