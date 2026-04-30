@@ -20105,60 +20105,88 @@ function showPrepModal() {
     // [新增] 注入供应商货箱与倍率控制器逻辑
     const topControls = document.getElementById('prep-top-controls');
     if (topControls) {
-        const crateDiscountRate = 0.5;
-        const meatCrateCost = Math.floor(500 * crateDiscountRate);
-        const vegeCrateCost = Math.floor(313 * crateDiscountRate);
-        const seafoodCrateCost = Math.floor(563 * crateDiscountRate);
-        const isJapan = isJapanStore;
-        const crateConfig = {
-            title: isJapan ? "商社机密货源" : "供应商批发箱",
-            meat: {
-                title: isJapan ? "黑毛与内脏统货" : "鲜肉全包箱",
-                desc: isJapan ? "极道肉商特供。高阶牛筋、大肠及各类鲜肉" : "巨量肉类 + 葱/薯/椒等辅料",
-                cost: meatCrateCost
-            },
-            vege: {
-                title: isJapan ? "农协直发契约箱" : "农场全素筐",
-                desc: isJapan ? "JA农协直送。冲绳苦瓜、卷心菜及全类时蔬" : "全品类蔬菜 + 鸡蛋/米饭",
-                cost: vegeCrateCost
-            },
-            seafood: {
-                title: isJapan ? "丰洲暗拍盲盒" : "码头海鲜桶",
-                desc: isJapan ? "凌晨暗拍截获。极品小乌贼、鳗鱼肝等水产" : "虾/鱼 + 葱姜/鸡蛋/猪肉",
-                cost: seafoodCrateCost
-            }
-        };
+        const unlockedRecipesForCrates = (typeof getActiveRecipes === 'function') ? (getActiveRecipes() || []) : [];
+        const canShowSupplierCrates = (() => {
+            if (!Array.isArray(unlockedRecipesForCrates) || unlockedRecipesForCrates.length < 8) return false;
+            const cats = new Set();
+            const veggieKeys = ['tomato', 'potato', 'onion', 'lettuce', 'veg', 'eggplant', 'pepper', 'corn', 'carrot', 'cucumber', 'mushroom', 'pumpkin', 'asparagus', 'bean', 'ginger', 'garlic', 'apple', 'parsley', 'spinach', 'cabbage', 'leek', 'green_bean', 'avocado'];
+            const meatKeys = ['pork', 'beef', 'chicken', 'egg', 'meat', 'lamb', 'duck', 'sausage', 'bacon', 'ham', 'ribs', 'wagyu', 'quail', 'spam', 'tuna', 'pork_liver', 'beef_intestine', 'eel_liver'];
+            const seafoodKeys = ['shrimp', 'fish', 'seafood', 'crab', 'clam', 'oyster', 'squid', 'abalone', 'maw', 'sea_cucumber', 'eel'];
+            const addCatForIng = (ingId) => {
+                const id = String(ingId || '');
+                if (!id) return;
+                const name = (typeof INGREDIENTS !== 'undefined' && INGREDIENTS && INGREDIENTS[id] && INGREDIENTS[id].name) ? String(INGREDIENTS[id].name) : '';
+                const isVeggie = veggieKeys.some(k => id.includes(k)) || ['菜', '菇', '茄', '瓜', '笋', '葱', '姜', '蒜', '豆', '椒', '薯', '果'].some(k => name.includes(k));
+                const isMeat = meatKeys.some(k => id.includes(k)) || ['肉', '蛋', '排', '牛', '鸡', '鸭', '肠', '腿', '肝'].some(k => name.includes(k));
+                const isSeafood = seafoodKeys.some(k => id.includes(k)) || ['虾', '鱼', '蟹', '贝', '参', '胶', '鳗', '鲜', '鲍'].some(k => name.includes(k));
+                if (isMeat) cats.add('meat');
+                if (isSeafood) cats.add('seafood');
+                if (isVeggie && !isMeat && !isSeafood) cats.add('vege');
+            };
+            unlockedRecipesForCrates.forEach(r => {
+                if (!r || !Array.isArray(r.ingredients)) return;
+                r.ingredients.forEach(addCatForIng);
+            });
+            return cats.size >= 2;
+        })();
+        if (!canShowSupplierCrates) {
+            topControls.innerHTML = '';
+        } else {
+            const crateDiscountRate = 0.5;
+            const meatCrateCost = Math.floor(500 * crateDiscountRate);
+            const vegeCrateCost = Math.floor(313 * crateDiscountRate);
+            const seafoodCrateCost = Math.floor(563 * crateDiscountRate);
+            const isJapan = isJapanStore;
+            const crateConfig = {
+                title: isJapan ? "商社机密货源" : "供应商批发箱",
+                meat: {
+                    title: isJapan ? "黑毛与内脏统货" : "鲜肉全包箱",
+                    desc: isJapan ? "极道肉商特供。高阶牛筋、大肠及各类鲜肉" : "巨量肉类 + 葱/薯/椒等辅料",
+                    cost: meatCrateCost
+                },
+                vege: {
+                    title: isJapan ? "农协直发契约箱" : "农场全素筐",
+                    desc: isJapan ? "JA农协直送。冲绳苦瓜、卷心菜及全类时蔬" : "全品类蔬菜 + 鸡蛋/米饭",
+                    cost: vegeCrateCost
+                },
+                seafood: {
+                    title: isJapan ? "丰洲暗拍盲盒" : "码头海鲜桶",
+                    desc: isJapan ? "凌晨暗拍截获。极品小乌贼、鳗鱼肝等水产" : "虾/鱼 + 葱姜/鸡蛋/猪肉",
+                    cost: seafoodCrateCost
+                }
+            };
 
-        topControls.innerHTML = `
-            <div style="margin-bottom: min(20px, 4vw);">
-                <div style="font-size: clamp(12px, 3vw, 14px); color: #95a5a6; margin-bottom: min(12px, 2vw); font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                    <svg style="width:min(16px, 4vw);height:min(16px, 4vw);fill:#95a5a6;" viewBox="0 0 24 24"><path d="M20,6h-4V4c0-1.1-0.9-2-2-2h-4C8.9,2,8,2.9,8,4v2H4C2.9,6,2,6.9,2,8v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M10,4h4v2h-4V4z M20,20H4V8h16V20z"/></svg>
-                    ${crateConfig.title} <span style="font-weight:400; font-size:clamp(10px, 2.5vw, 12px); background:rgba(231,76,60,0.1); color:#e74c3c; padding:2px 6px; border-radius:4px; margin-left:8px;">5折优惠</span>
+            topControls.innerHTML = `
+                <div style="margin-bottom: min(20px, 4vw);">
+                    <div style="font-size: clamp(12px, 3vw, 14px); color: #95a5a6; margin-bottom: min(12px, 2vw); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                        <svg style="width:min(16px, 4vw);height:min(16px, 4vw);fill:#95a5a6;" viewBox="0 0 24 24"><path d="M20,6h-4V4c0-1.1-0.9-2-2-2h-4C8.9,2,8,2.9,8,4v2H4C2.9,6,2,6.9,2,8v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8C22,6.9,21.1,6,20,6z M10,4h4v2h-4V4z M20,20H4V8h16V20z"/></svg>
+                        ${crateConfig.title} <span style="font-weight:400; font-size:clamp(10px, 2.5vw, 12px); background:rgba(231,76,60,0.1); color:#e74c3c; padding:2px 6px; border-radius:4px; margin-left:8px;">5折优惠</span>
+                    </div>
+                    <div style="display: flex; gap: min(12px, 2.5vw); overflow: hidden; padding: 4px; align-items: center; justify-content: center;">
+                        <div class="supplier-crate meat" onclick="buyCrate('meat')">
+                            <div class="crate-header">
+                                <div class="crate-title">${crateConfig.meat.title}</div>
+                            </div>
+                            <div class="crate-price-tag">¥${crateConfig.meat.cost}</div>
+                        </div>
+
+                        <div class="supplier-crate vege" onclick="buyCrate('vege')">
+                            <div class="crate-header">
+                                <div class="crate-title">${crateConfig.vege.title}</div>
+                            </div>
+                            <div class="crate-price-tag">¥${crateConfig.vege.cost}</div>
+                        </div>
+
+                        <div class="supplier-crate seafood" onclick="buyCrate('seafood')">
+                            <div class="crate-header">
+                                <div class="crate-title">${crateConfig.seafood.title}</div>
+                            </div>
+                            <div class="crate-price-tag">¥${crateConfig.seafood.cost}</div>
+                        </div>
+                    </div>
                 </div>
-                <div style="display: flex; gap: min(12px, 2.5vw); overflow: hidden; padding: 4px; align-items: center; justify-content: center;">
-                    <div class="supplier-crate meat" onclick="buyCrate('meat')">
-                        <div class="crate-header">
-                            <div class="crate-title">${crateConfig.meat.title}</div>
-                        </div>
-                        <div class="crate-price-tag">¥${crateConfig.meat.cost}</div>
-                    </div>
-
-                    <div class="supplier-crate vege" onclick="buyCrate('vege')">
-                        <div class="crate-header">
-                            <div class="crate-title">${crateConfig.vege.title}</div>
-                        </div>
-                        <div class="crate-price-tag">¥${crateConfig.vege.cost}</div>
-                    </div>
-
-                    <div class="supplier-crate seafood" onclick="buyCrate('seafood')">
-                        <div class="crate-header">
-                            <div class="crate-title">${crateConfig.seafood.title}</div>
-                        </div>
-                        <div class="crate-price-tag">¥${crateConfig.seafood.cost}</div>
-                    </div>
-                </div>
-            </div>
-        `;
+            `;
+        }
     }
 
     // 6. 渲染商品内容 (此时虽然不可见但已存在 DOM 中)
