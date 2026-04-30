@@ -6474,12 +6474,13 @@
         <div id="debug-hotspot" onclick="toggleDebugMenu()" style="position: absolute; bottom: 0; right: 0; width: 80px; height: 80px; z-index: 99; cursor: default; background: transparent;"></div>
         <div id="debug-menu" style="position: absolute; bottom: 10px; right: 10px; display: none; flex-direction: column; gap: 5px; z-index: 100;">
             <div style="color: rgba(255,255,255,0.5); font-size: 12px; margin-bottom: 2px;">🛠️ 开发者测试通道</div>
+            <button onclick="enterTestMode('carry_900k')" style="background: rgba(0,0,0,0.6); color: #f1c40f; border: 1px solid #f1c40f; padding: 4px 8px; font-size: 12px; cursor: pointer;">延续进度 (¥900000)</button>
             <button onclick="enterTestMode('t3')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T3 食界新锐</button>
             <button onclick="enterTestMode('t4')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T4 餐饮名流</button>
             <button onclick="enterTestMode('t5')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T5 饮食大鳄</button>
             <button onclick="enterTestMode('t6')" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #7f8c8d; padding: 4px 8px; font-size: 12px; cursor: pointer;">T6 餐饮帝国</button>
             <button onclick="enterTestMode('day5')" style="background: rgba(0,0,0,0.6); color: #f1c40f; border: 1px solid #f1c40f; padding: 4px 8px; font-size: 12px; cursor: pointer;">Day 5 高升排骨</button>
-            <button onclick="enterTestMode('ingredients')" style="background: rgba(0,0,0,0.6); color: #2ecc71; border: 1px solid #2ecc71; padding: 4px 8px; font-size: 12px; cursor: pointer;">🥦 全食材满仓测试 (真实损耗)</button>
+            <button onclick="enterTestMode('ingredients')" style="background: rgba(0,0,0,0.6); color: #2ecc71; border: 1px solid #2ecc71; padding: 4px 8px; font-size: 12px; cursor: pointer;">全食材满仓测试 (真实损耗)</button>
         </div>
 
         <button id="btn-exit-test" onclick="exitTestMode()" style="display: none; position: absolute; bottom: 10px; right: 10px; background: #e74c3c; color: #fff; border: 2px solid #fff; padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
@@ -11146,7 +11147,8 @@ function buyUpgrade(type, levelIdx, actualPrice, targetStoreId) {
         if (upgradedTitle && typeof showTitleUpgradeModal === 'function') showTitleUpgradeModal(upgradedTitle);
 
         if (type === 'pot' && levelIdx >= 3) {
-            if (typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
+            const isMainCnStore = (sid === 'cn:main' || sid === 'china');
+            if (isMainCnStore && typeof checkAndTriggerStory === 'function' && typeof STORY_EVENTS === 'object') {
                 checkAndTriggerStory('buy_omni', STORY_EVENTS.BUY_OMNI);
             }
         }
@@ -12500,6 +12502,13 @@ window.enterTestMode = function(mode) {
             if (activeStore && typeof activeStore === 'object' && activeStore.dailyInventory) {
                 testGame.dailyInventory = activeStore.dailyInventory;
             }
+        } else if (mode === 'carry_900k') {
+            const realSave = localStorage.getItem('game_save_backup') || localStorage.getItem('game_save') || localStorage.getItem('gameState');
+            if (realSave) {
+                try { testGame = JSON.parse(realSave); } catch (_) {}
+            }
+            if (!testGame || typeof testGame !== 'object') testGame = {};
+            testGame.coins = 900000;
         }
 
         const json = JSON.stringify(testGame);
@@ -21181,25 +21190,60 @@ function runKMES() {
 // Level 1: 自动配菜
 function kmesAutoPrep() {
     // 1. 统计当前需求
-    const needed = {};
-    
     // [新增] 优先级排序：按剩余耐心值从低到高排序
-    const sortedOrders = [...game.activeOrders].sort((a, b) => {
+    const sourceOrders = Array.isArray(game && game.orderSlots)
+        ? game.orderSlots.filter(Boolean)
+        : (Array.isArray(game && game.activeOrders) ? game.activeOrders : []);
+    const sortedOrders = [...sourceOrders].sort((a, b) => {
         return (a.patience || 0) - (b.patience || 0);
     });
 
-    const activeRecipes = (typeof getActiveRecipes === 'function') ? getActiveRecipes() : [];
-    const normKey = (v) => String(v || '').replace(/\s+/g, '').trim();
-    const resolveRecipeForDish = (dishLike) => {
-        const dishId = normKey(dishLike && (dishLike.id || dishLike.recipeId || dishLike.rid));
-        if (dishId) {
-            const byId = activeRecipes.find(r => r && normKey(r.id) === dishId);
-            if (byId) return byId;
+    const recipePool = (() => {
+        const a = (typeof getActiveRecipes === 'function') ? (getActiveRecipes() || []) : [];
+        const b = (typeof RECIPES !== 'undefined' && Array.isArray(RECIPES)) ? RECIPES : [];
+        const merged = a.concat(b).filter(Boolean);
+        const byId = new Map();
+        const byName = new Map();
+        const normalizeLoose = (raw) => {
+            let s = String(raw ?? '').normalize('NFKC').trim();
+            if (!s) return '';
+            s = s.replace(/[\u00A0\u3000]/g, ' ');
+            s = s.replace(/\s+/g, ' ').trim();
+            s = s.replace(/(\s*[\(\（\[\【].*?[\)\）\]\】]\s*)$/g, '').trim();
+            s = s.replace(/\s*[x×*]\s*\d+\s*$/i, '').trim();
+            s = s.replace(/\s*\d+\s*份\s*$/i, '').trim();
+            return s.replace(/[\s\u00A0\u3000]+/g, '').trim();
+        };
+        for (const r of merged) {
+            const id = normalizeLoose(r && (r.id || r.recipeId));
+            if (id && !byId.has(id)) byId.set(id, r);
+            const name = normalizeLoose(r && (r.name || r.n));
+            if (name && !byName.has(name)) byName.set(name, r);
         }
-        const dishName = normKey(dishLike && (dishLike.name || dishLike.n));
+        return { list: merged, byId, byName, normalizeLoose };
+    })();
+
+    const normKey = (v) => recipePool.normalizeLoose(v);
+    const resolveRecipeForDish = (dishLike) => {
+        if (!dishLike) return null;
+        const dishId = normKey(typeof dishLike === 'object' ? (dishLike.id || dishLike.recipeId || dishLike.rid) : '');
+        if (dishId && recipePool.byId.has(dishId)) return recipePool.byId.get(dishId) || null;
+
+        const rawName = (typeof dishLike === 'string')
+            ? dishLike
+            : (dishLike && (dishLike.name || dishLike.n || dishLike.title));
+        const dishName = normKey(rawName);
+        if (dishName && recipePool.byName.has(dishName)) return recipePool.byName.get(dishName) || null;
+
         if (dishName) {
-            const byName = activeRecipes.find(r => r && normKey(r.name) === dishName);
-            if (byName) return byName;
+            const matches = [];
+            for (const r of recipePool.list) {
+                const rn = normKey(r && (r.name || r.n));
+                if (!rn) continue;
+                if (dishName.includes(rn) || rn.includes(dishName)) matches.push(r);
+                if (matches.length > 2) break;
+            }
+            if (matches.length === 1) return matches[0] || null;
         }
         return null;
     };
@@ -21208,21 +21252,20 @@ function kmesAutoPrep() {
         return r && r.id ? String(r.id) : null;
     };
 
-    sortedOrders.forEach(order => {
-        order.dishes.forEach(d => {
-            const key = resolveRecipeKey(d) || normKey(d && (d.name || d.n));
-            if (!key) return;
-            needed[key] = (needed[key] || 0) + 1;
-        });
-    });
-
-    // 2. 统计正在制作的数量 (IDLE 除外)
-    const inProgress = {};
+    // 2. 统计“可立即出餐”的数量 vs “制作中”的数量
+    const readySupply = {};
+    const futureSupply = {};
+    const addCount = (bucket, key, delta) => {
+        if (!key) return;
+        const n = Number(delta);
+        if (!Number.isFinite(n) || n <= 0) return;
+        bucket[key] = (bucket[key] || 0) + n;
+    };
     
     // [新增] 统计玩家手里的成品 (Hand)
     if (typeof holdingThing !== 'undefined' && holdingThing && holdingThing.type === 'DISH') {
         const key = resolveRecipeKey(holdingThing.val) || normKey(holdingThing.val && (holdingThing.val.name || holdingThing.val.n));
-        if (key) inProgress[key] = (inProgress[key] || 0) + 1;
+        addCount(readySupply, key, 1);
     }
 
     Object.keys(stations).forEach(sid => {
@@ -21232,23 +21275,34 @@ function kmesAutoPrep() {
             if (s.stage === 'FINISHED' && s.dishResult) {
                 const servings = (typeof s.servingsLeft === 'number' && s.servingsLeft > 0) ? s.servingsLeft : 1;
                 const key = resolveRecipeKey(s.dishResult) || normKey(s.dishResult && s.dishResult.name);
-                if (key) inProgress[key] = (inProgress[key] || 0) + servings;
+                addCount(readySupply, key, servings);
             }
             else if (s.stage === 'COOKING' && s.recipe) {
                 const servings = (typeof s.servingsLeft === 'number' && s.servingsLeft > 0) ? s.servingsLeft : 1;
                 const key = resolveRecipeKey(s.recipe) || normKey(s.recipe && s.recipe.name);
-                if (key) inProgress[key] = (inProgress[key] || 0) + servings;
+                addCount(futureSupply, key, servings);
             }
             else if (s.stage === 'PREP_ING') {
                 const analysis = analyzeDish(s.currentIngredients);
                 // 只有完全匹配才算
                 if (analysis && analysis.name !== '黑暗料理') {
                     const key = (analysis.recipe && analysis.recipe.id) ? String(analysis.recipe.id) : normKey(analysis.name);
-                    if (key) inProgress[key] = (inProgress[key] || 0) + 1;
+                    addCount(futureSupply, key, 1);
                 }
             }
         }
     });
+
+    if (Array.isArray(warmingRack) && warmingRack.length > 0) {
+        for (const item of warmingRack) {
+            if (!item || !item.dishName) continue;
+            const servings = (typeof item.portions === 'number' && Number.isFinite(item.portions)) ? item.portions : 0;
+            if (servings <= 0) continue;
+            const resolved = resolveRecipeForDish(item.dishName);
+            const key = (resolved && resolved.id) ? String(resolved.id) : normKey(item.dishName);
+            addCount(readySupply, key, servings);
+        }
+    }
 
     // 3. 寻找空闲灶台 (提前获取，用于报错定位)
     let targetSid = null;
@@ -21270,44 +21324,68 @@ function kmesAutoPrep() {
     let firstMissingDish = null; // 记录第一个因为缺货而跳过的菜
     let firstUnknownDish = null; // 记录第一个因为找不到菜谱而跳过的菜
 
+    const allocReady = Object.assign({}, readySupply);
+    const allocFuture = Object.assign({}, futureSupply);
+    const isUrgentOrder = (order) => {
+        const p = Number(order && order.patience);
+        const mp = Number(order && order.maxPatience);
+        if (Number.isFinite(p) && Number.isFinite(mp) && mp > 0) return (p / mp) <= 0.35;
+        if (Number.isFinite(p)) return p <= 900;
+        return false;
+    };
     for (const order of sortedOrders) {
-        for (const d of order.dishes) {
+        const allowFuture = !isUrgentOrder(order);
+        const orderNeed = new Map();
+        const orderKeys = [];
+        for (const d of (order && Array.isArray(order.dishes) ? order.dishes : [])) {
             const resolvedRecipe = resolveRecipeForDish(d);
             const key = (resolvedRecipe && resolvedRecipe.id) ? String(resolvedRecipe.id) : null;
             if (!resolvedRecipe || !key) {
                 if (!firstUnknownDish) firstUnknownDish = (d && (d.name || d.n)) ? String(d.name || d.n) : '未知菜品';
                 continue;
             }
-            const countNeeded = needed[key]; 
-            const current = inProgress[key] || 0;
-            
-            if (current < countNeeded) {
-                // 候选菜品
-                const recipe = resolvedRecipe;
+            if (!orderNeed.has(key)) orderKeys.push({ key, recipe: resolvedRecipe });
+            orderNeed.set(key, (orderNeed.get(key) || 0) + 1);
+        }
 
-                // 检查库存
-                let hasStock = true;
-                if (game.level !== 1 && game.dailyInventory) {
-                    const storeId = (game && game.activeStoreId) ? game.activeStoreId : 'cn:main';
-                    for (const ingId of recipe.ingredients) {
-                        if (typeof window.getIngredientCount === 'function' && window.getIngredientCount(storeId, ingId) <= 0) {
-                            hasStock = false;
-                            break;
-                        }
+        for (const entry of orderKeys) {
+            const key = entry.key;
+            const recipe = entry.recipe;
+            const needCount = orderNeed.get(key) || 0;
+            const readyAvail = allocReady[key] || 0;
+            const readyAllocated = Math.min(readyAvail, needCount);
+            allocReady[key] = Math.max(0, readyAvail - readyAllocated);
+
+            let remaining = needCount - readyAllocated;
+            if (remaining > 0 && allowFuture) {
+                const futureAvail = allocFuture[key] || 0;
+                const futureAllocated = Math.min(futureAvail, remaining);
+                allocFuture[key] = Math.max(0, futureAvail - futureAllocated);
+                remaining -= futureAllocated;
+            }
+            if (remaining <= 0) continue;
+
+            let hasStock = true;
+            if (game.level !== 1 && game.dailyInventory) {
+                const storeId = (game && game.activeStoreId) ? game.activeStoreId : 'cn:main';
+                for (const ingId of recipe.ingredients) {
+                    if (typeof window.getIngredientCount === 'function' && window.getIngredientCount(storeId, ingId) <= 0) {
+                        hasStock = false;
+                        break;
                     }
                 }
+            }
 
-                if (hasStock) {
-                    targetDishName = key;
-                    targetRecipe = recipe;
-                    break; // 找到可做且有库存的，跳出内层循环
-                } else {
-                    if (!firstMissingDish) firstMissingDish = recipe.name || key;
-                    // 库存不足，继续找下一个
-                }
+            if (hasStock) {
+                targetDishName = key;
+                targetRecipe = recipe;
+                break;
+            } else if (!firstMissingDish) {
+                firstMissingDish = recipe.name || key;
             }
         }
-        if (targetDishName) break; // 找到目标，跳出外层循环
+
+        if (targetDishName) break;
     }
 
     if (!targetDishName) {
