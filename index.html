@@ -6739,7 +6739,7 @@
             <h2 style="margin-top:0; color:#e74c3c; font-size:24px;">⚠️ 警告：删档重置</h2>
             <p style="color:#555; font-size:16px; line-height:1.6; margin:20px 0;">这将删除所有存档（包括所有分店进度），<br>完全回到初始状态。<br><br><span style="font-size:14px; color:#c0392b; font-weight:bold;">此操作无法撤销！</span></p>
             <div style="display:flex; justify-content:center; gap:20px; margin-top:25px;">
-                <button onclick="window.hideResetConfirmModal()" style="padding:10px 25px; background:#95a5a6; border-bottom:4px solid #7f8c8d; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">取消</button>
+                <button onclick="window.hideResetConfirmModal()" style="padding:10px 25px; background:#95a5a6; border-bottom:4px solid #7f8c8d; color:white; border-radius:8px; font-weight:bold; cursor:pointer; width: 118px; box-sizing: border-box;">取消</button>
                 <button onclick="window.executeReset()" style="padding:10px 25px; background:#e74c3c; border-bottom:4px solid #c0392b; color:white; border-radius:8px; font-weight:bold; cursor:pointer;">确认重置</button>
             </div>
         </div>
@@ -11834,7 +11834,8 @@ window.updateLobbyCookbookAttention = function() {
         const progress = (typeof getStoreProgress === 'function') ? getStoreProgress(r.region) : { days: 0, equipLevel: 0 };
         const meetDay = (progress.days >= (Number(r.reqDay) || 1));
         const meetEquip = (progress.equipLevel >= (Number(r.reqEquip) || 1));
-        return meetDay && meetEquip;
+        const isFreeClaim = (Number(r.unlockCost) || 0) === 0;
+        return meetDay && meetEquip && isFreeClaim;
     });
     badge.style.display = hasPending ? 'block' : 'none';
 };
@@ -12427,6 +12428,7 @@ window.enterTestMode = function(mode) {
             testGame.titleLevel = 5;
         } else if (mode === 't6') {
             testGame.level = 60;
+            testGame.coins = 1000000;
             testGame.ultimateGearDaysPlayed = 10;
             testGame.stores['cn:main'] = mkStore(60, mkInv({ pot: 3, kmes: 3 }));
             testGame.stores['jp:shibuya'] = Object.assign(mkStore(40, mkInv({ pot: 3, kmes: 3 })), { automatedDaysPlayed: 5 });
@@ -15230,6 +15232,7 @@ function handleStationClick(sid, event, zone) {
             }
 
             s.currentIngredients.push(ingId);
+            s.lastManualPrepAt = Date.now();
             
             // [核心修改] 仅当工位空闲时才改变状态，防止打断 COOKING 状态
             if (s.stage === 'IDLE') {
@@ -15548,6 +15551,8 @@ function trashStation(sid, type = 'all', withSound = true, isPenalty = true) {
             }
         }
         s.currentIngredients = [];
+        s.lastManualPrepAt = null;
+        s.autoCookAt = null;
         // If stage was PREP_ING, reset to IDLE. If COOKING, don't touch stage unless type is all/cook
         if (s.stage === 'PREP_ING') s.stage = 'IDLE';
 
@@ -15576,6 +15581,7 @@ function trashStation(sid, type = 'all', withSound = true, isPenalty = true) {
              s.recipe = null;
              s.progress = 0;
              if (s.timer) clearInterval(s.timer);
+             s.autoCookAt = null;
              // [新增] 停止音效
              if (s.audio) {
                  s.audio.pause();
@@ -21440,30 +21446,92 @@ function kmesAutoCook() {
         if (s.stage === 'PREP_ING' && s.currentIngredients.length > 0) {
             // 检查是否是有效菜品
             const analysis = analyzeDish(s.currentIngredients);
-            // 只有不是黑暗料理才煮
-            if (analysis && analysis.name !== '黑暗料理') {
-                // [核心优化] 1.5秒延迟展示逻辑
-                if (!s.autoCookAt) {
-                    s.autoCookAt = Date.now() + 1500; // 设定1.5秒倒计时
-                    if (typeof renderStation === 'function') renderStation(sid, 'prep'); // 触发按钮 UI 更新
-                    return;
-                }
-                
-                // 还没到时间，继续展示
-                if (Date.now() < s.autoCookAt) {
-                    return;
-                }
-                
-                // 时间到了，清除标记并开始烹饪
+            if (!analysis || analysis.name === '黑暗料理') {
                 s.autoCookAt = null;
-                startCooking(sid);
-                
-                // 视觉反馈
-                const stationEl = document.getElementById('s_' + sid);
-                if (stationEl) {
-                    const rect = stationEl.getBoundingClientRect();
-                    // triggerFeedback(rect.left + rect.width/2, rect.top - 20, "🤖 自动烹饪", "#e67e22");
+                return;
+            }
+
+            const normalizeIngId = (raw) => {
+                const id = String(raw || '');
+                if (!id) return id;
+                if (id === 'leek') return 'scallion';
+                return id;
+            };
+
+            if (!analysis.hasStock && analysis.recipe && analysis.quality === 0.4) {
+                const idleMs = (typeof s.lastManualPrepAt === 'number' && Number.isFinite(s.lastManualPrepAt))
+                    ? (Date.now() - s.lastManualPrepAt)
+                    : 999999;
+                if (idleMs >= 800) {
+                    const storeId = (game && game.activeStoreId) ? game.activeStoreId : 'cn:main';
+                    const current = Array.isArray(s.currentIngredients) ? s.currentIngredients.map(normalizeIngId) : [];
+                    const currentSet = new Set(current.filter(Boolean));
+                    const candidates = (typeof getActiveRecipes === 'function' ? getActiveRecipes() : [])
+                        .filter(r => r && Array.isArray(r.ingredients))
+                        .filter(r => {
+                            const ingSet = new Set(r.ingredients.map(normalizeIngId).filter(Boolean));
+                            for (const ingId of currentSet) {
+                                if (!ingSet.has(ingId)) return false;
+                            }
+                            return true;
+                        });
+                    const recipeForFill = (candidates.length === 1) ? candidates[0] : null;
+                    const targetIngredients = recipeForFill && Array.isArray(recipeForFill.ingredients)
+                        ? recipeForFill.ingredients.map(normalizeIngId).filter(Boolean)
+                        : [];
+                    const missing = targetIngredients.filter(id => !current.includes(id));
+
+                    let canFill = missing.length > 0;
+                    if (canFill && game.level !== 1 && game.dailyInventory) {
+                        for (const ingId of missing) {
+                            if (typeof window.getIngredientCount === 'function' && window.getIngredientCount(storeId, ingId) <= 0) {
+                                canFill = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (canFill) {
+                        if (game.level !== 1 && game.dailyInventory) {
+                            for (const ingId of missing) {
+                                if (typeof window.consumeIngredient === 'function') window.consumeIngredient(storeId, ingId, 1);
+                            }
+                            if (typeof initIngredients === 'function') initIngredients();
+                        }
+                        missing.forEach(id => s.currentIngredients.push(id));
+                        if (typeof renderStation === 'function') renderStation(sid, 'prep');
+                    }
                 }
+                s.autoCookAt = null;
+                return;
+            }
+
+            if (!analysis.hasStock) {
+                s.autoCookAt = null;
+                return;
+            }
+
+            // [核心优化] 1.5秒延迟展示逻辑
+            if (!s.autoCookAt) {
+                s.autoCookAt = Date.now() + 1500; // 设定1.5秒倒计时
+                if (typeof renderStation === 'function') renderStation(sid, 'prep'); // 触发按钮 UI 更新
+                return;
+            }
+            
+            // 还没到时间，继续展示
+            if (Date.now() < s.autoCookAt) {
+                return;
+            }
+            
+            // 时间到了，清除标记并开始烹饪
+            s.autoCookAt = null;
+            startCooking(sid);
+            
+            // 视觉反馈
+            const stationEl = document.getElementById('s_' + sid);
+            if (stationEl) {
+                const rect = stationEl.getBoundingClientRect();
+                // triggerFeedback(rect.left + rect.width/2, rect.top - 20, "🤖 自动烹饪", "#e67e22");
             }
         } else {
             // 状态不对时清理标记
