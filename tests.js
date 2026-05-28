@@ -693,6 +693,78 @@ const Tests = {
         console.log("Coin FX Initial Scale + No Shadow Test Completed.");
     }
     ,
+    testCoinFxThreeStageTiming: function() {
+        console.log("Running Coin FX Three-Stage Timing Test...");
+        if (typeof window.enqueueCoinFlight !== 'function') { console.error("FAIL: enqueueCoinFlight missing."); return; }
+
+        const backup = { timing: window.__coinFxTiming };
+        const fromEl = document.createElement('div');
+        const toEl = document.createElement('div');
+        fromEl.style.position = 'fixed';
+        fromEl.style.left = '100px';
+        fromEl.style.top = '120px';
+        fromEl.style.width = '10px';
+        fromEl.style.height = '10px';
+        toEl.style.position = 'fixed';
+        toEl.style.left = '420px';
+        toEl.style.top = '80px';
+        toEl.style.width = '10px';
+        toEl.style.height = '10px';
+        document.body.appendChild(fromEl);
+        document.body.appendChild(toEl);
+
+        window.__coinFxTiming = { burstMin: 220, burstMax: 220, hoverMin: 180, hoverMax: 180, flyMin: 340, flyMax: 340 };
+
+        try {
+            const count = 4;
+            const start = performance.now ? performance.now() : Date.now();
+            let done = false;
+            window.enqueueCoinFlight(fromEl, toEl, count, () => { done = true; });
+
+            setTimeout(() => {
+                const coins = document.querySelectorAll('.coin-fx');
+                if (coins.length > 0) console.log("PASS: coins spawned.");
+                else console.error("FAIL: coins not spawned.");
+            }, 60);
+
+            const expectedMin = 220 + 180 + 340;
+            const expectedMax = expectedMin + 260;
+            const poll = () => {
+                const now = performance.now ? performance.now() : Date.now();
+                const elapsed = now - start;
+                if (done) {
+                    const remain = document.querySelectorAll('.coin-fx').length;
+                    if (remain === 0) console.log("PASS: coins removed on complete.");
+                    else console.error("FAIL: coins still present after complete (" + remain + ").");
+
+                    if (elapsed >= expectedMin && elapsed <= expectedMax) console.log("PASS: timing roughly matches three-stage budget (" + Math.round(elapsed) + "ms).");
+                    else console.error("FAIL: timing out of expected range (" + Math.round(elapsed) + "ms, expected " + expectedMin + "-" + expectedMax + "ms).");
+
+                    window.__coinFxTiming = backup.timing;
+                    try { fromEl.remove(); } catch (_) {}
+                    try { toEl.remove(); } catch (_) {}
+                    console.log("Coin FX Three-Stage Timing Test Completed.");
+                    return;
+                }
+                if (elapsed > 2500) {
+                    console.error("FAIL: coin fx did not complete in time.");
+                    window.__coinFxTiming = backup.timing;
+                    try { fromEl.remove(); } catch (_) {}
+                    try { toEl.remove(); } catch (_) {}
+                    console.log("Coin FX Three-Stage Timing Test Completed.");
+                    return;
+                }
+                setTimeout(poll, 60);
+            };
+            poll();
+        } catch (e) {
+            console.error("FAIL: Coin FX Three-Stage Timing Test crashed:", e);
+            window.__coinFxTiming = backup.timing;
+            try { fromEl.remove(); } catch (_) {}
+            try { toEl.remove(); } catch (_) {}
+        }
+    }
+    ,
     testPrepDay1GiftAndPaidExtras: function() {
         console.log("Running Prep Day1 Gift + Paid Extras Test...");
         if (!window.game) { console.error("FAIL: game object not found."); return; }
@@ -781,6 +853,139 @@ const Tests = {
         }
 
         console.log("Prep Day1 Gift + Paid Extras Test Completed.");
+    }
+    ,
+    testPrepDay2NoTutorialGiftBaseline: function() {
+        console.log("Running Prep Day2 No Tutorial Gift Baseline Test...");
+        if (!window.game) { console.error("FAIL: game object not found."); return; }
+        if (typeof showPrepModal !== 'function') { console.error("FAIL: showPrepModal missing."); return; }
+        if (typeof renderPrepUI !== 'function') { console.error("FAIL: renderPrepUI missing."); return; }
+        if (typeof window.getIngredientCount !== 'function') { console.error("FAIL: getIngredientCount missing."); return; }
+
+        const backup = {
+            level: game.level,
+            activeStoreId: game.activeStoreId,
+            coins: game.coins,
+            dailyInventory: game.dailyInventory ? JSON.stringify(game.dailyInventory) : null,
+            stores: game.stores ? JSON.stringify(game.stores) : null,
+            prepTutorialDayOne: window.__prepTutorialDayOne,
+            prepTutorialGiftBase: window.__prepTutorialGiftBase,
+            showToast: window.showToast,
+            playSfx: window.playSfx,
+            playButtonSound: window.playButtonSound
+        };
+
+        try {
+            window.showToast = () => {};
+            window.playSfx = () => {};
+            window.playButtonSound = () => {};
+
+            if (!game.stores || typeof game.stores !== 'object') game.stores = {};
+            if (!game.stores['cn:main']) game.stores['cn:main'] = {};
+
+            game.level = 2;
+            game.activeStoreId = 'cn:main';
+            game.coins = 1000;
+            game.dailyInventory = {};
+
+            window.__prepTutorialDayOne = true;
+            window.__prepTutorialGiftBase = { tomato: 20, egg: 20, onion: 20 };
+
+            showPrepModal();
+
+            if (window.__prepTutorialDayOne) console.error("FAIL: __prepTutorialDayOne should be reset to false on day2.");
+            else console.log("PASS: __prepTutorialDayOne reset on day2.");
+
+            renderPrepUI();
+
+            const cards = Array.from(document.querySelectorAll('#prep-grid .ingredient-card'));
+            const tomatoName = (INGREDIENTS && INGREDIENTS.tomato && INGREDIENTS.tomato.name) ? INGREDIENTS.tomato.name : '番茄';
+            const tomatoCard = cards.find(c => {
+                const n = c.querySelector('.ing-name');
+                return n && (n.textContent || '').trim() === tomatoName;
+            });
+            if (!tomatoCard) { console.error("FAIL: tomato card not found."); return; }
+
+            const plus10 = tomatoCard.querySelector('.buy-btn[data-qty="10"]');
+            if (!plus10) { console.error("FAIL: +10 button missing on tomato card."); return; }
+
+            const beforeQty = window.getIngredientCount('__temp__', 'tomato');
+            const c0 = window.tempCoins;
+            plus10.click();
+            const afterQty = window.getIngredientCount('__temp__', 'tomato');
+            const c1 = window.tempCoins;
+
+            if (afterQty === beforeQty + 10) console.log("PASS: day2 +10 increases stock by 10 (no gift clamp).");
+            else console.error(`FAIL: expected tomato qty ${beforeQty + 10}, got ${afterQty}.`);
+
+            if (c1 < c0) console.log("PASS: day2 +10 costs coins.");
+            else console.error(`FAIL: expected coins to decrease on day2 (before=${c0}, after=${c1}).`);
+
+            const costEl = document.getElementById('prep-cost-display');
+            const costTxt = costEl ? String(costEl.textContent || '') : '';
+            if (costEl && costTxt.replace(/\s/g, '') !== '¥0') console.log("PASS: prep cost display updates (not ¥0).");
+            else console.error("FAIL: prep cost display did not update (still ¥0 or missing).");
+        } catch (e) {
+            console.error("FAIL: Prep Day2 No Tutorial Gift Baseline Test crashed:", e);
+        } finally {
+            game.level = backup.level;
+            game.activeStoreId = backup.activeStoreId;
+            game.coins = backup.coins;
+            try { game.dailyInventory = backup.dailyInventory ? JSON.parse(backup.dailyInventory) : game.dailyInventory; } catch (_) {}
+            try { game.stores = backup.stores ? JSON.parse(backup.stores) : game.stores; } catch (_) {}
+            window.__prepTutorialDayOne = backup.prepTutorialDayOne;
+            window.__prepTutorialGiftBase = backup.prepTutorialGiftBase;
+            window.showToast = backup.showToast;
+            window.playSfx = backup.playSfx;
+            window.playButtonSound = backup.playButtonSound;
+            try { const m = document.getElementById('prep-modal'); if (m) m.style.display = 'none'; } catch (_) {}
+        }
+
+        console.log("Prep Day2 No Tutorial Gift Baseline Test Completed.");
+    }
+    ,
+    testGossipAvoidsUselessTrendWhenNoMatchingRecipes: function() {
+        console.log("Running Gossip Avoids Useless Trend When No Matching Recipes Test...");
+        if (!window.game) { console.error("FAIL: game object not found."); return; }
+        if (typeof generateDailyGossip !== 'function') { console.error("FAIL: generateDailyGossip missing."); return; }
+        if (typeof window.getActiveRecipes !== 'function' && typeof window.getAvailableRecipes !== 'function') { console.error("FAIL: getActiveRecipes/getAvailableRecipes missing."); return; }
+
+        const backup = {
+            activeStoreId: game.activeStoreId,
+            dailyTrend: game.dailyTrend,
+            dailyGossip: game.dailyGossip ? JSON.stringify(game.dailyGossip) : null,
+            getActiveRecipes: window.getActiveRecipes,
+            getAvailableRecipes: window.getAvailableRecipes
+        };
+
+        try {
+            game.activeStoreId = 'cn:main';
+
+            const minimalPool = [
+                { id: 'r_tomato_egg', name: '番茄炒蛋', ingredients: ['tomato', 'egg'] }
+            ];
+            window.getAvailableRecipes = () => minimalPool;
+
+            const blocked = new Set(['meat', 'seafood', 'spicy']);
+            let bad = 0;
+            for (let i = 0; i < 50; i++) {
+                generateDailyGossip();
+                const t = String(game.dailyTrend || '');
+                if (blocked.has(t)) bad += 1;
+            }
+            if (bad === 0) console.log("PASS: with only vege-capable recipes, gossip never picks meat/seafood/spicy trend.");
+            else console.error(`FAIL: gossip picked blocked trend ${bad} times (should be 0).`);
+        } catch (e) {
+            console.error("FAIL: Gossip Avoids Useless Trend When No Matching Recipes Test crashed:", e);
+        } finally {
+            game.activeStoreId = backup.activeStoreId;
+            game.dailyTrend = backup.dailyTrend;
+            try { game.dailyGossip = backup.dailyGossip ? JSON.parse(backup.dailyGossip) : game.dailyGossip; } catch (_) {}
+            window.getActiveRecipes = backup.getActiveRecipes;
+            window.getAvailableRecipes = backup.getAvailableRecipes;
+        }
+
+        console.log("Gossip Avoids Useless Trend When No Matching Recipes Test Completed.");
     }
     ,
     testDay1EndStorySkipsIfPotUpgraded: function() {
